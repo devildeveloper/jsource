@@ -21,7 +21,7 @@ var document = window.document;
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.extend( app.util, {
+app.util = app.core.extend( app.util, {
 	konami: {
 		A: 65,
 		B: 66,

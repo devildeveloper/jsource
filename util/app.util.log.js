@@ -24,7 +24,7 @@ window.console.log = window.console.log || function () {};
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.extend( app.util, {
+app.util = app.core.extend( app.util, {
 	log: function () {
 		var args = [].slice.call( arguments, 0 );
 		

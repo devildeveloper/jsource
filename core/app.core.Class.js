@@ -75,7 +75,9 @@
 	};
 	
 	// Expose Class to app.core
-	app.core.Class = Class;
+	app.core = app.core.extend( app.core, {
+		Class: Class
+	});
 
 })();
 
