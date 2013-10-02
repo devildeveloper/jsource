@@ -6,8 +6,6 @@
  * By John Resig http://ejohn.org
  * MIT Licensed.
  *
- * @deps: app
- *
  *
  */
 (function ( window, app, undefined ) {

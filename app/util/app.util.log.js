@@ -4,8 +4,6 @@
  *
  * Simple wrapper for console logging
  *
- * @deps: app
- *
  *
  */
 (function ( window, app, undefined ) {

@@ -5,7 +5,8 @@
  * Konami code easter egg.
  * Does cool stuff if you hook into it!
  *
- * @deps: app, app.util.log
+ * 
+ * @dependency: app.util.log
  *
  *
  */

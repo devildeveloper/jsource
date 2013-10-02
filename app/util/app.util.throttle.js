@@ -6,8 +6,6 @@
  *
  * @usage: el.addEventListener( "keyup", app.util.throttle( delay, cb ), false )
  *
- * @deps: app
- *
  *
  */
 (function ( window, app, undefined ) {

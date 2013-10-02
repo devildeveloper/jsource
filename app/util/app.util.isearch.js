@@ -8,7 +8,8 @@
  * @usage: app.util.isearch.terms( [term, term, term] )
  * @usage: app.util.isearch.query( term, cb[matches] )
  *
- * @deps: app, app.util.log
+ * 
+ * @dependency: app.util.log
  *
  *
  */
