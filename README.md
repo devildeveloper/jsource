@@ -27,6 +27,6 @@ cd server
 node server.js
 ```
 
-You should be able to visit [localhost:5050][]
+You should be able to visit [localhost:5050][]. For scripts that require some applicational code to test, create an index.js file at the root of the repo and test there.
 
 _(More to come on this...)_
