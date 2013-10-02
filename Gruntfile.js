@@ -4,9 +4,9 @@ module.exports = function ( grunt ) {
 	
 	
 	var appjs = require( "app-js-util" )( grunt, {
-		jsRoot: ".",
-		jsAppRoot: ".",
-		jsDistRoot: "./dist"
+		jsRoot: "./app",
+		jsAppRoot: "./app",
+		jsDistRoot: "./app/dist"
 	});
 	
 	
@@ -27,7 +27,7 @@ module.exports = function ( grunt ) {
 		concat: {
 			app: {
 				src: [],
-				dest: "dist/app.js"
+				dest: "app/dist/app.js"
 			}
 		}
 	});
@@ -42,15 +42,15 @@ module.exports = function ( grunt ) {
 	grunt.registerTask( "test", function ( module ) {
 		var file;
 		
-		if ( grunt.file.exists( "core/app.core."+module+".js" ) ) {
+		if ( grunt.file.exists( "app/core/app.core."+module+".js" ) ) {
 			file = {
-				abspath: "core/app.core."+module+".js",
+				abspath: "app/core/app.core."+module+".js",
 				filename: "app.core."+module+".js"
 			};
 			
-		} else if ( grunt.file.exists( "util/app.util."+module+".js" ) ) {
+		} else if ( grunt.file.exists( "app/util/app.util."+module+".js" ) ) {
 			file = {
-				abspath: "util/app.util."+module+".js",
+				abspath: "app/util/app.util."+module+".js",
 				filename: "app.util."+module+".js"
 			};
 			
