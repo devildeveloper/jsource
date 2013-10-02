@@ -6,5 +6,11 @@
 </head>
 <body>
 	<script src="/app/dist/app.js"></script>
+	<script>
+		document.addEventListener( "keydown", app.util.throttle( 500, function ( e ) {
+			console.log( "throttled", e.which );
+			
+		}), false );
+	</script>
 </body>
 </html>
