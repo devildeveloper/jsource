@@ -8,9 +8,6 @@
  * @usage: app.util.isearch.terms( [term, term, term] )
  * @usage: app.util.isearch.query( term, cb[matches] )
  *
- * 
- * @dependency: app.util.log
- *
  *
  */
 (function ( window, app, undefined ) {

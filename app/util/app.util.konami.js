@@ -5,9 +5,6 @@
  * Konami code easter egg.
  * Does cool stuff if you hook into it!
  *
- * 
- * @dependency: app.util.log
- *
  *
  */
 (function ( window, app, undefined ) {
