@@ -40,16 +40,20 @@ module.exports = function ( grunt ) {
 	
 	// Test app-js files.
 	grunt.registerTask( "test", function ( module ) {
-		var file;
+		var config = grunt.config.get( "concat" ),
+			file,
+			merge;
 		
 		if ( grunt.file.exists( "app/core/app.core."+module+".js" ) ) {
 			file = {
+				module: module,
 				abspath: "app/core/app.core."+module+".js",
 				filename: "app.core."+module+".js"
 			};
 			
 		} else if ( grunt.file.exists( "app/util/app.util."+module+".js" ) ) {
 			file = {
+				module: module,
 				abspath: "app/util/app.util."+module+".js",
 				filename: "app.util."+module+".js"
 			};
@@ -58,13 +62,13 @@ module.exports = function ( grunt ) {
 			grunt.fail.fatal( "did not match any file for module "+module );
 		}
 		
-		var deps = appjs.recursiveGetScriptDependencies( [], file ).map(function ( elem ) {
-			return appjs.findScriptDependency( elem );
-		});
+		merge = appjs.mergeScriptFilesArray(
+			[],
+			[],
+			[file]
+		);
 		
-		var config = grunt.config.get( "concat" );
-		
-		config.app.src = deps.concat( [file.abspath] );
+		config.app.src = merge[ module ].src;
 		
 		grunt.config.set( "concat", config );
 		
