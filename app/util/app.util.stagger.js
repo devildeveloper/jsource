@@ -4,9 +4,10 @@
  *
  * A promising timeout utility
  *
- * @dependency: app.core.Class
- *
  * @usage: app.util.stagger( options ).step( fn[i] ).when( i, fn ).done( fn )
+ *
+ *
+ * @dependency: app.core.Class
  *
  *
  */

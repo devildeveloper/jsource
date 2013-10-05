@@ -79,10 +79,12 @@ app.util = app.core.extend( app.util, {
 		
 		codeString = ""+(codeString+e.keyCode);
 		
+		//console.log( codeString, code2Match );
+		
 		if ( codeString === code2Match ) {
 			konami.dispatch( "app.konami.code" );
 			
-			app.util.log( "Konami code entered!" );
+			//app.util.log( "Konami code entered!" );
 		}
 		
 		codeTimeout = setTimeout(function () {

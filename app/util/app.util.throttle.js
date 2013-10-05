@@ -2,7 +2,7 @@
  *
  * App Util: util.throttle
  *
- * A handly way to put a rev limiter on your event callbacks
+ * A handy way to put a rev limiter on your event callbacks
  *
  * @usage: el.addEventListener( "keyup", app.util.throttle( delay, cb ), false )
  *
