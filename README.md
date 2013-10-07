@@ -1,5 +1,5 @@
-app-js-bank
-===========
+app-js-dom
+==========
 
 [localhost:5050]: http://localhost:5050
 
