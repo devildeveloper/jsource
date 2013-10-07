@@ -17,13 +17,13 @@
 "use strict";
 
 
-var noop = function () {},
+var _noop = function () {},
 	Stagger = app.core.Class.extend({
-		_step: noop,
+		_step: _noop,
 		
 		_when: {},
 		
-		_done: noop,
+		_done: _noop,
 		
 		_delay: 250,
 		

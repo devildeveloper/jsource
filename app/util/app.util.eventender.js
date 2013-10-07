@@ -25,8 +25,7 @@ var _enders = {},
 	
 	EventEnder = app.core.Class.extend({
 		init: function ( event, delay, callback ) {
-			var ender = this,
-				timeout,
+			var timeout,
 				handler;
 			
 			// Store some props yo

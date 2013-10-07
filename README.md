@@ -29,4 +29,8 @@ node server.js
 
 You should be able to visit [localhost:5050][]. For scripts that require some applicational code to test, create an index.js file at the root of the repo and test there.
 
-_(More to come on this...)_
+Git will ignore an index.js file at the root. Use this to test the modules as its loaded directly after app/dist/app.js in index.html.
+
+```
+touch index.js
+```

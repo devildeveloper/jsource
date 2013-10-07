@@ -70,6 +70,11 @@ module.exports = function ( grunt ) {
 		
 		config.app.src = merge[ module ].src;
 		
+		config[ module ] = {
+			src: merge[ module ].src,
+			dest: "app/dist/"+module+".js"
+		};
+		
 		grunt.config.set( "concat", config );
 		
 		grunt.task.run( "concat" );
