@@ -4,7 +4,12 @@
  *
  * A promising timeout utility
  *
- * @usage: app.util.stagger( options ).step( fn[i] ).when( i, fn ).done( fn )
+ * @usage: var stagger = app.util.stagger( options )
+ * @usage: stagger.step( fn[i] )
+ * @usage: stagger.when( i, fn )
+ * @usage: stagger.done( fn )
+ *
+ * @chainable: stagger().step().when().done()
  *
  *
  * @dependency: app.core.Class

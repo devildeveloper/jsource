@@ -4,9 +4,14 @@
  *
  * Performs a quick search against an array of terms
  *
- * @usage: app.util.isearch.set( "escapeInputs", true )
- * @usage: app.util.isearch.terms( [term, term, term] )
- * @usage: app.util.isearch.query( term, cb[matches] )
+ * @usage: var search = app.util.isearch( [options] )
+ * @usage: search.query( term, cb[matches] )
+ * @usage: search.set( option, value )
+ *
+ * @chainable: isearch().set().query()
+ *
+ *
+ * @dependency: app.core.Class
  *
  *
  */
@@ -28,34 +33,35 @@ var _rEscChars = /\/|\\|\.|\||\*|\&|\+|\(|\)|\[|\]|\?|\$|\^/g,
 		}
 		
 		return 0;
-	};
-
-
-/******************************************************************************
- * App Extensions
-*******************************************************************************/
-app.util = app.core.extend( app.util, {
-	isearch: {
-		// @key: escapeInputs bool
-		// @key: matchFront bool
-		// @key: matchAny bool
-		// @key: matchCase bool
-		// @key: alphaResults bool
+	},
+	
+	// Supported isearch options
+	_defaults = {
+		escapeInputs: false,
+		matchFront: false,
+		matchAny: true,
+		matchCase: false,
+		alphaResults: false
+	},
+	
+	Isearch = app.core.Class.extend({
+		init: function ( options ) {
+			options = app.core.extend( _defaults, options );
+			
+			this.set( options );
+		},
+		
 		set: function ( key, val ) {
 			if ( typeof key === "object" ) {
 				for ( var prop in key ) {
 					this[ prop ] = key[ prop ];
 				}
 				
-			} else {
+			} else if ( key ) {
 				this[ key ] = val;
 			}
-		},
-		
-		// Expects an [array, ay, ay, ay]
-		// [echo, echo, echo]
-		terms: function ( tArray ) {
-			this._terms = tArray;
+			
+			return this;
 		},
 		
 		// Performs matchAny true by default
@@ -72,7 +78,7 @@ app.util = app.core.extend( app.util, {
 				return;
 			}
 			
-			if ( !this._terms || !this._terms.length ) {
+			if ( !this.terms || !this.terms.length ) {
 				app.util.log( "no terms to query against" );
 				
 				return;
@@ -95,11 +101,11 @@ app.util = app.core.extend( app.util, {
 			
 			regex = new RegExp( rstring, rflags.join( "" ) );
 			
-			for ( var i = this._terms.length; i--; ) {
-				var match = this._terms[ i ].match( regex );
+			for ( var i = this.terms.length; i--; ) {
+				var match = this.terms[ i ].match( regex );
 				
 				if ( match ) {
-					matches.push( this._terms[ i ] );
+					matches.push( this.terms[ i ] );
 				}
 			}
 			
@@ -110,7 +116,18 @@ app.util = app.core.extend( app.util, {
 			if ( typeof callback === "function" ) {
 				callback( matches );
 			}
+			
+			return this;
 		}
+	});
+
+
+/******************************************************************************
+ * App Extensions
+*******************************************************************************/
+app.util = app.core.extend( app.util, {
+	isearch: function ( options ) {
+		return new Isearch( options );
 	}
 });
 

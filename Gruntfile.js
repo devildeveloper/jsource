@@ -19,7 +19,7 @@ module.exports = function ( grunt ) {
 		
 		// Clean tasks.
 		clean: {
-			dist: ["dist"]
+			dist: ["app/dist"]
 		},
 		
 		
