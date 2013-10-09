@@ -10,6 +10,7 @@
  *
  *
  * @dependency: app.core.Class
+ * @dependency: app.core.Evenger
  * @dependency: app.util.throttle
  *
  *
@@ -25,54 +26,21 @@ var _enders = {},
 	
 	EventEnder = app.core.Class.extend({
 		init: function ( event, delay, callback ) {
-			var timeout,
-				handler;
-			
 			// Store some props yo
-			this.event = event;
 			this.delay = delay;
-			this.handler = callback;
-			this.timestamp = +new Date();
+			this.eventName = event;
 			
-			// Keep handler private
-			_enders[ this.timestamp ] = handler = app.util.throttle( delay, function () {
+			this.Event = app.core.Evenger( this.event, window, app.util.throttle( this.delay, function () {
 				if ( typeof callback === "function" ) {
 					callback();
 				}
-			});
-			
-			// Figure out how we can bind the event
-			if ( window.addEventListener ) {
-				window.addEventListener( event, handler, false );
-				
-			} else if ( window.attachEvent ) {
-				event = "on"+event;
-				
-				window.attachEvent( event, handler );
-				
-			} else {
-				event = "on"+event;
-				
-				window[ event ] = handler;
-			}
-			
-			// In case we had to add the "on"
-			this.event = event;
+			}));
 		},
 		
 		teardown: function () {
-			if ( window.removeEventListener ) {
-				window.removeEventListener( this.event, _enders[ this.timestamp ], false );
-				
-			} else if ( window.detachEvent ) {
-				window.detachEvent( this.event, _enders[ this.timestamp ] );
-				
-			} else {
-				window[ this.event ] = _enders[ this.timestamp ] = null;
-			}
+			this.Event.teardown();
 			
-			// Completely remove the handler reference
-			delete _enders[ this.timestamp ];
+			return this;
 		}
 	});
 
