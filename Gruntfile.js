@@ -28,6 +28,15 @@ module.exports = function ( grunt ) {
 			app: {
 				src: [],
 				dest: "app/dist/app.js"
+			},
+			
+			all: {
+				src: [
+					appjs.getCoreModelScriptPath(),
+					"app/core/**/*.js",
+					"app/util/**/*.js"
+				],
+				dest: "app/dist/app.js"
 			}
 		}
 	});
@@ -57,9 +66,12 @@ module.exports = function ( grunt ) {
 				abspath: "app/util/app.util."+module+".js",
 				filename: "app.util."+module+".js"
 			};
-			
+		
+		// Build all modules in priority order core, util...	
 		} else {
-			grunt.fail.fatal( "did not match any file for module "+module );
+			grunt.task.run( "concat:all" );
+			
+			return;
 		}
 		
 		merge = appjs.mergeScriptFilesArray(
@@ -70,14 +82,16 @@ module.exports = function ( grunt ) {
 		
 		config.app.src = merge[ module ].src;
 		
+		/*
 		config[ module ] = {
 			src: merge[ module ].src,
 			dest: "app/dist/"+module+".js"
 		};
+		*/
 		
 		grunt.config.set( "concat", config );
 		
-		grunt.task.run( "concat" );
+		grunt.task.run( "concat:app" );
 	});
 	
 	

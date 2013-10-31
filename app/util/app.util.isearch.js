@@ -1,6 +1,6 @@
 /*!
  *
- * App Util: util.isearch
+ * App Util: app.util.isearch
  *
  * Performs a quick search against an array of terms
  *
@@ -125,11 +125,9 @@ var _rEscChars = /\/|\\|\.|\||\*|\&|\+|\(|\)|\[|\]|\?|\$|\^/g,
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.core.extend( app.util, {
-	isearch: function ( options ) {
-		return new Isearch( options );
-	}
-});
+app.util.isearch = function ( options ) {
+	return new Isearch( options );
+};
 
 
 })( window, window.app );

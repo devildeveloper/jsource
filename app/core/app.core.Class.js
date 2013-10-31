@@ -1,6 +1,6 @@
 /*!
  *
- * App Core: core.Class
+ * App Core: app.core.Class
  *
  * Simple JavaScript Inheritance
  * By John Resig http://ejohn.org
@@ -73,9 +73,7 @@
 	};
 	
 	// Expose Class to app.core
-	app.core = app.core.extend( app.core, {
-		Class: Class
-	});
+	app.core.Class = Class;
 
 })();
 

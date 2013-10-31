@@ -1,6 +1,6 @@
 /*!
  *
- * App Util: util.konami
+ * App Util: app.util.konami
  *
  * Konami code easter egg.
  * Does cool stuff if you hook into it!
@@ -105,11 +105,9 @@ var document = window.document,
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.core.extend( app.util, {
-	konami: function () {
-		return new Konami();
-	}
-});
+app.util.konami = function () {
+	return new Konami();
+};
 
 
 })( window, window.app );

@@ -1,6 +1,6 @@
 /*!
  *
- * App Core: core.Evenger
+ * App Core: app.core.Evenger
  *
  * An event application Class
  *
@@ -69,11 +69,9 @@ var _events = {},
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.core = app.core.extend( app.core, {
-	Evenger: function ( event, element, callback ) {
-		return new Evenger( event, element, callback );
-	}
-});
+app.core.Evenger = function ( event, element, callback ) {
+	return new Evenger( event, element, callback );
+};
 
 
 })( window, window.app );

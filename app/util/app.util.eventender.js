@@ -1,6 +1,6 @@
 /*!
  *
- * App Util: util.eventender
+ * App Util: app.util.eventender
  *
  * The ender of all events, or just for Window
  * events that don't have a proper onend handler
@@ -48,13 +48,11 @@ var _enders = {},
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.core.extend( app.util, {
-	// Supports event = "scroll"
-	// Supports event = "resize"
-	eventender: function ( event, delay, callback ) {
-		return new EventEnder( event, delay, callback );
-	}
-});
+// Supports event = "scroll"
+// Supports event = "resize"
+app.util.eventender = function ( event, delay, callback ) {
+	return new EventEnder( event, delay, callback );
+};
 
 
 })( window, window.app );

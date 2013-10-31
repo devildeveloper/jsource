@@ -1,6 +1,6 @@
 /*!
  *
- * App Util: util.stagger
+ * App Util: app.util.stagger
  *
  * A promising timeout utility
  *
@@ -23,6 +23,7 @@
 
 
 var _noop = function () {},
+
 	Stagger = app.core.Class.extend({
 		_step: _noop,
 		
@@ -140,11 +141,9 @@ var _noop = function () {},
 /******************************************************************************
  * App Extensions
 *******************************************************************************/
-app.util = app.core.extend( app.util, {
-	stagger: function ( options ) {
-		return new Stagger( options );
-	}
-});
+app.util.stagger = function ( options ) {
+	return new Stagger( options );
+};
 
 
 })( window, window.app );

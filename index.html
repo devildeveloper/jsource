@@ -2,18 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app-js-bank // testing</title>
+    <title>app-js-dom // modules</title>
     <style>
-    	div {
-	    	-webkit-transition: opacity 300ms;
-    	}
-    	
-    	div.out {
-	    	opacity: 0;
-    	}
+    	* {
+    		margin: 0;
+    		padding: 0;
+			}
+    	body {
+	    	background-color: #ebebeb;
+	    	border-top: 3px solid #00aeef;
+	    	color: #333;
+	    	font-family: "Helvetica Neue", Sans-serif;
+    		}
+    	a {
+	    	color: #00bff3;
+	    	text-decoration: none;
+	    	transition: color 200ms ease-out;
+	    	-webkit-transition: color 200ms ease-out;
+    		}
+    	a:hover {
+	    	color: #0076a3;
+    		}
+    	ul, li {
+    		color: #0076a3;
+	    	list-style-type: none;
+    		}
+    	pre {
+	    	color: #0076a3;
+	    	font-family: Monaco, monospace;
+	    	font-size: 12px;
+    		}
+    	#modules {
+    		box-sizing: border-box;
+    		margin: 0 auto;
+    		padding: 20px;
+	    	width: 640px;
+    		}
+    	#modules section {
+	    	background-color: #fff;
+	    	border: 1px solid #d7d7d7;
+	    	border-radius: 10px;
+    		box-sizing: border-box;
+    		margin-bottom: 20px;
+    		padding: 20px;
+    		}
+    	#modules section h2 {
+	    	font-size: 18px;
+    		}
+    	#modules section h1 {
+    		border-bottom: 1px dotted #d7d7d7;
+    		margin-bottom: 10px;
+	    	padding-bottom: 10px;
+    		}
+    	#modules article {
+	    	margin-top: 20px;
+    		}
+    	#modules > hgroup {
+	    	margin-bottom: 40px;
+    		}
     </style>
 </head>
 <body>
+	<div id="modules">
+		<hgroup>
+			<h1>App JS Modules</h1>
+		</hgroup>
+		<section data-module="app.core.Class">
+			<hgroup>
+				<h1><a href="/app/core/app.core.Class.js">app.core.Class</a></h1>
+				<h2>A ported example of Class inheritance from <a href="http://ejohn.org/blog/simple-javascript-inheritance/">John Resig</a>.</h2>
+			</hgroup>
+			<article>
+				<h2>Usage:</h2>
+				<pre>var </pre>
+			</article>
+			<article>
+				<h2>Public methods:</h2>
+				<ul>
+					<li><pre>teardown()</pre></li>
+				</ul>
+			</article>
+		</section>
+		<section data-module="app.core.Evenger">
+			<hgroup>
+				<h1><a href="/app/core/app.core.Evenger.js">app.core.Evenger</a></h1>
+				<h2>A cross browser event binding manager. Returns a new instance of Evenger which handles binding and tearing down the event.</h2>
+			</hgroup>
+			<article>
+				<h2>Usage:</h2>
+				<pre>this.Event = app.core.Evenger( "keydown", document, handler );</pre>
+			</article>
+			<article>
+				<h2>Public methods:</h2>
+				<ul>
+					<li><pre>teardown()</pre></li>
+				</ul>
+			</article>
+			<article>
+				<h2>Dependencies:</h2>
+				<pre>app.core.Class</pre>
+			</article>
+		</section>
+	</div>
 	<script src="/app/dist/app.js"></script>
 	<script src="/index.js"></script>
 </body>
