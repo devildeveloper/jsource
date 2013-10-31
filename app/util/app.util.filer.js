@@ -2,7 +2,7 @@
  *
  * App Util: app.util.filer
  *
- * A file notification utility
+ * A file notification utility. Not really helpfull yet...
  *
  *
  * @dependency: app.core.Class
