@@ -50,6 +50,7 @@ module.exports = function ( grunt ) {
 	// Test app-js files.
 	grunt.registerTask( "test", function ( module ) {
 		var config = grunt.config.get( "concat" ),
+			scripts,
 			file,
 			merge;
 		
@@ -74,20 +75,9 @@ module.exports = function ( grunt ) {
 			return;
 		}
 		
-		merge = appjs.mergeScriptFilesArray(
-			[],
-			[],
-			[file]
-		);
+		scripts = appjs.recursiveGetScripts( [], file ).concat( [ file.abspath ] );
 		
-		config.app.src = merge[ module ].src;
-		
-		/*
-		config[ module ] = {
-			src: merge[ module ].src,
-			dest: "app/dist/"+module+".js"
-		};
-		*/
+		config.app.src = [ appjs.getCoreModelScriptPath() ].concat( scripts );
 		
 		grunt.config.set( "concat", config );
 		
