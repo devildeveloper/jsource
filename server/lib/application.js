@@ -10,13 +10,13 @@
 
 var express = require( "express" ),
 
-	app = express(),
-	
-	path = require( "path" );
+    app = express(),
+    
+    path = require( "path" );
 
 app.configure(function () {
-	app.use( app.router );
-	app.use( express.static( path.join( __dirname, "../../" ) ) );
+    app.use( app.router );
+    app.use( express.static( path.join( __dirname, "../../" ) ) );
 });
 
 app.set( "port", 5050 );

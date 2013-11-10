@@ -9,17 +9,17 @@
 (function ( exports ) {
 
 var router,
-	
-	_instance;
+    
+    _instance;
 
 router = function ( app ) {
-	if ( !(this instanceof router) ) {
-		return new router( app );
-	}
-	
-	_instance = this;
-	
-	this.app = app;
+    if ( !(this instanceof router) ) {
+        return new router( app );
+    }
+    
+    _instance = this;
+    
+    this.app = app;
 };
 
 exports.router = router;

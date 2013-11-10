@@ -18,21 +18,21 @@
  * App Extensions
 *******************************************************************************/
 app.util.throttle = function ( delay, callback ) {
-	var timeout = null;
-	
-	return function () {
-		var context = this,
-			args = arguments;
-		
-		clearTimeout( timeout );
-		
-		timeout = setTimeout(function () {
-			if ( typeof callback === "function" ) {
-				callback.apply( context, args );
-			}
-			
-		}, delay );
-	};
+    var timeout = null;
+    
+    return function () {
+        var context = this,
+            args = arguments;
+        
+        clearTimeout( timeout );
+        
+        timeout = setTimeout(function () {
+            if ( typeof callback === "function" ) {
+                callback.apply( context, args );
+            }
+            
+        }, delay );
+    };
 };
 
 

@@ -23,26 +23,26 @@
 
 // Keep track of handlers so we can tear them down
 var _enders = {},
-	
-	EventEnder = app.core.Class.extend({
-		init: function ( event, delay, callback ) {
-			// Store some props yo
-			this.delay = delay;
-			this.eventName = event;
-			
-			this.Event = app.core.Evenger( this.event, window, app.util.throttle( this.delay, function () {
-				if ( typeof callback === "function" ) {
-					callback();
-				}
-			}));
-		},
-		
-		teardown: function () {
-			this.Event.teardown();
-			
-			return this;
-		}
-	});
+    
+    EventEnder = app.core.Class.extend({
+        init: function ( event, delay, callback ) {
+            // Store some props yo
+            this.delay = delay;
+            this.eventName = event;
+            
+            this.Event = app.core.Evenger( this.event, window, app.util.throttle( this.delay, function () {
+                if ( typeof callback === "function" ) {
+                    callback();
+                }
+            }));
+        },
+        
+        teardown: function () {
+            this.Event.teardown();
+            
+            return this;
+        }
+    });
 
 
 /******************************************************************************
@@ -51,7 +51,7 @@ var _enders = {},
 // Supports event = "scroll"
 // Supports event = "resize"
 app.util.eventender = function ( event, delay, callback ) {
-	return new EventEnder( event, delay, callback );
+    return new EventEnder( event, delay, callback );
 };
 
 
