@@ -4,6 +4,10 @@
  *
  * Performs a wildcard style match check against an array of routes given a url.
  *
+ * @wild: :any
+ * @wild: :num
+ * @wild: :slug
+ *
  * @routeFormat: "en_US/foo/:slug/bar/:num/baz"
  *
  * @usage: var matchRoute = app.util.matchRoute( [routesConfig] )
