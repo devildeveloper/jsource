@@ -77,7 +77,7 @@ module.exports = function ( grunt ) {
         
         scripts = appjs.recursiveGetScripts( [], file ).concat( [ file.abspath ] );
         
-        config.app.src = [ appjs.getCoreModelScriptPath() ].concat( scripts );
+        config.app.src = [ appjs.getCoreModelScriptPath() ].concat( ["app/lib/**/*.js"] ).concat( scripts );
         
         grunt.config.set( "concat", config );
         

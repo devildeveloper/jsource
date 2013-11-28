@@ -5,7 +5,6 @@
  * A file notification utility. Not really helpfull yet...
  *
  *
- * @dependency: app.core.Class
  * @dependency: app.core.Evenger
  *
  *
@@ -65,7 +64,7 @@ var document = window.document,
         request.send( data );
     },
     
-    Filer = app.core.Class.extend({
+    Filer = app.Class.extend({
         _onfiles: _noop,
         
         _onprogress: _noop,

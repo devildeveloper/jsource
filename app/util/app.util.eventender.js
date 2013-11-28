@@ -9,7 +9,6 @@
  * @usage: ender.teardown();
  *
  *
- * @dependency: app.core.Class
  * @dependency: app.core.Evenger
  * @dependency: app.util.throttle
  *
@@ -24,7 +23,7 @@
 // Keep track of handlers so we can tear them down
 var _enders = {},
     
-    EventEnder = app.core.Class.extend({
+    EventEnder = app.Class.extend({
         init: function ( event, delay, callback ) {
             // Store some props yo
             this.delay = delay;

@@ -11,7 +11,6 @@
  * @note: You likely should not use the dispatch method yourself, though :-P
  *
  *
- * @dependency: app.core.Class
  * @dependency: app.core.Evenger
  *
  *
@@ -59,7 +58,7 @@ var document = window.document,
         }
     },
     
-    Konami = app.core.Class.extend({
+    Konami = app.Class.extend({
         init: function () {
             var codeString = "",
                 codeTimeout,

@@ -1,6 +1,6 @@
 /*!
  *
- * App Core: app.core.Class
+ * Class Inheritance Model
  *
  * Simple JavaScript Inheritance
  * By John Resig http://ejohn.org
@@ -43,7 +43,7 @@
                                             
                                             // The method only need to be bound temporarily, so we
                                             // remove it when we're done executing
-                                            var ret = fn.apply( this, arguments );       
+                                            var ret = fn.apply( this, arguments );
                                             this._super = tmp;
                                             
                                             return ret;
@@ -73,7 +73,7 @@
     };
     
     // Expose Class to app.core
-    app.core.Class = Class;
+    app.Class = Class;
 
 })();
 

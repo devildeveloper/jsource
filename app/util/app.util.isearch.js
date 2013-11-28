@@ -11,9 +11,6 @@
  * @chainable: isearch().set().query()
  *
  *
- * @dependency: app.core.Class
- *
- *
  */
 (function ( window, app, undefined ) {
 
@@ -44,7 +41,7 @@ var _rEscChars = /\/|\\|\.|\||\*|\&|\+|\(|\)|\[|\]|\?|\$|\^/g,
         alphaResults: false
     },
     
-    Isearch = app.core.Class.extend({
+    Isearch = app.Class.extend({
         init: function ( options ) {
             options = app.core.extend( _defaults, options );
             

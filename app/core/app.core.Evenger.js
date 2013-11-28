@@ -5,9 +5,6 @@
  * An event application Class
  *
  *
- * @dependency: app.core.Class
- *
- *
  */
 (function ( window, app, undefined ) {
 
@@ -17,7 +14,7 @@
 
 var _events = {},
 
-    Evenger = app.core.Class.extend({
+    Evenger = app.Class.extend({
         init: function ( event, element, callback, delay ) {
             var handler;
             

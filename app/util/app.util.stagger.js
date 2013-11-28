@@ -12,9 +12,6 @@
  * @chainable: stagger().step().when().done()
  *
  *
- * @dependency: app.core.Class
- *
- *
  */
 (function ( window, app, undefined ) {
 
@@ -24,7 +21,7 @@
 
 var _noop = function () {},
 
-    Stagger = app.core.Class.extend({
+    Stagger = app.Class.extend({
         _step: _noop,
         
         _when: {},
