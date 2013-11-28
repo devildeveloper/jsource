@@ -3,12 +3,15 @@
  * App Util: app.util.matchRoute
  *
  * Performs a wildcard style match check against an array of routes given a url.
+ * Valid wildcards are "any", "slug", "num" and "reg". Regex must be escaped for backslashes.
  *
  * @wild: :any
  * @wild: :num
  * @wild: :slug
+ * @wild: :reg(/regex/)
  *
  * @routeFormat: "en_US/foo/:slug/bar/:num/baz"
+ * @routeFormat: "var/:reg(foo_.*?\\d{1,2})/pooh/:any"
  *
  * @usage: var matchRoute = app.util.matchRoute( [routesConfig] )
  * @usage: matchRoute.config( [routesConfig] ) => updates internal routes config to use
@@ -25,11 +28,15 @@
 
 var _rHTTPs = /^http[s]?:\/\/.*?\//,
     _rTrails = /^\/|\/$/g,
-    _rHashQuery = /#.*|\?.*/g,
-    _rWild = /:num|:slug|:any/,
-    _rSlug = /^[A-Za-z0-9-_.]*/,
-    _rNum = /^[0-9]+$/,
-    _rAny = /^.*/,
+    _rHashQuery = /#.*|.*\?$/g,
+    _rWild = /^:num|^:slug|^:any|^:reg/,
+    
+    _wilders = {
+        ":slug": /^[A-Za-z0-9-_.]*/,
+        ":num": /^[0-9]+$/,
+        ":any": /^.*/,
+        ":reg": /:reg|\(|\)/g
+    },
     
     _cleanRoute = function ( route ) {
         route = route.replace( _rHTTPs, "" );
@@ -99,7 +106,12 @@ var _rHTTPs = /^http[s]?:\/\/.*?\//,
                     if ( matches ) {
                         match = matches[ 0 ];
                         
-                        regex = ( match === ":num" ) ? _rNum : ( match === ":any" ) ? _rAny : _rSlug;
+                        if ( match === ":reg" ) {
+                            regex = new RegExp( ruris[ j ].replace( _wilders[ match ], "" ) );
+                            
+                        } else {
+                            regex = _wilders[ match ];
+                        }
                         
                         if ( regex.test( uris[ j ] ) ) {
                             segMatches++;
