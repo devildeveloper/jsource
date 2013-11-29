@@ -5,7 +5,7 @@ app-js-dom
 
 Resource bank of app-js files that can be used with grunt-nautilus
 
-## Use with bower
+## Using with bower
 
 ```
 bower install app-js-dom
