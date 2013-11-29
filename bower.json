@@ -1,0 +1,24 @@
+{
+  "name": "app-js-dom",
+  "main": "",
+  "version": "0.1.3",
+  "homepage": "https://github.com/kitajchuk/app-js-dom",
+  "authors": [
+    "Brandon Kitajchuk <kitajchuk@gmail.com>"
+  ],
+  "description": "Resource collection of app-js files that can be used with grunt-nautilus",
+  "keywords": [
+    "javascript",
+    "dom",
+    "modular",
+    "application",
+    "development"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "devDependencies": {}
+}

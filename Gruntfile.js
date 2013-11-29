@@ -33,10 +33,11 @@ module.exports = function ( grunt ) {
             all: {
                 src: [
                     appjs.getCoreModelScriptPath(),
+                    "app/lib/**/*.js",
                     "app/core/**/*.js",
                     "app/util/**/*.js"
                 ],
-                dest: "app/dist/app.js"
+                dest: "app.js"
             }
         }
     });

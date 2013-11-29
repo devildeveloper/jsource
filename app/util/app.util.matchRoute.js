@@ -8,7 +8,7 @@
  * @wild: :any
  * @wild: :num
  * @wild: :slug
- * @wild: :reg(/regex/)
+ * @wild: :reg(regex)
  *
  * @routeFormat: "en_US/foo/:slug/bar/:num/baz"
  * @routeFormat: "var/:reg(foo_.*?\\d{1,2})/pooh/:any"
