@@ -87,6 +87,52 @@
 				<pre>app.Class</pre>
 			</article>
 		</section>
+		
+		<section data-module="app.util.eventender">
+			<hgroup>
+				<h1><a href="/app/util/app.util.eventender.js">app.util.eventender</a></h1>
+				<h2>A polyfill for window onend events that don't exist. Supports "scroll" and "resize".</h2>
+			</hgroup>
+			<article>
+				<h2>Usage:</h2>
+				<pre>var ender = app.util.eventender( "scroll", 300, cb );</pre>
+			</article>
+			<article>
+				<h2>Public methods:</h2>
+				<ul>
+					<li><pre>teardown()</pre></li>
+				</ul>
+			</article>
+			<article>
+				<h2>Dependencies:</h2>
+				<pre>app.core.Evenger</pre>
+				<pre>app.util.throttle</pre>
+			</article>
+		</section>
+		
+		<section data-module="app.util.isearch">
+			<hgroup>
+				<h1><a href="/app/util/app.util.isearch.js">app.util.isearch</a></h1>
+				<h2>Performs a quick search against an array of terms.</h2>
+			</hgroup>
+			<article>
+				<h2>Usage:</h2>
+				<pre>var search = app.util.isearch( [options] );</pre>
+                <pre>search.query( term, cb[matches] );</pre>
+                <pre>search.set( option, value );</pre>
+			</article>
+			<article>
+				<h2>Public methods:</h2>
+				<ul>
+					<li><pre>set()</pre></li>
+					<li><pre>query()</pre></li>
+				</ul>
+			</article>
+			<article>
+				<h2>Dependencies:</h2>
+				<pre>app.Class</pre>
+			</article>
+		</section>
 	</div>
 	<script src="/app/dist/app.js"></script>
 	<script src="/index.js"></script>

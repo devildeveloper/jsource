@@ -1,7 +1,7 @@
 {
     "name": "app-js-dom",
     "description": "A Collection of scripts for modular app-js development",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "homepage": "https://github.com/kitajchuk/app-js-dom",
     "readmeFilename": "README.md",
     "author": {
