@@ -5,6 +5,14 @@ app-js-dom
 
 Resource bank of app-js files that can be used with grunt-nautilus
 
+## Use with bower
+
+```
+bower install app-js-dom
+```
+
+You can link to any individual app-js file or the entire current build is compiled as app.js in the root.
+
 ## Testing a file
 
 First install packages:
