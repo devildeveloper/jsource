@@ -28,7 +28,7 @@
 
 var _rHTTPs = /^http[s]?:\/\/.*?\//,
     _rTrails = /^\/|\/$/g,
-    _rHashQuery = /#.*|.*\?$/g,
+    _rHashQuery = /[#|?].*$/g,
     _rWild = /^:num|^:slug|^:any|^:reg/,
     
     _wilders = {
