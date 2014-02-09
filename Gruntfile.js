@@ -1,15 +1,15 @@
-/* global module:false */
-
+/*!
+ *
+ * JSource config.
+ *
+ */
 module.exports = function ( grunt ) {
     
     
-    var appjs = require( "app-js-util" )( grunt, {
-        jsRoot: "./app",
-        jsAppRoot: "./app",
-        jsDistRoot: "./app/dist"
-    });
+    var _ = grunt.util._;
     
     
+    // Project configuration.
     grunt.initConfig({
         // Project meta.
         meta: {
@@ -17,72 +17,104 @@ module.exports = function ( grunt ) {
         },
         
         
-        // Clean tasks.
-        clean: {
-            dist: ["app/dist"]
+        // Project banner.
+        banner:
+            "/*!\n"+
+            " * \n"+
+            " * \n"+
+            " * JSource - v<%= meta.version %> - <%= grunt.template.today('yyyy-mm-dd') %>\n"+
+            " * Copyright (c) Brandon Lee Kitajchuk <%= grunt.template.today('yyyy') %>\n"+
+            " * Licensed MIT\n"+
+            " * \n"+
+            " * \n"+
+            " */\n"+
+            "\n",
+        
+        
+        // Concat config.
+        concat: {
+            jsource: {
+                src: ["src/**/*.js"],
+                dest: "dist/jsource.js"
+            }
         },
         
         
-        // Concat tasks.
-        concat: {
-            app: {
-                src: [],
-                dest: "app/dist/app.js"
-            },
-            
-            all: {
-                src: [
-                    appjs.getCoreModelScriptPath(),
-                    "app/lib/**/*.js",
-                    "app/core/**/*.js",
-                    "app/util/**/*.js"
-                ],
-                dest: "app.js"
+        // Uglify config.
+        uglify: {
+            jsource: {
+                src: ["src/**/*.js"],
+                dest: "dist/jsource.min.js"
             }
-        }
+        },
+        
+        
+        // Watch config.
+        watch: {
+            jsource: {
+                files: ["src/**/*.js"],
+                tasks: ["concat:jsource"]
+            }
+        },
+        
+        
     });
     
     
-    // Load tasks.
-    grunt.loadNpmTasks( "grunt-contrib-clean" );
+    // Load the plugins.
+    grunt.loadNpmTasks( "grunt-contrib-jshint" );
     grunt.loadNpmTasks( "grunt-contrib-concat" );
+    grunt.loadNpmTasks( "grunt-contrib-uglify" );
+    grunt.loadNpmTasks( "grunt-contrib-watch" );
+    grunt.loadNpmTasks( "grunt-contrib-clean" );
     
     
-    // Test app-js files.
-    grunt.registerTask( "test", function ( module ) {
-        var config = grunt.config.get( "concat" ),
-            scripts,
-            file,
-            merge;
+    // Register default task.
+    grunt.registerTask( "default", ["concat:jsource", "uglify:jsource"] );
+    
+    
+    // Register build task.
+    grunt.registerTask( "build", function ( script ) {
+        var file = "src/"+script+".js",
+            src = [],
+            dist = "dist/"+script+".js",
+            dest = "dist/"+script+".min.js",
+            concats = grunt.config.get( "concat" ),
+            uglifys = grunt.config.get( "uglify" ),
+            rRequires = /@require:(.*?)\n/g,
+            rReplaces = /@require|:|\s|\n|\r/g;
         
-        if ( grunt.file.exists( "app/core/app.core."+module+".js" ) ) {
-            file = {
-                module: module,
-                abspath: "app/core/app.core."+module+".js",
-                filename: "app.core."+module+".js"
+        if ( script && grunt.file.isFile( file ) ) {
+            var contents = grunt.file.read( file );
+            var requires = contents.match( rRequires );
+            
+            _.each( requires, function ( el, i, list ) {
+                el = el.replace( rReplaces, "" );
+                
+                src.push( "src/"+el+".js" );
+            });
+            
+            src.push( file );
+            
+            concats[ script ] = {
+                src: src,
+                dest: dist
             };
             
-        } else if ( grunt.file.exists( "app/util/app.util."+module+".js" ) ) {
-            file = {
-                module: module,
-                abspath: "app/util/app.util."+module+".js",
-                filename: "app.util."+module+".js"
+            uglifys[ script ] = {
+                src: src,
+                dest: dest
             };
-        
-        // Build all modules in priority order core, util...    
+            
+            grunt.config.set( "concat", concats );
+            grunt.config.set( "uglify", uglifys );
+            
+            grunt.task.run( "concat:" + script );
+            grunt.task.run( "uglify:" + script );
+            
         } else {
-            grunt.task.run( "concat:all" );
-            
-            return;
+            grunt.task.run( "default" );
         }
-        
-        scripts = appjs.recursiveGetScripts( [], file ).concat( [ file.abspath ] );
-        
-        config.app.src = [ appjs.getCoreModelScriptPath() ].concat( ["app/lib/**/*.js"] ).concat( scripts );
-        
-        grunt.config.set( "concat", config );
-        
-        grunt.task.run( "concat:app" );
     });
     
     

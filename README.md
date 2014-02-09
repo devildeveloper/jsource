@@ -1,44 +1,31 @@
-app-js-dom
-==========
+JSource
+=======
 
-[localhost:5050]: http://localhost:5050
+> A vanilla javascript resource for the everyday developer.
 
-Resource bank of app-js files that can be used with grunt-nautilus
 
-## Using with bower
+These javascript resources can be used standalone or with one another. They are meant to be vanilla js resources that are lightweight and useful. Basically, this is where I write scripts I don't want to have to write more than once and when I cannot find something out there that does what I want the way I want. A lot of resources just try to do too much.
 
-```
-bower install app-js-dom
-```
 
-You can link to any individual app-js file or the entire current build is compiled as app.js in the root.
+### Docs
+You can jsdoc the src directory to see what is in there.
 
-## Testing a file
+```shell
+# make jsdocs
+make jsdocs
 
-First install packages:
-
-```
-npm install
+# start a server
+python -m SimpleHTTPServer
 ```
 
-For example, to test the konami code util you would run the following:
+You should be able to see the docs at [http://localhost:8000/docs/](http://localhost:8000/docs/);
 
-```
-grunt test:konami
-```
 
-Then to test the build run the following:
-
-```
-cd server
-
-node server.js
+### Build
+You can use [grunt](http://gruntjs.com/) to build just a single resource you need. You can also just read the files and take what you need. They are clearly documented and state whether they need another file or not.
+```shell
+# build Router with grunt
+grunt build:Router
 ```
 
-You should be able to visit [localhost:5050][]. For scripts that require some applicational code to test, create an index.js file at the root of the repo and test there.
-
-Git will ignore an index.js file at the root. Use this to test the modules as its loaded directly after app/dist/app.js in index.html.
-
-```
-touch index.js
-```
+The above would distribute to dist/Router.js and dist/Router.min.js.

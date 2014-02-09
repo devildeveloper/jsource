@@ -1,4 +1,21 @@
+########################
+# misc / editors
+########################
 .DS_Store
-dist
+
+
+########################
+# npm / node
+########################
 node_modules
-index.js
+npm-debug.log
+dist
+
+
+########################
+# testing
+########################
+/index.html
+/img
+/docs
+/dependencies
