@@ -1,6 +1,7 @@
 /*!
  *
  * Handles history pushstate/popstate with async option
+ * If history is not supported, falls back to hashbang!
  *
  * @PushState
  * @author: kitajchuk
@@ -41,12 +42,30 @@ PushState.prototype = {
         
         /**
          *
-         * Flag whether popstate is enabled
+         * Expression match #
          * @memberof PushState
-         * @member _poppable
+         * @member PushState._rHash
          *
          */
-        this._poppable = false;
+        this._rHash = /#/;
+        
+        /**
+         *
+         * Expression match http/https
+         * @memberof PushState
+         * @member PushState._rHTTPs
+         *
+         */
+        this._rHTTPs = /^http[s]?:\/\/.*?\//,
+        
+        /**
+         *
+         * Flag whether state is enabled
+         * @memberof PushState
+         * @member _enabled
+         *
+         */
+        this._enabled = false;
         
         /**
          *
@@ -56,6 +75,32 @@ PushState.prototype = {
          *
          */
         this._pushable = ("history" in window && "pushState" in window.history);
+        
+        /**
+         *
+         * Fallback to hashchange if needed. Support:
+         * <ul>
+         * <li>Internet Explorer 8</li>
+         * <li>Firefox 3.6</li>
+         * <li>Chrome 5</li>
+         * <li>Safari 5</li>
+         * <li>Opera 10.6</li>
+         * </ul>
+         * @memberof PushState
+         * @member _hashable
+         *
+         */
+        this._hashable = ("onhashchange" in window);
+        
+        /**
+         *
+         * Flag when hash is changed by PushState
+         * This allows appropriate replication of popstate
+         * @memberof PushState
+         * @member _ishashpushed
+         *
+         */
+        this._ishashpushed = false;
         
         /**
          *
@@ -120,7 +165,7 @@ PushState.prototype = {
         this._caching = ( options.caching !== undefined ) ? options.caching : true;
 
         // Enable the popstate event
-        this._enable();
+        this._stateEnable();
     },
     
     /**
@@ -163,7 +208,7 @@ PushState.prototype = {
                     }
                     
                     if ( typeof callback === "function" ) {
-                        callback( response.responseText );
+                        callback( response );
                     }
                 });
     
@@ -250,6 +295,11 @@ PushState.prototype = {
     _push: function ( url ) {
         if ( this._pushable ) {
             window.history.pushState( this._states[ url ], "", url );
+            
+        } else {
+            this._ishashpushed = true;
+            
+            window.location.hash = url.replace( this._rHTTPs, "" );
         }
     },
     
@@ -347,35 +397,49 @@ PushState.prototype = {
     
     /**
      *
-     * Bind this instances popstate handler
+     * Bind this instances state handler
      * @memberof PushState
-     * @method _enable
+     * @method _stateEnabled
      *
      */
-    _enable: function () {
-        if ( !this._pushable || this._poppable ) {
+    _stateEnable: function () {
+        if ( this._enabled ) {
             return this;
         }
 
-        var self = this;
-
-        // Popping
-        this._poppable = true;
-
-        // Bind the popstate event
-        window.addEventListener( "popstate", function ( e ) {
-            var url = window.location.href;
-            
-            if ( self._stateCached( url ) ) {
-                self._fire( "pop", url, self._responses[ url ] );
+        var self = this,
+            handler = function () {
+                var url = window.location.href.replace( self._rHash, "/" );
                 
-            } else {
-                self._getUrl( url, function ( response ) {
-                    self._fire( "pop", url, response );
-                });
-            }
+                if ( self._stateCached( url ) ) {
+                    self._fire( "pop", url, self._responses[ url ] );
+                    
+                } else {
+                    self._getUrl( url, function ( response ) {
+                        self._fire( "pop", url, response );
+                    });
+                }
+            };
+
+        this._enabled = true;
+        
+        if ( this._pushable ) {
+            window.addEventListener( "popstate", function ( e ) {
+                handler();
+                
+            }, false );
             
-        }, false );
+        } else if ( this._hashable ) {
+            window.addEventListener( "hashchange", function ( e ) {
+                if ( !self._ishashpushed ) {
+                    handler();
+                    
+                } else {
+                    self._ishashpushed = false;
+                }
+                
+            }, false );
+        }
     }
 };
 

@@ -49,6 +49,12 @@ module.exports = function ( grunt ) {
         },
         
         
+        // Clean config.
+        clean: [
+            "dist"
+        ],
+        
+        
         // Watch config.
         watch: {
             jsource: {
@@ -70,7 +76,7 @@ module.exports = function ( grunt ) {
     
     
     // Register default task.
-    grunt.registerTask( "default", ["concat:jsource", "uglify:jsource"] );
+    grunt.registerTask( "default", ["clean", "concat:jsource", "uglify:jsource"] );
     
     
     // Register build task.
