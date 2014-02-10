@@ -344,12 +344,10 @@ PushState.prototype = {
      *
      */
     _getUrl: function ( url, callback ) {
-        var xhr = new XMLHttpRequest(),
-            res;
+        var xhr = new XMLHttpRequest();
         
         xhr.open( "GET", url, true );
-        //xhr.setRequestHeader( "Accept", "text/html" );
-        //xhr.setRequestHeader( "Content-Type", "text/html" );
+        
         xhr.onreadystatechange = function ( e ) {
             if ( this.readyState === 4 ) {
                 if ( this.status === 200 ) {
@@ -362,6 +360,7 @@ PushState.prototype = {
                 }
             }
         };
+        
         xhr.send();
     },
     
