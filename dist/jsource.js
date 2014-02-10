@@ -1485,12 +1485,6 @@ PushState.prototype = {
                     self._push( url );
     
                     self._fire( "after", response );
-    
-                    // Cache if option enabled
-                    if ( self._caching ) {
-                        self._states[ url ].cached = true;
-                        self._responses[ url ] = response;
-                    }
                     
                     if ( typeof callback === "function" ) {
                         callback( response );
@@ -1606,6 +1600,13 @@ PushState.prototype = {
         return ret;
     },
     
+    _cacheState: function ( url, response ) {
+        if ( this._caching ) {
+            this._states[ url ].cached = true;
+            this._responses[ url ] = response;
+        }
+    },
+    
     /**
      *
      * Get a unique ID
@@ -1629,7 +1630,8 @@ PushState.prototype = {
      *
      */
     _getUrl: function ( url, callback ) {
-        var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest(),
+            self = this;
         
         xhr.open( "GET", url, true );
         
@@ -1637,6 +1639,9 @@ PushState.prototype = {
             if ( this.readyState === 4 ) {
                 if ( this.status === 200 ) {
                     try {
+                        // Cache if option enabled
+                        self._cacheState( url, this );
+                        
                         if ( typeof callback === "function" ) {
                             callback( this );
                         }

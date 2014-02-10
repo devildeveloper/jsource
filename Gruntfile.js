@@ -59,7 +59,7 @@ module.exports = function ( grunt ) {
         watch: {
             jsource: {
                 files: ["src/**/*.js"],
-                tasks: ["concat:jsource"]
+                tasks: ["buildAll"]
             }
         },
         
