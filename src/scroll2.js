@@ -2,7 +2,7 @@
  *
  * A basic scrollto function without all the fuss
  *
- * @scrollTo
+ * @scroll2
  * @author: kitajchuk
  * @require: Tween
  *
@@ -15,8 +15,8 @@
 
 /**
  *
- * Window scrollTo function
- * @method scrollTo
+ * Window scroll2 function
+ * @method scroll2
  * @param {number} to Where are we scrolling
  * @param {number} duration How long will it take
  * @param {function} ease The easing function to use
@@ -24,7 +24,7 @@
  * @memberof! <global>
  *
  */
-var scrollTo = function ( to, duration, ease, callback ) {
+var scroll2 = function ( to, duration, ease, callback ) {
     var from = (window.scrollY || window.pageYOffset),
         hand = function ( t ) {
             window.scrollTo( 0, t );
@@ -45,7 +45,7 @@ var scrollTo = function ( to, duration, ease, callback ) {
 
 
 // Expose
-window.scrollTo = scrollTo;
+window.scroll2 = scroll2;
 
 
 })( window );

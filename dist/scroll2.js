@@ -25,18 +25,20 @@
  *
  */
 var Tween = function ( duration, from, to, tween, ease ) {
+    console.log( arguments );
+    
     ease = (ease || function ( t ) {
         return t;
     });
     
-    var time = duration || 1000,
-        animDiff = to-from,
+    var time = (duration || 1000),
+        animDiff = (to - from),
         startTime = new Date(),
         timer;
     
     function animate() {
-        var diff = new Date()-startTime,
-            animTo = (animDiff*ease( diff/time ))+from;
+        var diff = new Date() - startTime,
+            animTo = (animDiff * ease( diff / time )) + from;
         
         if ( diff > time ) {
             tween( to );
@@ -63,7 +65,7 @@ window.Tween = Tween;
  *
  * A basic scrollto function without all the fuss
  *
- * @scrollTo
+ * @scroll2
  * @author: kitajchuk
  * @require: Tween
  *
@@ -76,8 +78,8 @@ window.Tween = Tween;
 
 /**
  *
- * Window scrollTo function
- * @method scrollTo
+ * Window scroll2 function
+ * @method scroll2
  * @param {number} to Where are we scrolling
  * @param {number} duration How long will it take
  * @param {function} ease The easing function to use
@@ -85,7 +87,9 @@ window.Tween = Tween;
  * @memberof! <global>
  *
  */
-var scrollTo = function ( to, duration, ease, callback ) {
+var scroll2 = function ( to, duration, ease, callback ) {
+    console.log( arguments );
+    
     var from = (window.scrollY || window.pageYOffset),
         hand = function ( t ) {
             window.scrollTo( 0, t );
@@ -106,7 +110,7 @@ var scrollTo = function ( to, duration, ease, callback ) {
 
 
 // Expose
-window.scrollTo = scrollTo;
+window.scroll2 = scroll2;
 
 
 })( window );

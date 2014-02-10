@@ -25,18 +25,20 @@
  *
  */
 var Tween = function ( duration, from, to, tween, ease ) {
+    console.log( arguments );
+    
     ease = (ease || function ( t ) {
         return t;
     });
     
-    var time = duration || 1000,
-        animDiff = to-from,
+    var time = (duration || 1000),
+        animDiff = (to - from),
         startTime = new Date(),
         timer;
     
     function animate() {
-        var diff = new Date()-startTime,
-            animTo = (animDiff*ease( diff/time ))+from;
+        var diff = new Date() - startTime,
+            animTo = (animDiff * ease( diff / time )) + from;
         
         if ( diff > time ) {
             tween( to );
