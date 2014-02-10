@@ -1,0 +1,31 @@
+{
+    "name": "jsource",
+    "main": "",
+    "version": "0.1.0",
+    "homepage": "https://github.com/kitajchuk/jsource",
+    "authors": [
+        "Brandon Kitajchuk <kitajchuk@gmail.com>"
+    ],
+    "description": "A Javascript resource for the everyday coder.",
+    "keywords": [
+        "javascript",
+        "modular",
+        "application",
+        "development",
+        "grunt",
+        "grunt-nautilus"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests",
+        "docs",
+        "dist",
+        "dependencies",
+        "img"
+    ],
+    "devDependencies": {}
+}
