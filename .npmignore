@@ -2,7 +2,7 @@
 node_modules
 npm-debug.log
 bower.json
-dist
+#dist
 /index.html
 /img
 /docs

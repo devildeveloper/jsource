@@ -76,15 +76,15 @@ module.exports = function ( grunt ) {
     
     
     // Register default task.
-    grunt.registerTask( "default", ["clean", "concat:jsource", "uglify:jsource"] );
+    grunt.registerTask( "default", ["concat:jsource", "uglify:jsource"] );
     
     
     // Register build task.
     grunt.registerTask( "build", function ( script ) {
-        var file = "src/"+script+".js",
+        var file = "src/" + script + ".js",
             src = [],
-            dist = "dist/"+script+".js",
-            dest = "dist/"+script+".min.js",
+            dist = "dist/" + script + ".js",
+            dest = "dist/" + script + ".min.js",
             concats = grunt.config.get( "concat" ),
             uglifys = grunt.config.get( "uglify" ),
             rRequires = /@require:(.*?)\n/g,
@@ -97,7 +97,7 @@ module.exports = function ( grunt ) {
             _.each( requires, function ( el, i, list ) {
                 el = el.replace( rReplaces, "" );
                 
-                src.push( "src/"+el+".js" );
+                src.push( "src/" + el + ".js" );
             });
             
             src.push( file );
@@ -121,6 +121,23 @@ module.exports = function ( grunt ) {
         } else {
             grunt.task.run( "default" );
         }
+    });
+    
+    
+    // Register buildAll task.
+    grunt.registerTask( "buildAll", function ( script ) {
+        // First clean dist
+        grunt.task.run( "clean" );
+        
+        // Walk src to build dist
+        grunt.file.recurse( "src", function ( abspath, rootdir, subdir, filename ) {
+            var script = filename.replace( /\.js$/, "" );
+            
+            grunt.task.run( "build:" + script );
+        });
+        
+        // Build compilation
+        grunt.task.run( "default" );
     });
     
     

@@ -23,7 +23,6 @@
         "test",
         "tests",
         "docs",
-        "dist",
         "dependencies",
         "img"
     ],
