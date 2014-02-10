@@ -25,8 +25,6 @@
  *
  */
 var Tween = function ( duration, from, to, tween, ease ) {
-    console.log( arguments );
-    
     ease = (ease || function ( t ) {
         return t;
     });
@@ -88,8 +86,6 @@ window.Tween = Tween;
  *
  */
 var scroll2 = function ( to, duration, ease, callback ) {
-    console.log( arguments );
-    
     var from = (window.scrollY || window.pageYOffset),
         hand = function ( t ) {
             window.scrollTo( 0, t );

@@ -25,8 +25,6 @@
  *
  */
 var Tween = function ( duration, from, to, tween, ease ) {
-    console.log( arguments );
-    
     ease = (ease || function ( t ) {
         return t;
     });
