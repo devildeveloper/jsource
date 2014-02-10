@@ -1806,19 +1806,35 @@ Router.prototype = {
         };
         
         /**
+         * GET click event handler
+         * @memberof Router
+         * @method _handler
+         *
+         */
+        this._handler = function ( e ) {
+            // Only capture <a> elements
+            if ( e.target.tagName.toLowerCase() === "a" ) {
+                var elem = e.target;
+                
+                if ( elem.href.indexOf( "#" ) === -1 && self._matcher.test( elem.href ) ) {
+                    self._pusher.push( elem.href, function ( response ) {
+                        self._fire( "get", elem.href, response );
+                    });
+                }
+            }
+        };
+        
+        /**
          *
          * Bind GET requests to links
          *
          */
-        EventApi.delegateEvent( "click", document, "a", function ( e ) {
-            var elem = this;
+        if ( document.addEventListener ) {
+            document.addEventListener( "click", this._handler, false );
             
-            if ( elem.href.indexOf( "#" ) === -1 && self._matcher.test( elem.href ) ) {
-                self._pusher.push( elem.href, function ( response ) {
-                    self._fire( "get", elem.href, response );
-                });
-            }
-        });
+        } else {
+            document.attachEvent( "onclick", this._handler );
+        }
         
         // Listen for pop events
         setTimeout(function () {
