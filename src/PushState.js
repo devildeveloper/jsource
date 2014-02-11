@@ -315,6 +315,15 @@ PushState.prototype = {
         return ret;
     },
     
+    /**
+     *
+     * Cache the response for a url
+     * @memberof PushState
+     * @method _cacheState
+     * @param {string} url The url to cache for
+     * @param {object} response The XMLHttpRequest response object
+     *
+     */
     _cacheState: function ( url, response ) {
         if ( this._caching ) {
             this._states[ url ].cached = true;
