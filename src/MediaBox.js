@@ -31,6 +31,15 @@ MediaBox.prototype = {
     
     /**
      *
+     * Expression match hashbang/querystring
+     * @memberof MediaBox
+     * @member MediaBox._rHashQuery
+     *
+     */
+    _rHashQuery: /[#|?].*$/g,
+    
+    /**
+     *
      * MediaBox stopped state constant
      * @memberof MediaBox
      * @member MediaBox.STATE_STOPPED
@@ -261,18 +270,16 @@ MediaBox.prototype = {
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
         this._video[ id ].element.setAttribute( "controls", false );
-        this._video[ id ].useSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
+        this._video[ id ]._usedSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
         this._video[ id ]._events = {};
-                
-        xhr.open( "GET", obj[ 1 ][ 0 ], true );
+        
+        xhr.open( "GET", this._video[ id ]._usedSource.source, true );
         xhr.onload = function ( e ) {
-            for ( var i = self._video[ id ].sources.length; i--; ) {
-                var source = document.createElement( "source" );
-                    source.src = self._video[ id ].sources[ i ];
-                    source.type = self._getMimeFromMedia( self._video[ id ].sources[ i ] );
-                
-                self._video[ id ].element.appendChild( source );
-            }
+            var source = document.createElement( "source" );
+                source.src = self._video[ id ]._usedSource.source;
+                source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
+        
+            self._video[ id ].element.appendChild( source );
             
             if ( typeof callback === "function" ) {
                 callback();
@@ -386,10 +393,10 @@ MediaBox.prototype = {
         this._audio[ id ].loop = (obj[ 2 ].loop || false);
         this._audio[ id ].sources = obj[ 1 ];
         this._audio[ id ].context = this.createAudioContext();
-        this._audio[ id ].useSource = this._getUsedMediaSource( "audio", this._audio[ id ].sources );
+        this._audio[ id ]._usedSource = this._getUsedMediaSource( "audio", this._audio[ id ].sources );
         this._audio[ id ].state = this.STATE_STOPPED;
         
-        xhr.open( "GET", this._audio[ id ].useSource, true );
+        xhr.open( "GET", this._audio[ id ]._usedSource.source, true );
         xhr.responseType = "arraybuffer";
         xhr.onload = function ( e ) {
             self._audio[ id ].context.decodeAudioData( xhr.response, function ( buffer ) {
@@ -776,24 +783,48 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._getUsedMediaSource
      * @param {string} media the media type to check
-     * @param {array} collection of audio sources
-     * @returns string audio source
+     * @param {array} sources Array of media sources
+     * @returns object
      *
      */
     _getUsedMediaSource: function ( media, sources ) {
-        var ret;
+        var source, canPlay;
         
         for ( var i = sources.length; i--; ) {
-            var src = sources[ i ].split( "." ).pop().toLowerCase();
+            var src = sources[ i ].split( "." ).pop().toLowerCase().replace( this._rHashQuery, "" );
             
-            if ( this._supported[ media ][ src ] === "probably" ) {
-                ret = sources[ i ];
+            if ( media === "video" && src === "mp4" ) {
+                if ( (this._supported.video.mpeg4 === "probably" || this._supported.video.h264 === "probably") ) {
+                    source = sources[ i ];
+                    
+                    canPlay = "probably";
+                    
+                } else if ( (this._supported.video.mpeg4 === "maybe" || this._supported.video.h264 === "maybe") ) {
+                    source = sources[ i ];
+                    
+                    canPlay = "maybe";
+                }
                 
+            } else if ( this._supported[ media ][ src ] === "probably" ) {
+                source = sources[ i ];
+                
+                canPlay = "probably";
+                
+            } else if ( this._supported[ media ][ src ] === "maybe" ) {
+                source = sources[ i ];
+                
+                canPlay = "maybe";
+            }
+            
+            if ( source ) {
                 break;
             }
         }
         
-        return ret;
+        return {
+            source: source,
+            canPlay: canPlay
+        };
     },
     
     /**
@@ -849,6 +880,7 @@ MediaBox.prototype = {
         try {
             if ( bool = !!elem.canPlayType ) {
                 bool = new Boolean( bool );
+                bool.mpeg4 = elem.canPlayType( 'video/mp4; codecs="mp4v.20.8"' ).replace( rnos, "" );
                 bool.ogg = elem.canPlayType( 'video/ogg; codecs="theora"' ).replace( rnos, "" );
                 bool.h264 = elem.canPlayType( 'video/mp4; codecs="avc1.42E01E"' ).replace( rnos, "" );
                 bool.webm = elem.canPlayType( 'video/webm; codecs="vp8, vorbis"' ).replace( rnos, "" );
