@@ -3382,16 +3382,21 @@ Stagger.prototype = {
                     return;
                 }
                 
-                self._step( self._current );
+                if ( typeof self._step === "function" ) {
+                    self._step( self._current );
+                }
                 
-                if ( self._when[ self._current ] ) {
+                if ( typeof self._when[ self._current ] === "function" ) {
                     self._when[ self._current ]( self._current );
                 }
                 
                 self._current++;
                 
                 if ( self._current === self._occurrences ) {
-                    self._done();
+                    if ( typeof self._done === "function" ) {
+                        self._done();
+                    }
+                    
                     self._resolve();
                     
                 } else {
