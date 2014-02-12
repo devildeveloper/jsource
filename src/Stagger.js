@@ -6,7 +6,7 @@
  * @author: kitajchuk
  *
  */
-(function ( window, app, undefined ) {
+(function ( window, undefined ) {
 
 
 "use strict";
