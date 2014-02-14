@@ -141,15 +141,16 @@ MediaBox.prototype = {
      *
      */
     createAudioContext: function () {
+        var AudioContext;
+        
         if ( window.AudioContext ) {
-            return new AudioContext();
+            AudioContext = AudioContext;
             
         } else if ( window.webkitAudioContext ) {
-            return new webkitAudioContext();
-            
-        } else {
-            return false;
+            AudioContext = webkitAudioContext;
         }
+        
+        return ( AudioContext ) ? new AudioContext() : AudioContext;
     },
     
     /**
@@ -161,12 +162,16 @@ MediaBox.prototype = {
      *
      */
     createGainNode: function ( context ) {
+        var gainNode;
+        
         if ( !context.createGain ) {
-            return context.createGainNode();
+            gainNode = context.createGainNode();
             
         } else {
-            return context.createGain();
+            gainNode = context.createGain();
         }
+        
+        return gainNode;
     },
     
     /**
@@ -228,19 +233,20 @@ MediaBox.prototype = {
      */
     addMedia: function ( json, callback ) {
         var current = 0,
-            total = 0;
+            total = 0,
+            func = function () {
+                current++;
+                
+                if ( (typeof callback === "function") && (current === total) ) {
+                    callback();
+                }
+            };
         
         for ( var m in json ) {
             total = total + json[ m ].length;
             
             for ( var i = json[ m ].length; i--; ) {
-                this[ m ]( json[ m ][ i ], function () {
-                    current++;
-                    
-                    if ( (typeof callback === "function") && (current === total) ) {
-                        callback();
-                    }
-                });
+                this[ m ]( json[ m ][ i ], func );
             }
         }
     },
@@ -337,7 +343,13 @@ MediaBox.prototype = {
      *
      */
     getVideo: function ( id ) {
-        return this._video[ id ].element;
+        var ret;
+        
+        if ( this._video[ id ] ) {
+            ret = this._video[ id ].element;
+        }
+        
+        return ret;
     },
     
     /**
@@ -837,26 +849,25 @@ MediaBox.prototype = {
      *
      * @memberof MediaBox
      * @method MediaBox._getAudioSupport
-     * @returns bool
+     * @returns object
      *
      */
     _getAudioSupport: function () {
         var elem = document.createElement( "audio" ),
-            bool = false,
-            rnos = /^no$/;
+            rnos = /^no$/,
+            ret = {};
 
         try {
-            if ( bool = !!elem.canPlayType ) {
-                bool = new Boolean( bool );
-                bool.ogg  = elem.canPlayType( 'audio/ogg; codecs="vorbis"' ).replace( rnos, "" );
-                bool.mp3  = elem.canPlayType( 'audio/mpeg;' ).replace( rnos, "" );
-                bool.wav  = elem.canPlayType( 'audio/wav; codecs="1"').replace( rnos, "" );
-                bool.m4a  = (elem.canPlayType( 'audio/x-m4a;' ) || elem.canPlayType( 'audio/aac;' )).replace( rnos, "" );
+            if ( elem.canPlayType ) {
+                ret.ogg = elem.canPlayType( 'audio/ogg; codecs="vorbis"' ).replace( rnos, "" );
+                ret.mp3 = elem.canPlayType( 'audio/mpeg;' ).replace( rnos, "" );
+                ret.wav = elem.canPlayType( 'audio/wav; codecs="1"').replace( rnos, "" );
+                ret.m4a = (elem.canPlayType( 'audio/x-m4a;' ) || elem.canPlayType( 'audio/aac;' )).replace( rnos, "" );
             }
             
         } catch ( e ) {}
 
-        return bool;
+        return ret;
     },
     
     /**
@@ -869,26 +880,25 @@ MediaBox.prototype = {
      *
      * @memberof MediaBox
      * @method MediaBox._getVideoSupport
-     * @returns bool
+     * @returns object
      *
      */
     _getVideoSupport: function () {
         var elem = document.createElement( "video" ),
-            bool = false,
-            rnos = /^no$/;
+            rnos = /^no$/,
+            ret = {};
 
         try {
-            if ( bool = !!elem.canPlayType ) {
-                bool = new Boolean( bool );
-                bool.mpeg4 = elem.canPlayType( 'video/mp4; codecs="mp4v.20.8"' ).replace( rnos, "" );
-                bool.ogg = elem.canPlayType( 'video/ogg; codecs="theora"' ).replace( rnos, "" );
-                bool.h264 = elem.canPlayType( 'video/mp4; codecs="avc1.42E01E"' ).replace( rnos, "" );
-                bool.webm = elem.canPlayType( 'video/webm; codecs="vp8, vorbis"' ).replace( rnos, "" );
+            if ( elem.canPlayType ) {
+                ret.mpeg4 = elem.canPlayType( 'video/mp4; codecs="mp4v.20.8"' ).replace( rnos, "" );
+                ret.ogg = elem.canPlayType( 'video/ogg; codecs="theora"' ).replace( rnos, "" );
+                ret.h264 = elem.canPlayType( 'video/mp4; codecs="avc1.42E01E"' ).replace( rnos, "" );
+                ret.webm = elem.canPlayType( 'video/webm; codecs="vp8, vorbis"' ).replace( rnos, "" );
             }
 
         } catch ( e ) {}
 
-        return bool;
+        return ret;
     }
 };
 

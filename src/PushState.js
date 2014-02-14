@@ -56,7 +56,7 @@ PushState.prototype = {
          * @member PushState._rHTTPs
          *
          */
-        this._rHTTPs = /^http[s]?:\/\/.*?\//,
+        this._rHTTPs = /^http[s]?:\/\/.*?\//;
         
         /**
          *

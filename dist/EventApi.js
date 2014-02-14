@@ -17,7 +17,6 @@
  * A vanilla javascript crossbrowser event api
  * @namespace EventApi
  * @memberof! <global>
- * @author: kitajchuk
  *
  */
 var EventApi = {
@@ -151,37 +150,6 @@ var EventApi = {
         } else {
             element.attachEvent( "on"+name, handler );
         }
-    },
-    
-    /**
-     *
-     * Handle an event with a delayed callback
-     * @memberof EventApi
-     * @method throttleEvent
-     * @param {string} name The event to unbind
-     * @param {DOMElement} element The element to unbind from
-     * @param {number} delay The timeout delay in ms
-     * @param {function} callback The event handler
-     *
-     */
-    throttleEvent: function ( name, element, delay, callback ) {
-        var timeout = null;
-        
-        EventApi.addEvent( name, element, function () {
-            return function () {
-                var context = this,
-                    args = arguments;
-                
-                clearTimeout( timeout );
-                
-                timeout = setTimeout(function () {
-                    if ( typeof callback === "function" ) {
-                        callback.apply( context, args );
-                    }
-                    
-                }, delay );
-            };
-        });
     }
 };
 

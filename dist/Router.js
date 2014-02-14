@@ -56,7 +56,7 @@ PushState.prototype = {
          * @member PushState._rHTTPs
          *
          */
-        this._rHTTPs = /^http[s]?:\/\/.*?\//,
+        this._rHTTPs = /^http[s]?:\/\/.*?\//;
         
         /**
          *
@@ -582,7 +582,7 @@ MatchRoute.prototype = {
      *
      */
     test: function ( url ) {
-        return this.parse( url ).match;
+        return this.parse( url, this._routes ).match;
     },
     
     /**
@@ -595,7 +595,7 @@ MatchRoute.prototype = {
      *
      */
     match: function ( url ) {
-        return this.parse( url ).matches;
+        return this.parse( url, this._routes ).matches;
     },
     
     /**
@@ -618,14 +618,13 @@ MatchRoute.prototype = {
      * @memberof MatchRoute
      * @method parse
      * @param {string} url to test against routes
-     * @param {array} routes optional override routes to use
+     * @param {array} routes The routes to test against
      * @returns Object witch match bool and matches array
      *
      */
     parse: function ( url, routes ) {
         var segMatches,
             matches,
-            routes = (routes || this._routes),
             route = this._cleanRoute( url ),
             match,
             ruris,

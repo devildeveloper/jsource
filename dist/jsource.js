@@ -345,7 +345,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuad: function ( t ) { return t*t },
+    easeInQuad: function ( t ) { return t*t; },
     
     /**
      *
@@ -356,7 +356,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuad: function ( t ) { return t*(2-t) },
+    easeOutQuad: function ( t ) { return t*(2-t); },
     
     /**
      *
@@ -367,7 +367,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuad: function ( t ) { return t<.5 ? 2*t*t : -1+(4-2*t)*t },
+    easeInOutQuad: function ( t ) { return t<0.5 ? 2*t*t : -1+(4-2*t)*t; },
     
     /**
      *
@@ -378,7 +378,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInCubic: function ( t ) { return t*t*t },
+    easeInCubic: function ( t ) { return t*t*t; },
     
     /**
      *
@@ -389,7 +389,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutCubic: function ( t ) { return (--t)*t*t+1 },
+    easeOutCubic: function ( t ) { return (--t)*t*t+1; },
     
     /**
      *
@@ -400,7 +400,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutCubic: function ( t ) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 },
+    easeInOutCubic: function ( t ) { return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1; },
     
     /**
      *
@@ -411,7 +411,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuart: function ( t ) { return t*t*t*t },
+    easeInQuart: function ( t ) { return t*t*t*t; },
     
     /**
      *
@@ -422,7 +422,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuart: function ( t ) { return 1-(--t)*t*t*t },
+    easeOutQuart: function ( t ) { return 1-(--t)*t*t*t; },
     
     /**
      *
@@ -433,7 +433,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuart: function ( t ) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t },
+    easeInOutQuart: function ( t ) { return t<0.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t; },
     
     /**
      *
@@ -444,7 +444,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuint: function ( t ) { return t*t*t*t*t },
+    easeInQuint: function ( t ) { return t*t*t*t*t; },
     
     /**
      *
@@ -455,7 +455,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuint: function ( t ) { return 1+(--t)*t*t*t*t },
+    easeOutQuint: function ( t ) { return 1+(--t)*t*t*t*t; },
     
     /**
      *
@@ -466,7 +466,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuint: function ( t ) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
+    easeInOutQuint: function ( t ) { return t<0.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t; }
 };
 
 
@@ -494,7 +494,6 @@ window.Easing = Easing;
  * A vanilla javascript crossbrowser event api
  * @namespace EventApi
  * @memberof! <global>
- * @author: kitajchuk
  *
  */
 var EventApi = {
@@ -628,37 +627,6 @@ var EventApi = {
         } else {
             element.attachEvent( "on"+name, handler );
         }
-    },
-    
-    /**
-     *
-     * Handle an event with a delayed callback
-     * @memberof EventApi
-     * @method throttleEvent
-     * @param {string} name The event to unbind
-     * @param {DOMElement} element The element to unbind from
-     * @param {number} delay The timeout delay in ms
-     * @param {function} callback The event handler
-     *
-     */
-    throttleEvent: function ( name, element, delay, callback ) {
-        var timeout = null;
-        
-        EventApi.addEvent( name, element, function () {
-            return function () {
-                var context = this,
-                    args = arguments;
-                
-                clearTimeout( timeout );
-                
-                timeout = setTimeout(function () {
-                    if ( typeof callback === "function" ) {
-                        callback.apply( context, args );
-                    }
-                    
-                }, delay );
-            };
-        });
     }
 };
 
@@ -1434,7 +1402,7 @@ MatchRoute.prototype = {
      *
      */
     test: function ( url ) {
-        return this.parse( url ).match;
+        return this.parse( url, this._routes ).match;
     },
     
     /**
@@ -1447,7 +1415,7 @@ MatchRoute.prototype = {
      *
      */
     match: function ( url ) {
-        return this.parse( url ).matches;
+        return this.parse( url, this._routes ).matches;
     },
     
     /**
@@ -1470,14 +1438,13 @@ MatchRoute.prototype = {
      * @memberof MatchRoute
      * @method parse
      * @param {string} url to test against routes
-     * @param {array} routes optional override routes to use
+     * @param {array} routes The routes to test against
      * @returns Object witch match bool and matches array
      *
      */
     parse: function ( url, routes ) {
         var segMatches,
             matches,
-            routes = (routes || this._routes),
             route = this._cleanRoute( url ),
             match,
             ruris,
@@ -1718,15 +1685,16 @@ MediaBox.prototype = {
      *
      */
     createAudioContext: function () {
+        var AudioContext;
+        
         if ( window.AudioContext ) {
-            return new AudioContext();
+            AudioContext = AudioContext;
             
         } else if ( window.webkitAudioContext ) {
-            return new webkitAudioContext();
-            
-        } else {
-            return false;
+            AudioContext = webkitAudioContext;
         }
+        
+        return ( AudioContext ) ? new AudioContext() : AudioContext;
     },
     
     /**
@@ -1738,12 +1706,16 @@ MediaBox.prototype = {
      *
      */
     createGainNode: function ( context ) {
+        var gainNode;
+        
         if ( !context.createGain ) {
-            return context.createGainNode();
+            gainNode = context.createGainNode();
             
         } else {
-            return context.createGain();
+            gainNode = context.createGain();
         }
+        
+        return gainNode;
     },
     
     /**
@@ -1805,19 +1777,20 @@ MediaBox.prototype = {
      */
     addMedia: function ( json, callback ) {
         var current = 0,
-            total = 0;
+            total = 0,
+            func = function () {
+                current++;
+                
+                if ( (typeof callback === "function") && (current === total) ) {
+                    callback();
+                }
+            };
         
         for ( var m in json ) {
             total = total + json[ m ].length;
             
             for ( var i = json[ m ].length; i--; ) {
-                this[ m ]( json[ m ][ i ], function () {
-                    current++;
-                    
-                    if ( (typeof callback === "function") && (current === total) ) {
-                        callback();
-                    }
-                });
+                this[ m ]( json[ m ][ i ], func );
             }
         }
     },
@@ -1914,7 +1887,13 @@ MediaBox.prototype = {
      *
      */
     getVideo: function ( id ) {
-        return this._video[ id ].element;
+        var ret;
+        
+        if ( this._video[ id ] ) {
+            ret = this._video[ id ].element;
+        }
+        
+        return ret;
     },
     
     /**
@@ -2414,26 +2393,25 @@ MediaBox.prototype = {
      *
      * @memberof MediaBox
      * @method MediaBox._getAudioSupport
-     * @returns bool
+     * @returns object
      *
      */
     _getAudioSupport: function () {
         var elem = document.createElement( "audio" ),
-            bool = false,
-            rnos = /^no$/;
+            rnos = /^no$/,
+            ret = {};
 
         try {
-            if ( bool = !!elem.canPlayType ) {
-                bool = new Boolean( bool );
-                bool.ogg  = elem.canPlayType( 'audio/ogg; codecs="vorbis"' ).replace( rnos, "" );
-                bool.mp3  = elem.canPlayType( 'audio/mpeg;' ).replace( rnos, "" );
-                bool.wav  = elem.canPlayType( 'audio/wav; codecs="1"').replace( rnos, "" );
-                bool.m4a  = (elem.canPlayType( 'audio/x-m4a;' ) || elem.canPlayType( 'audio/aac;' )).replace( rnos, "" );
+            if ( elem.canPlayType ) {
+                ret.ogg = elem.canPlayType( 'audio/ogg; codecs="vorbis"' ).replace( rnos, "" );
+                ret.mp3 = elem.canPlayType( 'audio/mpeg;' ).replace( rnos, "" );
+                ret.wav = elem.canPlayType( 'audio/wav; codecs="1"').replace( rnos, "" );
+                ret.m4a = (elem.canPlayType( 'audio/x-m4a;' ) || elem.canPlayType( 'audio/aac;' )).replace( rnos, "" );
             }
             
         } catch ( e ) {}
 
-        return bool;
+        return ret;
     },
     
     /**
@@ -2446,26 +2424,25 @@ MediaBox.prototype = {
      *
      * @memberof MediaBox
      * @method MediaBox._getVideoSupport
-     * @returns bool
+     * @returns object
      *
      */
     _getVideoSupport: function () {
         var elem = document.createElement( "video" ),
-            bool = false,
-            rnos = /^no$/;
+            rnos = /^no$/,
+            ret = {};
 
         try {
-            if ( bool = !!elem.canPlayType ) {
-                bool = new Boolean( bool );
-                bool.mpeg4 = elem.canPlayType( 'video/mp4; codecs="mp4v.20.8"' ).replace( rnos, "" );
-                bool.ogg = elem.canPlayType( 'video/ogg; codecs="theora"' ).replace( rnos, "" );
-                bool.h264 = elem.canPlayType( 'video/mp4; codecs="avc1.42E01E"' ).replace( rnos, "" );
-                bool.webm = elem.canPlayType( 'video/webm; codecs="vp8, vorbis"' ).replace( rnos, "" );
+            if ( elem.canPlayType ) {
+                ret.mpeg4 = elem.canPlayType( 'video/mp4; codecs="mp4v.20.8"' ).replace( rnos, "" );
+                ret.ogg = elem.canPlayType( 'video/ogg; codecs="theora"' ).replace( rnos, "" );
+                ret.h264 = elem.canPlayType( 'video/mp4; codecs="avc1.42E01E"' ).replace( rnos, "" );
+                ret.webm = elem.canPlayType( 'video/webm; codecs="vp8, vorbis"' ).replace( rnos, "" );
             }
 
         } catch ( e ) {}
 
-        return bool;
+        return ret;
     }
 };
 
@@ -2533,7 +2510,7 @@ PushState.prototype = {
          * @member PushState._rHTTPs
          *
          */
-        this._rHTTPs = /^http[s]?:\/\/.*?\//,
+        this._rHTTPs = /^http[s]?:\/\/.*?\//;
         
         /**
          *
@@ -3479,6 +3456,64 @@ window.Tween = Tween;
 })( window );
 /*!
  *
+ * Debounce methods
+ * Sourced from here:
+ * http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+ *
+ * @debounce
+ * @author: kitajchuk
+ *
+ */
+(function ( window, undefined ) {
+
+
+"use strict";
+
+
+/**
+ *
+ * Limit method calls
+ * @memberof! <global>
+ * @method debounce
+ * @param {function} callback The method handler
+ * @param {number} threshold The timeout delay in ms
+ * @param {boolean} execAsap Call function at beginning or end of detection period
+ *
+ */
+var debounce = function ( callback, threshold, execAsap ) {
+    var timeout = null;
+    
+    return function debounced() {
+        var args = arguments,
+            context = this;
+        
+        function delayed() {
+            if ( !execAsap ) {
+                callback.apply( context, args );
+            }
+            
+            timeout = null;
+        }
+        
+        if ( timeout ) {
+            clearTimeout( timeout );
+            
+        } else if ( execAsap ) {
+            callback.apply( context, args );
+        }
+        
+        timeout = setTimeout( delayed, (threshold || 100) );
+    };
+};
+
+
+// Expose
+window.debounce = debounce;
+
+
+})( window );
+/*!
+ *
  * A basic scrollto function without all the fuss
  *
  * @scroll2
@@ -3525,6 +3560,56 @@ var scroll2 = function ( to, duration, ease, callback ) {
 
 // Expose
 window.scroll2 = scroll2;
+
+
+})( window );
+/*!
+ *
+ * Throttle methods
+ *
+ * @throttle
+ * @author: kitajchuk
+ *
+ */
+(function ( window, undefined ) {
+
+
+"use strict";
+
+
+/**
+ *
+ * Limit method calls
+ * @memberof! <global>
+ * @method throttle
+ * @param {number} threshold The timeout delay in ms
+ * @param {function} callback The method handler
+ *
+ */
+var throttle = function ( threshold, callback ) {
+    var timeout = null;
+    
+    return function throttled() {
+        var args = arguments,
+            context = this;
+        
+        function delayed() {
+            callback.apply( context, args );
+            
+            timeout = null;
+        }
+        
+        if ( timeout ) {
+            clearTimeout( timeout );
+        }
+        
+        timeout = setTimeout( delayed, (threshold || 100) );
+    };
+};
+
+
+// Expose
+window.throttle = throttle;
 
 
 })( window );

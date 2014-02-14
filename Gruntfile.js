@@ -49,6 +49,14 @@ module.exports = function ( grunt ) {
         },
         
         
+        // Jshint config.
+        jshint: {
+            jsource: {
+                src: ["src/**/*.js"]
+            }
+        },
+        
+        
         // Clean config.
         clean: [
             "dist"
@@ -76,7 +84,7 @@ module.exports = function ( grunt ) {
     
     
     // Register default task.
-    grunt.registerTask( "default", ["concat:jsource", "uglify:jsource"] );
+    grunt.registerTask( "default", ["jshint:jsource", "concat:jsource", "uglify:jsource"] );
     
     
     // Register build task.

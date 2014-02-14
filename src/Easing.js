@@ -53,7 +53,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuad: function ( t ) { return t*t },
+    easeInQuad: function ( t ) { return t*t; },
     
     /**
      *
@@ -64,7 +64,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuad: function ( t ) { return t*(2-t) },
+    easeOutQuad: function ( t ) { return t*(2-t); },
     
     /**
      *
@@ -75,7 +75,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuad: function ( t ) { return t<.5 ? 2*t*t : -1+(4-2*t)*t },
+    easeInOutQuad: function ( t ) { return t<0.5 ? 2*t*t : -1+(4-2*t)*t; },
     
     /**
      *
@@ -86,7 +86,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInCubic: function ( t ) { return t*t*t },
+    easeInCubic: function ( t ) { return t*t*t; },
     
     /**
      *
@@ -97,7 +97,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutCubic: function ( t ) { return (--t)*t*t+1 },
+    easeOutCubic: function ( t ) { return (--t)*t*t+1; },
     
     /**
      *
@@ -108,7 +108,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutCubic: function ( t ) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 },
+    easeInOutCubic: function ( t ) { return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1; },
     
     /**
      *
@@ -119,7 +119,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuart: function ( t ) { return t*t*t*t },
+    easeInQuart: function ( t ) { return t*t*t*t; },
     
     /**
      *
@@ -130,7 +130,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuart: function ( t ) { return 1-(--t)*t*t*t },
+    easeOutQuart: function ( t ) { return 1-(--t)*t*t*t; },
     
     /**
      *
@@ -141,7 +141,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuart: function ( t ) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t },
+    easeInOutQuart: function ( t ) { return t<0.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t; },
     
     /**
      *
@@ -152,7 +152,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInQuint: function ( t ) { return t*t*t*t*t },
+    easeInQuint: function ( t ) { return t*t*t*t*t; },
     
     /**
      *
@@ -163,7 +163,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeOutQuint: function ( t ) { return 1+(--t)*t*t*t*t },
+    easeOutQuint: function ( t ) { return 1+(--t)*t*t*t*t; },
     
     /**
      *
@@ -174,7 +174,7 @@ var Easing = {
      * @returns a new t value
      *
      */
-    easeInOutQuint: function ( t ) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
+    easeInOutQuint: function ( t ) { return t<0.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t; }
 };
 
 
