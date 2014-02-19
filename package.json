@@ -1,7 +1,7 @@
 {
     "name": "jsource",
     "description": "A Javascript resource for the everyday coder.",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "homepage": "https://github.com/kitajchuk/jsource",
     "readmeFilename": "README.md",
     "author": {
@@ -23,7 +23,9 @@
         }
     ],
     "main": "Gruntfile.js",
-    "dependencies": {},
+    "dependencies": {
+        "jsdoc": "~3.2"
+    },
     "devDependencies": {
         "grunt": "~0.4",
         "grunt-contrib-jshint": "~0.7",

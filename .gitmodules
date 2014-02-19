@@ -1,3 +1,0 @@
-[submodule "dependencies/jsdoc"]
-	path = dependencies/jsdoc
-	url = git://github.com/jsdoc3/jsdoc.git
