@@ -514,7 +514,7 @@ MatchRoute.prototype = {
      * @member MatchRoute._rHashQuery
      *
      */
-    _rHashQuery: /[#|?].*$/g,
+    _rHashQuery: /#.*$|\?.*$/g,
     
     /**
      *
@@ -640,6 +640,14 @@ MatchRoute.prototype = {
         for ( var i = 0; i < iLen; i++ ) {
             ruris = routes[ i ].split( "/" );
             
+            // Handle route === "/"
+            if ( route === "/" && routes[ i ] === "/" ) {
+                ret.match = true;
+                ret.matches.push( routes[ i ] );
+                
+                break;
+            }
+            
             if ( ruris.length !== uris.length ) {
                 continue;
             }
@@ -684,6 +692,7 @@ MatchRoute.prototype = {
     /**
      *
      * Clean a route string
+     * If the route === "/" then it is returned as is
      * @memberof MatchRoute
      * @method parse
      * @param {string} route the route to clean
@@ -691,9 +700,15 @@ MatchRoute.prototype = {
      *
      */
     _cleanRoute: function ( route ) {
-        route = route.replace( this._rHTTPs, "" );
-        route = route.replace( this._rTrails, "" );
-        route = route.replace( this._rHashQuery, "" );
+        if ( route !== "/" ) {
+            route = route.replace( this._rHTTPs, "" );
+            route = route.replace( this._rTrails, "" );
+            route = route.replace( this._rHashQuery, "" );
+        }
+        
+        if ( route === "" ) {
+            route = "/";
+        }
         
         return route;
     },
@@ -848,9 +863,20 @@ Router.prototype = {
         this._matcher.config( [route] );
         
         // Bind the route to the callback
-        callback._route = route;
+        if ( callback._routes ) {
+            callback._routes.push( route );
+            
+        } else {
+            callback._routes = [route];
+        }
         
-        this._bind( "get", callback );
+        // When binding multiple routes to a single
+        // callback, we need to make sure the callbacks
+        // routes array is updated above but the callback
+        // only gets added to the list once.
+        if ( callback._routes.length === 1 ) {
+            this._bind( "get", callback );
+        }
     },
     
     /**
@@ -881,7 +907,7 @@ Router.prototype = {
     _fire: function ( event, url, response ) {
         if ( this._callbacks[ event ] ) {
             for ( var i = this._callbacks[ event ].length; i--; ) {
-                var compare = this._matcher.compare( this._callbacks[ event ][ i ]._route, url );
+                var compare = this._matcher.parse( url, this._callbacks[ event ][ i ]._routes );
                 
                 if ( compare.match ) {
                     this._callbacks[ event ][ i ].call( this, {

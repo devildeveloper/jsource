@@ -50,7 +50,7 @@ MatchRoute.prototype = {
      * @member MatchRoute._rHashQuery
      *
      */
-    _rHashQuery: /[#|?].*$/g,
+    _rHashQuery: /#.*$|\?.*$/g,
     
     /**
      *
@@ -176,6 +176,14 @@ MatchRoute.prototype = {
         for ( var i = 0; i < iLen; i++ ) {
             ruris = routes[ i ].split( "/" );
             
+            // Handle route === "/"
+            if ( route === "/" && routes[ i ] === "/" ) {
+                ret.match = true;
+                ret.matches.push( routes[ i ] );
+                
+                break;
+            }
+            
             if ( ruris.length !== uris.length ) {
                 continue;
             }
@@ -220,6 +228,7 @@ MatchRoute.prototype = {
     /**
      *
      * Clean a route string
+     * If the route === "/" then it is returned as is
      * @memberof MatchRoute
      * @method parse
      * @param {string} route the route to clean
@@ -227,9 +236,15 @@ MatchRoute.prototype = {
      *
      */
     _cleanRoute: function ( route ) {
-        route = route.replace( this._rHTTPs, "" );
-        route = route.replace( this._rTrails, "" );
-        route = route.replace( this._rHashQuery, "" );
+        if ( route !== "/" ) {
+            route = route.replace( this._rHTTPs, "" );
+            route = route.replace( this._rTrails, "" );
+            route = route.replace( this._rHashQuery, "" );
+        }
+        
+        if ( route === "" ) {
+            route = "/";
+        }
         
         return route;
     },
