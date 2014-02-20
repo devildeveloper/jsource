@@ -3428,6 +3428,15 @@ TouchMe.prototype = {
     
     /**
      *
+     * TouchMe events across entire start/move/end stack
+     * @memberof TouchMe
+     * @member TouchMe._events
+     *
+     */
+    _events: {},
+    
+    /**
+     *
      * TouchMe touches tracking object
      * @memberof TouchMe
      * @member TouchMe._touches
@@ -3509,22 +3518,45 @@ TouchMe.prototype = {
     
     /**
      *
+     * TouchMe Store user options
+     * @memberof TouchMe
+     * @member TouchMe._options
+     *
+     */
+    _options: {
+        preventDefault: true,
+        preventMouseEvents: false
+    },
+    
+    /**
+     *
      * TouchMe init constructor method
      * @memberof TouchMe
      * @method TouchMe.init
+     * @param {object} options Settings for event handling
      *
      */
-    init: function () {
+    init: function ( options ) {
         var self = this;
         
+        // Merge options with defaults
+        for ( var i in this._options ) {
+            if ( options && (typeof options[ i ] !== undefined) ) {
+                this._options[ i ] = options[ i ];
+            }
+        }
+        
+        // Apply touch events, using bubbling, not capturing
         document.addEventListener( "touchstart", function ( e ) { self._onTouchStart( e ); }, false );
-        document.addEventListener( "mousedown", function ( e ) { self._onTouchStart( e ); }, false );
-        
         document.addEventListener( "touchmove", function ( e ) { self._onTouchMove( e ); }, false );
-        document.addEventListener( "mousemove", function ( e ) { self._onTouchMove( e ); }, false );
-        
         document.addEventListener( "touchend", function ( e ) { self._onTouchEnd( e ); }, false );
-        document.addEventListener( "mouseup", function ( e ) { self._onTouchEnd( e ); }, false );
+        
+        // Apply mouse events if we can, using bubbling, not capturing
+        if ( !this._options.preventMouseEvents ) {
+            document.addEventListener( "mousedown", function ( e ) { self._onTouchStart( e ); }, false );
+            document.addEventListener( "mousemove", function ( e ) { self._onTouchMove( e ); }, false );
+            document.addEventListener( "mouseup", function ( e ) { self._onTouchEnd( e ); }, false );
+        }
     },
     
     /**
@@ -3638,6 +3670,10 @@ TouchMe.prototype = {
         // Get current window scroll
         this._windowScrollY = window.scrollY;
         
+        // New event object tracking
+        this._events = {};
+        this._events.touchstart = e;
+        
         if ( e.touches ) {
             this._lastTouch = e.touches.length - 1;
             this._touches.x1 = e.touches[ this._lastTouch ].pageX;
@@ -3666,7 +3702,9 @@ TouchMe.prototype = {
         var currSwipe,
             distX,
             distY;
-            
+        
+        this._events.touchmove = e;
+        
         if ( e.touches ) {
             this._touches.x2 = e.touches[ this._lastTouch ].pageX;
             this._touches.y2 = e.touches[ this._lastTouch ].pageY;
@@ -3691,7 +3729,7 @@ TouchMe.prototype = {
             this._touches.y1 = this._touches.y2;
             
             // Disable document scroll if horizontal swiping
-            if ( currSwipe === "left" || currSwipe === "right" ) {
+            if ( (currSwipe === "left" || currSwipe === "right") && this._options.preventDefault ) {
                 e.preventDefault();
             }
             
@@ -3715,9 +3753,13 @@ TouchMe.prototype = {
      */
     _onTouchEnd: function ( e ) {
         this._isTouchDown = false;
+        this._events.touchend = e;
         
         var scroll = Math.abs( window.scrollY - this._windowScrollY ),
             now;
+        
+        // Original touchstart event
+        e.originalEvent = this._events.touchstart;
         
         // Handle tapping
         if ( !this._gestures.length && scroll < this._threshold ) {
