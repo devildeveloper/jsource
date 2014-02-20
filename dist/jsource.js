@@ -3317,6 +3317,11 @@ Stagger.prototype = {
      */
     start: function () {
         this._started = true;
+        
+        if ( this._paused ) {
+            this.play();
+        }
+        
         this._stagger();
     },
     
