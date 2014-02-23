@@ -4,7 +4,6 @@
  *
  * @scroll2
  * @author: kitajchuk
- * @require: Tween
  *
  */
 (function ( window, undefined ) {
@@ -17,6 +16,7 @@
  *
  * Window scroll2 function
  * @method scroll2
+ * @requires Tween
  * @param {number} to Where are we scrolling
  * @param {number} duration How long will it take
  * @param {function} ease The easing function to use

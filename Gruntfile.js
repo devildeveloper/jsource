@@ -67,7 +67,7 @@ module.exports = function ( grunt ) {
         watch: {
             jsource: {
                 files: ["src/**/*.js"],
-                tasks: ["buildAll"]
+                tasks: ["default"]
             }
         },
         
@@ -84,7 +84,7 @@ module.exports = function ( grunt ) {
     
     
     // Register default task.
-    grunt.registerTask( "default", ["jshint:jsource", "concat:jsource", "uglify:jsource"] );
+    grunt.registerTask( "default", ["buildAll", "jshint:jsource", "concat:jsource", "uglify:jsource"] );
     
     
     // Register build task.
@@ -95,8 +95,8 @@ module.exports = function ( grunt ) {
             dest = "dist/" + script + ".min.js",
             concats = grunt.config.get( "concat" ),
             uglifys = grunt.config.get( "uglify" ),
-            rRequires = /@require:(.*?)\n/g,
-            rReplaces = /@require|:|\s|\n|\r/g;
+            rRequires = /@requires\s(.*?)\n/g,
+            rReplaces = /@requires|\s|\n|\r/g;
         
         if ( script && grunt.file.isFile( file ) ) {
             var contents = grunt.file.read( file );
@@ -143,9 +143,6 @@ module.exports = function ( grunt ) {
             
             grunt.task.run( "build:" + script );
         });
-        
-        // Build compilation
-        grunt.task.run( "default" );
     });
     
     

@@ -250,8 +250,6 @@ window.Tween = Tween;
  *
  * @MediaBox
  * @author: kitajchuk
- * @require: Easing
- * @require: Tween
  *
  */
 (function ( window, undefined ) {
@@ -265,6 +263,8 @@ window.Tween = Tween;
  * Manage audio and video with playback.
  * Calls MediaBox.prototype.init as constructor.
  * @constructor MediaBox
+ * @requires Easing
+ * @requires Tween
  * @memberof! <global>
  *
  */

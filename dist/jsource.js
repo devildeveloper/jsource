@@ -1563,8 +1563,6 @@ window.MatchRoute = MatchRoute;
  *
  * @MediaBox
  * @author: kitajchuk
- * @require: Easing
- * @require: Tween
  *
  */
 (function ( window, undefined ) {
@@ -1578,6 +1576,8 @@ window.MatchRoute = MatchRoute;
  * Manage audio and video with playback.
  * Calls MediaBox.prototype.init as constructor.
  * @constructor MediaBox
+ * @requires Easing
+ * @requires Tween
  * @memberof! <global>
  *
  */
@@ -2937,8 +2937,6 @@ window.PushState = PushState;
  *
  * @Router
  * @author: kitajchuk
- * @require: PushState
- * @require: MatchRoute
  *
  */
 (function ( window, undefined ) {
@@ -2951,6 +2949,8 @@ window.PushState = PushState;
  *
  * A simple router Class
  * @constructor Router
+ * @requires PushState
+ * @requires MatchRoute
  * @memberof! <global>
  *
  */
@@ -3941,7 +3941,6 @@ window.debounce = debounce;
  *
  * @scroll2
  * @author: kitajchuk
- * @require: Tween
  *
  */
 (function ( window, undefined ) {
@@ -3954,6 +3953,7 @@ window.debounce = debounce;
  *
  * Window scroll2 function
  * @method scroll2
+ * @requires Tween
  * @param {number} to Where are we scrolling
  * @param {number} duration How long will it take
  * @param {function} ease The easing function to use

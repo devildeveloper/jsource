@@ -743,8 +743,6 @@ window.MatchRoute = MatchRoute;
  *
  * @Router
  * @author: kitajchuk
- * @require: PushState
- * @require: MatchRoute
  *
  */
 (function ( window, undefined ) {
@@ -757,6 +755,8 @@ window.MatchRoute = MatchRoute;
  *
  * A simple router Class
  * @constructor Router
+ * @requires PushState
+ * @requires MatchRoute
  * @memberof! <global>
  *
  */
