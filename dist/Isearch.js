@@ -1,6 +1,6 @@
 /*!
  *
- * Performs a quick search against an array of terms
+ * Expression matching for term lists
  *
  * @Isearch
  * @author: kitajchuk
@@ -24,6 +24,8 @@ var Isearch = function () {
 };
     
 Isearch.prototype = {
+    constructor: Isearch,
+    
     /**
      *
      * Flag for input escaping

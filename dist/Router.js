@@ -25,6 +25,128 @@ var PushState = function () {
 };
 
 PushState.prototype = {
+    constructor: PushState,
+    
+    /**
+     *
+     * Expression match #
+     * @memberof PushState
+     * @member PushState._rHash
+     *
+     */
+    _rHash: /#/,
+    
+    /**
+     *
+     * Expression match http/https
+     * @memberof PushState
+     * @member PushState._rHTTPs
+     *
+     */
+    _rHTTPs: /^http[s]?:\/\/.*?\//,
+    
+    /**
+     *
+     * Flag whether state is enabled
+     * @memberof PushState
+     * @member _enabled
+     *
+     */
+    _enabled: false,
+    
+    /**
+     *
+     * Flag whether pushState is enabled
+     * @memberof PushState
+     * @member _pushable
+     *
+     */
+    _pushable: ("history" in window && "pushState" in window.history),
+    
+    /**
+     *
+     * Fallback to hashchange if needed. Support:
+     * <ul>
+     * <li>Internet Explorer 8</li>
+     * <li>Firefox 3.6</li>
+     * <li>Chrome 5</li>
+     * <li>Safari 5</li>
+     * <li>Opera 10.6</li>
+     * </ul>
+     * @memberof PushState
+     * @member _hashable
+     *
+     */
+    _hashable: ("onhashchange" in window),
+    
+    /**
+     *
+     * Flag when hash is changed by PushState
+     * This allows appropriate replication of popstate
+     * @memberof PushState
+     * @member _ishashpushed
+     *
+     */
+    _ishashpushed: false,
+    
+    /**
+     *
+     * Unique ID ticker
+     * @memberof PushState
+     * @member _uid
+     *
+     */
+    _uid: 0,
+    
+    /**
+     *
+     * Stored state objects
+     * @memberof PushState
+     * @member _states
+     *
+     */
+    _states: {},
+    
+    /**
+     *
+     * Stored response objects
+     * @memberof PushState
+     * @member _responses
+     *
+     */
+    _responses: {},
+    
+    /**
+     *
+     * Event callbacks
+     * @memberof PushState
+     * @member _callbacks
+     *
+     */
+    _callbacks: {
+        pop: [],
+        before: [],
+        after: []
+    },
+    
+    /**
+     *
+     * Flag whether to use ajax
+     * @memberof PushState
+     * @member _async
+     *
+     */
+    _async: true,
+    
+    /**
+     *
+     * Flag whether to use cached responses
+     * @memberof PushState
+     * @member _caching
+     *
+     */
+    _caching: true,
+    
     /**
      *
      * PushState init constructor method
@@ -40,129 +162,19 @@ PushState.prototype = {
     init: function ( options ) {
         var url = window.location.href;
         
-        /**
-         *
-         * Expression match #
-         * @memberof PushState
-         * @member PushState._rHash
-         *
-         */
-        this._rHash = /#/;
-        
-        /**
-         *
-         * Expression match http/https
-         * @memberof PushState
-         * @member PushState._rHTTPs
-         *
-         */
-        this._rHTTPs = /^http[s]?:\/\/.*?\//;
-        
-        /**
-         *
-         * Flag whether state is enabled
-         * @memberof PushState
-         * @member _enabled
-         *
-         */
-        this._enabled = false;
-        
-        /**
-         *
-         * Flag whether pushState is enabled
-         * @memberof PushState
-         * @member _pushable
-         *
-         */
-        this._pushable = ("history" in window && "pushState" in window.history);
-        
-        /**
-         *
-         * Fallback to hashchange if needed. Support:
-         * <ul>
-         * <li>Internet Explorer 8</li>
-         * <li>Firefox 3.6</li>
-         * <li>Chrome 5</li>
-         * <li>Safari 5</li>
-         * <li>Opera 10.6</li>
-         * </ul>
-         * @memberof PushState
-         * @member _hashable
-         *
-         */
-        this._hashable = ("onhashchange" in window);
-        
-        /**
-         *
-         * Flag when hash is changed by PushState
-         * This allows appropriate replication of popstate
-         * @memberof PushState
-         * @member _ishashpushed
-         *
-         */
-        this._ishashpushed = false;
-        
-        /**
-         *
-         * Unique ID ticker
-         * @memberof PushState
-         * @member _uid
-         *
-         */
-        this._uid = 0;
-        
-        /**
-         *
-         * Stored state objects
-         * @memberof PushState
-         * @member _states
-         *
-         */
-        this._states = {};
+        // Set initial state
         this._states[ url ] = {
             uid: this._getUid(),
             cached: false
         };
-        
-        /**
-         *
-         * Stored response objects
-         * @memberof PushState
-         * @member _responses
-         *
-         */
-        this._responses = {};
-        
-        /**
-         *
-         * Event callbacks
-         * @memberof PushState
-         * @member _callbacks
-         *
-         */
-        this._callbacks = {
-            pop: [],
-            before: [],
-            after: []
-        };
 
-        /**
-         *
-         * Flag whether to use ajax
-         * @memberof PushState
-         * @member _async
-         *
-         */
-        this._async = ( options.async !== undefined ) ? options.async : true;
+        if ( options.async !== undefined ) {
+            this._async = options.async;
+        }
         
-        /**
-         *
-         * Flag whether to use cached responses
-         * @memberof PushState
-         * @member _caching
-         *
-         */
-        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        if ( options.caching !== undefined ) {
+            this._caching = options.caching;
+        }
 
         // Enable the popstate event
         this._stateEnable();
@@ -478,8 +490,13 @@ window.PushState = PushState;
 
 /**
  *
- * Performs a wildcard style match check against an array of routes given a url.
- * Valid wildcards are "any", "slug", "num" and "reg". Regex must be escaped for backslashes.
+ * Handles wildcard route matching against urls
+ * <ul>
+ * <li>route = "/some/random/path/:num"</li>
+ * <li>route = "/some/random/path/:slug"</li>
+ * <li>route = "/some/random/path/:any"</li>
+ * <li>route = "/some/random/path/:reg(^foo-)"</li>
+ * </ul>
  * @constructor MatchRoute
  * @memberof! <global>
  *
@@ -489,6 +506,8 @@ var MatchRoute = function () {
 };
 
 MatchRoute.prototype = {
+    constructor: MatchRoute,
+    
     /**
      *
      * Expression match http/https
@@ -541,6 +560,15 @@ MatchRoute.prototype = {
     
     /**
      *
+     * The routes config array
+     * @memberof MatchRoute
+     * @member MatchRoute._routes
+     *
+     */
+    _routes: null,
+    
+    /**
+     *
      * MatchRoute init constructor method
      * @memberof MatchRoute
      * @method MatchRoute.init
@@ -548,13 +576,6 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
-        /**
-         *
-         * The routes config array
-         * @memberof MatchRoute
-         * @member _routes
-         *
-         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     
@@ -765,6 +786,55 @@ var Router = function () {
 };
 
 Router.prototype = {
+    constructor: Router,
+    
+    /**
+     *
+     * Internal MatchRoute instance
+     * @memberof Router
+     * @member _matcher
+     *
+     */
+    _matcher: new MatchRoute(),
+    
+    /**
+     *
+     * Internal PushState instance
+     * @memberof Router
+     * @member _pusher
+     *
+     */
+    _pusher: null,
+    
+    /**
+     *
+     * Event handling callbacks
+     * @memberof Router
+     * @member _callbacks
+     *
+     */
+    _callbacks: {
+        get: []
+    },
+    
+    /**
+     *
+     * Router Store user options
+     * @memberof Router
+     * @member Router._options
+     *
+     */
+    _options: {
+        /**
+         *
+         * Router prevent event default when routes are matched
+         * @memberof Router
+         * @member Router._options.preventDefault
+         *
+         */
+        preventDefault: false
+    },
+    
     /**
      *
      * Router init constructor method
@@ -780,64 +850,25 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        /**
-         *
-         * Internal MatchRoute instance
-         * @memberof Router
-         * @member _matcher
-         *
-         */
-        this._matcher = new MatchRoute();
+        // Handle router options
+        if ( options.preventDefault !== undefined ) {
+            this._options.preventDefault = options.preventDefault;
+        }
         
-        /**
-         *
-         * Internal PushState instance
-         * @memberof Router
-         * @member _pusher
-         *
-         */
+        // Pass options to pushstate
         this._pusher = new PushState( options );
         
-        /**
-         *
-         * Event handling callbacks
-         * @memberof Router
-         * @member _callbacks
-         *
-         */
-        this._callbacks = {
-            get: []
-        };
-        
-        /**
-         * GET click event handler
-         * @memberof Router
-         * @method _handler
-         *
-         */
-        this._handler = function ( e ) {
-            // Only capture <a> elements
-            if ( e.target.tagName.toLowerCase() === "a" ) {
-                var elem = e.target;
-                
-                if ( elem.href.indexOf( "#" ) === -1 && self._matcher.test( elem.href ) ) {
-                    self._pusher.push( elem.href, function ( response ) {
-                        self._fire( "get", elem.href, response );
-                    });
-                }
-            }
-        };
-        
-        /**
-         *
-         * Bind GET requests to links
-         *
-         */
+        // Bind GET requests to links
         if ( document.addEventListener ) {
-            document.addEventListener( "click", this._handler, false );
+            document.addEventListener( "click", function ( e ) {
+                self._handler( e );
+                
+            }, false );
             
-        } else {
-            document.attachEvent( "onclick", this._handler );
+        } else if ( document.attachEvent ) {
+            document.attachEvent( "onclick", function ( e ) {
+                self._handler( e );
+            });
         }
         
         // Listen for pop events
@@ -876,6 +907,50 @@ Router.prototype = {
         // only gets added to the list once.
         if ( callback._routes.length === 1 ) {
             this._bind( "get", callback );
+        }
+    },
+    
+    /**
+     * Compatible event preventDefault
+     * @memberof Router
+     * @method _preventDefault
+     * @param {object} e The event object
+     *
+     */
+    _preventDefault: function ( e ) {
+        if ( !this._options.preventDefault ) {
+            return this;
+        }
+        
+        if ( e.preventDefault ) {
+            e.preventDefault();
+            
+        } else {
+            e.returnValue = false;
+        }
+    },
+    
+    /**
+     * GET click event handler
+     * @memberof Router
+     * @method _handler
+     * @param {object} e The event object
+     *
+     */
+    _handler: function ( e ) {
+        var self = this;
+        
+        // Only capture <a> elements
+        if ( e.target.tagName.toLowerCase() === "a" ) {
+            var elem = e.target;
+            
+            if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
+                this._preventDefault( e );
+                
+                this._pusher.push( elem.href, function ( response ) {
+                    self._fire( "get", elem.href, response );
+                });
+            }
         }
     },
     

@@ -1,7 +1,6 @@
 /*!
  *
- * Konami code easter egg
- * Does cool stuff if you hook into it!
+ * A konami code easter egg handler
  *
  * @KonamiCode
  * @author: kitajchuk
@@ -40,7 +39,7 @@ var _keys = {
 
 /**
  *
- * A konami code easter egg dispatcher
+ * A konami code easter egg handler
  * @constructor KonamiCode
  * @memberof! <global>
  *
@@ -50,6 +49,8 @@ var KonamiCode = function () {
 };
 
 KonamiCode.prototype = {
+    constructor: KonamiCode,
+    
     /**
      *
      * Timeout between key inputs to reset
@@ -93,7 +94,7 @@ KonamiCode.prototype = {
                     
                 } catch ( error ) {}
                 
-                code = ""+(code+e.keyCode);
+                code = "" + (code + e.keyCode);
                 
                 if ( code === _code ) {
                     self._dispatch( "_konamicode_" );

@@ -29,6 +29,8 @@ var Blit = function () {
 };
 
 Blit.prototype = {
+    constructor: Blit,
+    
     /**
      *
      * Frame rate callback
@@ -491,7 +493,7 @@ window.Easing = Easing;
 
 /**
  *
- * A vanilla javascript crossbrowser event api
+ * A basic cross-browser event api
  * @namespace EventApi
  * @memberof! <global>
  *
@@ -530,7 +532,7 @@ var EventApi = {
             element.addEventListener( name, handler, false );
             
         } else {
-            element.attachEvent( "on"+name, handler );
+            element.attachEvent( "on" + name, handler );
         }
     },
     
@@ -549,7 +551,7 @@ var EventApi = {
             element.removeEventListener( name, listener, false );
             
         } else {
-            element.detachEvent( "on"+name, listener );
+            element.detachEvent( "on" + name, listener );
         }
     },
     
@@ -625,7 +627,7 @@ var EventApi = {
             element.addEventListener( name, handler, false );
             
         } else {
-            element.attachEvent( "on"+name, handler );
+            element.attachEvent( "on" + name, handler );
         }
     }
 };
@@ -638,7 +640,167 @@ window.EventApi = EventApi;
 })( window );
 /*!
  *
- * Performs a quick search against an array of terms
+ * A singleton event dispatching utility
+ *
+ * @Eventful
+ * @author: kitajchuk
+ *
+ */
+(function ( window, undefined ) {
+
+
+"use strict";
+
+
+// Singleton
+var _instance = null;
+
+
+/**
+ *
+ * A singleton event dispatching utility
+ * @constructor Eventful
+ * @memberof! <global>
+ *
+ */
+var Eventful = function () {
+    return (_instance || this.init.apply( this, arguments ));
+};
+
+Eventful.prototype = {
+    constructor: Eventful,
+    
+    /**
+     *
+     * Eventful event handlers object
+     * @memberof Eventful
+     * @member Eventful._handlers
+     *
+     */
+    _handlers: {},
+    
+    /**
+     *
+     * Eventful init constructor method
+     * @memberof Eventful
+     * @method Eventful.init
+     *
+     */
+    init: function () {
+        _instance = this;
+    },
+    
+    /**
+     *
+     * Eventful add event handler
+     * @memberof Eventful
+     * @method Eventful.on
+     * @param {string} event the event to listen for
+     * @param {function} handler the handler to call
+     *
+     */
+    on: function ( event, handler ) {
+        if ( typeof handler === "function" ) {
+            if ( !this._handlers[ event ] ) {
+                this._handlers[ event ] = [];
+            }
+            
+            handler._eventfulTime = Date.now();
+            handler._eventfulType = event;
+            
+            this._handlers[ event ].push( handler );
+        }
+    },
+    
+    /**
+     *
+     * Eventful remove event handler
+     * @memberof Eventful
+     * @method Eventful.off
+     * @param {string} event the event to remove handler for
+     * @param {function} handler the handler to remove
+     *
+     */
+    off: function ( event, handler ) {
+        if ( !this._handlers[ event ] ) {
+            return this;
+        }
+        
+        // Remove a single handler
+        if ( handler ) {
+            this._off( event, handler );
+        
+        // Remove all handlers for event    
+        } else {
+            this._offed( event );
+        }
+    },
+    
+    /**
+     *
+     * Eventful fire an event
+     * @memberof Eventful
+     * @method Eventful.fire
+     * @param {string} event the event to fire
+     *
+     */
+    fire: function ( event ) {
+        if ( !this._handlers[ event ] ) {
+            return this;
+        }
+        
+        var args = [].slice.call( arguments, 1 );
+        
+        for ( var i = this._handlers[ event ].length; i--; ) {
+            this._handlers[ event ][ i ].apply( this, args );
+        }
+    },
+    
+    /**
+     *
+     * Eventful internal off method assumes event AND handler are good
+     * @memberof Eventful
+     * @method Eventful._off
+     * @param {string} event the event to remove handler for
+     * @param {function} handler the handler to remove
+     *
+     */
+    _off: function ( event, handler ) {
+        for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
+            if ( handler._eventfulTime === this._handlers[ event ][ i ]._eventfulTime ) {
+                this._handlers[ event ].splice( i, 1 );
+                
+                break;
+            }
+        }
+    },
+    
+    /**
+     *
+     * Eventful completely remove all handlers and an event type
+     * @memberof Eventful
+     * @method Eventful._offed
+     * @param {string} event the event to remove handler for
+     *
+     */
+    _offed: function ( event ) {
+        for ( var i = this._handlers[ event ].length; i--; ) {
+            this._handlers[ event ][ i ] = null;
+        }
+        
+        delete this._handlers[ event ];
+    }
+};
+
+
+// Expose
+window.Eventful = Eventful;
+
+
+})( window );
+/*!
+ *
+ * Expression matching for term lists
  *
  * @Isearch
  * @author: kitajchuk
@@ -662,6 +824,8 @@ var Isearch = function () {
 };
     
 Isearch.prototype = {
+    constructor: Isearch,
+    
     /**
      *
      * Flag for input escaping
@@ -848,8 +1012,7 @@ window.Isearch = Isearch;
 })( window );
 /*!
  *
- * Konami code easter egg
- * Does cool stuff if you hook into it!
+ * A konami code easter egg handler
  *
  * @KonamiCode
  * @author: kitajchuk
@@ -888,7 +1051,7 @@ var _keys = {
 
 /**
  *
- * A konami code easter egg dispatcher
+ * A konami code easter egg handler
  * @constructor KonamiCode
  * @memberof! <global>
  *
@@ -898,6 +1061,8 @@ var KonamiCode = function () {
 };
 
 KonamiCode.prototype = {
+    constructor: KonamiCode,
+    
     /**
      *
      * Timeout between key inputs to reset
@@ -941,7 +1106,7 @@ KonamiCode.prototype = {
                     
                 } catch ( error ) {}
                 
-                code = ""+(code+e.keyCode);
+                code = "" + (code + e.keyCode);
                 
                 if ( code === _code ) {
                     self._dispatch( "_konamicode_" );
@@ -1298,8 +1463,13 @@ window.LazyLoader = LazyLoader;
 
 /**
  *
- * Performs a wildcard style match check against an array of routes given a url.
- * Valid wildcards are "any", "slug", "num" and "reg". Regex must be escaped for backslashes.
+ * Handles wildcard route matching against urls
+ * <ul>
+ * <li>route = "/some/random/path/:num"</li>
+ * <li>route = "/some/random/path/:slug"</li>
+ * <li>route = "/some/random/path/:any"</li>
+ * <li>route = "/some/random/path/:reg(^foo-)"</li>
+ * </ul>
  * @constructor MatchRoute
  * @memberof! <global>
  *
@@ -1309,6 +1479,8 @@ var MatchRoute = function () {
 };
 
 MatchRoute.prototype = {
+    constructor: MatchRoute,
+    
     /**
      *
      * Expression match http/https
@@ -1361,6 +1533,15 @@ MatchRoute.prototype = {
     
     /**
      *
+     * The routes config array
+     * @memberof MatchRoute
+     * @member MatchRoute._routes
+     *
+     */
+    _routes: null,
+    
+    /**
+     *
      * MatchRoute init constructor method
      * @memberof MatchRoute
      * @method MatchRoute.init
@@ -1368,13 +1549,6 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
-        /**
-         *
-         * The routes config array
-         * @memberof MatchRoute
-         * @member _routes
-         *
-         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     
@@ -1559,7 +1733,7 @@ window.MatchRoute = MatchRoute;
 })( window );
 /*!
  *
- * Handles html5 video and audio using the audio api.
+ * Manage audio and video with playback
  *
  * @MediaBox
  * @author: kitajchuk
@@ -1573,8 +1747,7 @@ window.MatchRoute = MatchRoute;
 
 /**
  *
- * Manage audio and video with playback.
- * Calls MediaBox.prototype.init as constructor.
+ * Manage audio and video with playback
  * @constructor MediaBox
  * @requires Easing
  * @requires Tween
@@ -1587,15 +1760,6 @@ var MediaBox = function () {
 
 MediaBox.prototype = {
     constructor: MediaBox,
-    
-    /**
-     *
-     * Expression match hashbang/querystring
-     * @memberof MediaBox
-     * @member MediaBox._rHashQuery
-     *
-     */
-    _rHashQuery: /[#|?].*$/g,
     
     /**
      *
@@ -1635,6 +1799,60 @@ MediaBox.prototype = {
     
     /**
      *
+     * Expression match hashbang/querystring
+     * @memberof MediaBox
+     * @member MediaBox._rHashQuery
+     *
+     */
+    _rHashQuery: /[#|?].*$/g,
+    
+    /**
+     *
+     * MediaBox supports
+     * @memberof MediaBox
+     * @member MediaBox._supported
+     *
+     */
+    _supported: {},
+    
+    /**
+     *
+     * MediaBox information for each channel
+     * @memberof MediaBox
+     * @member MediaBox._channels
+     *
+     */
+    _channels: {},
+    
+    /**
+     *
+     * MediaBox holds all audio tracks
+     * @memberof MediaBox
+     * @member MediaBox._audio
+     *
+     */
+    _audio: {},
+    
+    /**
+     *
+     * MediaBox holds all video tracks
+     * @memberof MediaBox
+     * @member MediaBox._video
+     *
+     */
+    _video: {},
+    
+    /**
+     *
+     * MediaBox boolean to stop/start all audio
+     * @memberof MediaBox
+     * @member MediaBox._audioPaused
+     *
+     */
+    _audioPaused: false,
+    
+    /**
+     *
      * MediaBox init constructor method
      * @memberof MediaBox
      * @method MediaBox.init
@@ -1645,50 +1863,21 @@ MediaBox.prototype = {
         
         /**
          *
-         * MediaBox supports
+         * MediaBox supported audio
          * @memberof MediaBox
-         * @member MediaBox._supported
+         * @member MediaBox._supported.audio
          *
          */
-        this._supported = {};
         this._supported.audio = this._getAudioSupport();
+        
+        /**
+         *
+         * MediaBox supported video
+         * @memberof MediaBox
+         * @member MediaBox._supported.video
+         *
+         */
         this._supported.video = this._getVideoSupport();
-        
-        /**
-         *
-         * MediaBox information for each channel
-         * @memberof MediaBox
-         * @member MediaBox._channels
-         *
-         */
-        this._channels = {};
-        
-        /**
-         *
-         * MediaBox holds all audio tracks
-         * @memberof MediaBox
-         * @member MediaBox._audio
-         *
-         */
-        this._audio = {};
-        
-        /**
-         *
-         * MediaBox holds all video tracks
-         * @memberof MediaBox
-         * @member MediaBox._video
-         *
-         */
-        this._video = {};
-        
-        /**
-         *
-         * MediaBox boolean to stop/start all audio
-         * @memberof MediaBox
-         * @member MediaBox._audioPaused
-         *
-         */
-        this._audioPaused = false;
     },
     
     /**
@@ -2494,6 +2683,128 @@ var PushState = function () {
 };
 
 PushState.prototype = {
+    constructor: PushState,
+    
+    /**
+     *
+     * Expression match #
+     * @memberof PushState
+     * @member PushState._rHash
+     *
+     */
+    _rHash: /#/,
+    
+    /**
+     *
+     * Expression match http/https
+     * @memberof PushState
+     * @member PushState._rHTTPs
+     *
+     */
+    _rHTTPs: /^http[s]?:\/\/.*?\//,
+    
+    /**
+     *
+     * Flag whether state is enabled
+     * @memberof PushState
+     * @member _enabled
+     *
+     */
+    _enabled: false,
+    
+    /**
+     *
+     * Flag whether pushState is enabled
+     * @memberof PushState
+     * @member _pushable
+     *
+     */
+    _pushable: ("history" in window && "pushState" in window.history),
+    
+    /**
+     *
+     * Fallback to hashchange if needed. Support:
+     * <ul>
+     * <li>Internet Explorer 8</li>
+     * <li>Firefox 3.6</li>
+     * <li>Chrome 5</li>
+     * <li>Safari 5</li>
+     * <li>Opera 10.6</li>
+     * </ul>
+     * @memberof PushState
+     * @member _hashable
+     *
+     */
+    _hashable: ("onhashchange" in window),
+    
+    /**
+     *
+     * Flag when hash is changed by PushState
+     * This allows appropriate replication of popstate
+     * @memberof PushState
+     * @member _ishashpushed
+     *
+     */
+    _ishashpushed: false,
+    
+    /**
+     *
+     * Unique ID ticker
+     * @memberof PushState
+     * @member _uid
+     *
+     */
+    _uid: 0,
+    
+    /**
+     *
+     * Stored state objects
+     * @memberof PushState
+     * @member _states
+     *
+     */
+    _states: {},
+    
+    /**
+     *
+     * Stored response objects
+     * @memberof PushState
+     * @member _responses
+     *
+     */
+    _responses: {},
+    
+    /**
+     *
+     * Event callbacks
+     * @memberof PushState
+     * @member _callbacks
+     *
+     */
+    _callbacks: {
+        pop: [],
+        before: [],
+        after: []
+    },
+    
+    /**
+     *
+     * Flag whether to use ajax
+     * @memberof PushState
+     * @member _async
+     *
+     */
+    _async: true,
+    
+    /**
+     *
+     * Flag whether to use cached responses
+     * @memberof PushState
+     * @member _caching
+     *
+     */
+    _caching: true,
+    
     /**
      *
      * PushState init constructor method
@@ -2509,129 +2820,19 @@ PushState.prototype = {
     init: function ( options ) {
         var url = window.location.href;
         
-        /**
-         *
-         * Expression match #
-         * @memberof PushState
-         * @member PushState._rHash
-         *
-         */
-        this._rHash = /#/;
-        
-        /**
-         *
-         * Expression match http/https
-         * @memberof PushState
-         * @member PushState._rHTTPs
-         *
-         */
-        this._rHTTPs = /^http[s]?:\/\/.*?\//;
-        
-        /**
-         *
-         * Flag whether state is enabled
-         * @memberof PushState
-         * @member _enabled
-         *
-         */
-        this._enabled = false;
-        
-        /**
-         *
-         * Flag whether pushState is enabled
-         * @memberof PushState
-         * @member _pushable
-         *
-         */
-        this._pushable = ("history" in window && "pushState" in window.history);
-        
-        /**
-         *
-         * Fallback to hashchange if needed. Support:
-         * <ul>
-         * <li>Internet Explorer 8</li>
-         * <li>Firefox 3.6</li>
-         * <li>Chrome 5</li>
-         * <li>Safari 5</li>
-         * <li>Opera 10.6</li>
-         * </ul>
-         * @memberof PushState
-         * @member _hashable
-         *
-         */
-        this._hashable = ("onhashchange" in window);
-        
-        /**
-         *
-         * Flag when hash is changed by PushState
-         * This allows appropriate replication of popstate
-         * @memberof PushState
-         * @member _ishashpushed
-         *
-         */
-        this._ishashpushed = false;
-        
-        /**
-         *
-         * Unique ID ticker
-         * @memberof PushState
-         * @member _uid
-         *
-         */
-        this._uid = 0;
-        
-        /**
-         *
-         * Stored state objects
-         * @memberof PushState
-         * @member _states
-         *
-         */
-        this._states = {};
+        // Set initial state
         this._states[ url ] = {
             uid: this._getUid(),
             cached: false
         };
-        
-        /**
-         *
-         * Stored response objects
-         * @memberof PushState
-         * @member _responses
-         *
-         */
-        this._responses = {};
-        
-        /**
-         *
-         * Event callbacks
-         * @memberof PushState
-         * @member _callbacks
-         *
-         */
-        this._callbacks = {
-            pop: [],
-            before: [],
-            after: []
-        };
 
-        /**
-         *
-         * Flag whether to use ajax
-         * @memberof PushState
-         * @member _async
-         *
-         */
-        this._async = ( options.async !== undefined ) ? options.async : true;
+        if ( options.async !== undefined ) {
+            this._async = options.async;
+        }
         
-        /**
-         *
-         * Flag whether to use cached responses
-         * @memberof PushState
-         * @member _caching
-         *
-         */
-        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        if ( options.caching !== undefined ) {
+            this._caching = options.caching;
+        }
 
         // Enable the popstate event
         this._stateEnable();
@@ -2959,6 +3160,55 @@ var Router = function () {
 };
 
 Router.prototype = {
+    constructor: Router,
+    
+    /**
+     *
+     * Internal MatchRoute instance
+     * @memberof Router
+     * @member _matcher
+     *
+     */
+    _matcher: new MatchRoute(),
+    
+    /**
+     *
+     * Internal PushState instance
+     * @memberof Router
+     * @member _pusher
+     *
+     */
+    _pusher: null,
+    
+    /**
+     *
+     * Event handling callbacks
+     * @memberof Router
+     * @member _callbacks
+     *
+     */
+    _callbacks: {
+        get: []
+    },
+    
+    /**
+     *
+     * Router Store user options
+     * @memberof Router
+     * @member Router._options
+     *
+     */
+    _options: {
+        /**
+         *
+         * Router prevent event default when routes are matched
+         * @memberof Router
+         * @member Router._options.preventDefault
+         *
+         */
+        preventDefault: false
+    },
+    
     /**
      *
      * Router init constructor method
@@ -2974,64 +3224,25 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        /**
-         *
-         * Internal MatchRoute instance
-         * @memberof Router
-         * @member _matcher
-         *
-         */
-        this._matcher = new MatchRoute();
+        // Handle router options
+        if ( options.preventDefault !== undefined ) {
+            this._options.preventDefault = options.preventDefault;
+        }
         
-        /**
-         *
-         * Internal PushState instance
-         * @memberof Router
-         * @member _pusher
-         *
-         */
+        // Pass options to pushstate
         this._pusher = new PushState( options );
         
-        /**
-         *
-         * Event handling callbacks
-         * @memberof Router
-         * @member _callbacks
-         *
-         */
-        this._callbacks = {
-            get: []
-        };
-        
-        /**
-         * GET click event handler
-         * @memberof Router
-         * @method _handler
-         *
-         */
-        this._handler = function ( e ) {
-            // Only capture <a> elements
-            if ( e.target.tagName.toLowerCase() === "a" ) {
-                var elem = e.target;
-                
-                if ( elem.href.indexOf( "#" ) === -1 && self._matcher.test( elem.href ) ) {
-                    self._pusher.push( elem.href, function ( response ) {
-                        self._fire( "get", elem.href, response );
-                    });
-                }
-            }
-        };
-        
-        /**
-         *
-         * Bind GET requests to links
-         *
-         */
+        // Bind GET requests to links
         if ( document.addEventListener ) {
-            document.addEventListener( "click", this._handler, false );
+            document.addEventListener( "click", function ( e ) {
+                self._handler( e );
+                
+            }, false );
             
-        } else {
-            document.attachEvent( "onclick", this._handler );
+        } else if ( document.attachEvent ) {
+            document.attachEvent( "onclick", function ( e ) {
+                self._handler( e );
+            });
         }
         
         // Listen for pop events
@@ -3070,6 +3281,50 @@ Router.prototype = {
         // only gets added to the list once.
         if ( callback._routes.length === 1 ) {
             this._bind( "get", callback );
+        }
+    },
+    
+    /**
+     * Compatible event preventDefault
+     * @memberof Router
+     * @method _preventDefault
+     * @param {object} e The event object
+     *
+     */
+    _preventDefault: function ( e ) {
+        if ( !this._options.preventDefault ) {
+            return this;
+        }
+        
+        if ( e.preventDefault ) {
+            e.preventDefault();
+            
+        } else {
+            e.returnValue = false;
+        }
+    },
+    
+    /**
+     * GET click event handler
+     * @memberof Router
+     * @method _handler
+     * @param {object} e The event object
+     *
+     */
+    _handler: function ( e ) {
+        var self = this;
+        
+        // Only capture <a> elements
+        if ( e.target.tagName.toLowerCase() === "a" ) {
+            var elem = e.target;
+            
+            if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
+                this._preventDefault( e );
+                
+                this._pusher.push( elem.href, function ( response ) {
+                    self._fire( "get", elem.href, response );
+                });
+            }
         }
     },
     
@@ -3146,6 +3401,8 @@ var Stagger = function () {
 };
 
 Stagger.prototype = {
+    constructor: Stagger,
+    
     /**
      *
      * Step callback
@@ -3623,7 +3880,7 @@ TouchMe.prototype = {
             return this;
         }
         
-        for ( var i = this._handlers[ event ].length; i--; ) {
+        for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
             if ( handler._timestamp === this._handlers[ event ][ i ]._timestamp ) {
                 this._handlers[ event ].splice( i, 1 );
                 

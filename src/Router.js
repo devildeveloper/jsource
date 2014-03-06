@@ -26,6 +26,55 @@ var Router = function () {
 };
 
 Router.prototype = {
+    constructor: Router,
+    
+    /**
+     *
+     * Internal MatchRoute instance
+     * @memberof Router
+     * @member _matcher
+     *
+     */
+    _matcher: new MatchRoute(),
+    
+    /**
+     *
+     * Internal PushState instance
+     * @memberof Router
+     * @member _pusher
+     *
+     */
+    _pusher: null,
+    
+    /**
+     *
+     * Event handling callbacks
+     * @memberof Router
+     * @member _callbacks
+     *
+     */
+    _callbacks: {
+        get: []
+    },
+    
+    /**
+     *
+     * Router Store user options
+     * @memberof Router
+     * @member Router._options
+     *
+     */
+    _options: {
+        /**
+         *
+         * Router prevent event default when routes are matched
+         * @memberof Router
+         * @member Router._options.preventDefault
+         *
+         */
+        preventDefault: false
+    },
+    
     /**
      *
      * Router init constructor method
@@ -41,64 +90,25 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        /**
-         *
-         * Internal MatchRoute instance
-         * @memberof Router
-         * @member _matcher
-         *
-         */
-        this._matcher = new MatchRoute();
+        // Handle router options
+        if ( options.preventDefault !== undefined ) {
+            this._options.preventDefault = options.preventDefault;
+        }
         
-        /**
-         *
-         * Internal PushState instance
-         * @memberof Router
-         * @member _pusher
-         *
-         */
+        // Pass options to pushstate
         this._pusher = new PushState( options );
         
-        /**
-         *
-         * Event handling callbacks
-         * @memberof Router
-         * @member _callbacks
-         *
-         */
-        this._callbacks = {
-            get: []
-        };
-        
-        /**
-         * GET click event handler
-         * @memberof Router
-         * @method _handler
-         *
-         */
-        this._handler = function ( e ) {
-            // Only capture <a> elements
-            if ( e.target.tagName.toLowerCase() === "a" ) {
-                var elem = e.target;
-                
-                if ( elem.href.indexOf( "#" ) === -1 && self._matcher.test( elem.href ) ) {
-                    self._pusher.push( elem.href, function ( response ) {
-                        self._fire( "get", elem.href, response );
-                    });
-                }
-            }
-        };
-        
-        /**
-         *
-         * Bind GET requests to links
-         *
-         */
+        // Bind GET requests to links
         if ( document.addEventListener ) {
-            document.addEventListener( "click", this._handler, false );
+            document.addEventListener( "click", function ( e ) {
+                self._handler( e );
+                
+            }, false );
             
-        } else {
-            document.attachEvent( "onclick", this._handler );
+        } else if ( document.attachEvent ) {
+            document.attachEvent( "onclick", function ( e ) {
+                self._handler( e );
+            });
         }
         
         // Listen for pop events
@@ -137,6 +147,50 @@ Router.prototype = {
         // only gets added to the list once.
         if ( callback._routes.length === 1 ) {
             this._bind( "get", callback );
+        }
+    },
+    
+    /**
+     * Compatible event preventDefault
+     * @memberof Router
+     * @method _preventDefault
+     * @param {object} e The event object
+     *
+     */
+    _preventDefault: function ( e ) {
+        if ( !this._options.preventDefault ) {
+            return this;
+        }
+        
+        if ( e.preventDefault ) {
+            e.preventDefault();
+            
+        } else {
+            e.returnValue = false;
+        }
+    },
+    
+    /**
+     * GET click event handler
+     * @memberof Router
+     * @method _handler
+     * @param {object} e The event object
+     *
+     */
+    _handler: function ( e ) {
+        var self = this;
+        
+        // Only capture <a> elements
+        if ( e.target.tagName.toLowerCase() === "a" ) {
+            var elem = e.target;
+            
+            if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
+                this._preventDefault( e );
+                
+                this._pusher.push( elem.href, function ( response ) {
+                    self._fire( "get", elem.href, response );
+                });
+            }
         }
     },
     

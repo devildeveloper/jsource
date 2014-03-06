@@ -29,6 +29,8 @@ var Blit = function () {
 };
 
 Blit.prototype = {
+    constructor: Blit,
+    
     /**
      *
      * Frame rate callback

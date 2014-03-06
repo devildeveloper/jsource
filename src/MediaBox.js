@@ -1,6 +1,6 @@
 /*!
  *
- * Handles html5 video and audio using the audio api.
+ * Manage audio and video with playback
  *
  * @MediaBox
  * @author: kitajchuk
@@ -14,8 +14,7 @@
 
 /**
  *
- * Manage audio and video with playback.
- * Calls MediaBox.prototype.init as constructor.
+ * Manage audio and video with playback
  * @constructor MediaBox
  * @requires Easing
  * @requires Tween
@@ -28,15 +27,6 @@ var MediaBox = function () {
 
 MediaBox.prototype = {
     constructor: MediaBox,
-    
-    /**
-     *
-     * Expression match hashbang/querystring
-     * @memberof MediaBox
-     * @member MediaBox._rHashQuery
-     *
-     */
-    _rHashQuery: /[#|?].*$/g,
     
     /**
      *
@@ -76,6 +66,60 @@ MediaBox.prototype = {
     
     /**
      *
+     * Expression match hashbang/querystring
+     * @memberof MediaBox
+     * @member MediaBox._rHashQuery
+     *
+     */
+    _rHashQuery: /[#|?].*$/g,
+    
+    /**
+     *
+     * MediaBox supports
+     * @memberof MediaBox
+     * @member MediaBox._supported
+     *
+     */
+    _supported: {},
+    
+    /**
+     *
+     * MediaBox information for each channel
+     * @memberof MediaBox
+     * @member MediaBox._channels
+     *
+     */
+    _channels: {},
+    
+    /**
+     *
+     * MediaBox holds all audio tracks
+     * @memberof MediaBox
+     * @member MediaBox._audio
+     *
+     */
+    _audio: {},
+    
+    /**
+     *
+     * MediaBox holds all video tracks
+     * @memberof MediaBox
+     * @member MediaBox._video
+     *
+     */
+    _video: {},
+    
+    /**
+     *
+     * MediaBox boolean to stop/start all audio
+     * @memberof MediaBox
+     * @member MediaBox._audioPaused
+     *
+     */
+    _audioPaused: false,
+    
+    /**
+     *
      * MediaBox init constructor method
      * @memberof MediaBox
      * @method MediaBox.init
@@ -86,50 +130,21 @@ MediaBox.prototype = {
         
         /**
          *
-         * MediaBox supports
+         * MediaBox supported audio
          * @memberof MediaBox
-         * @member MediaBox._supported
+         * @member MediaBox._supported.audio
          *
          */
-        this._supported = {};
         this._supported.audio = this._getAudioSupport();
+        
+        /**
+         *
+         * MediaBox supported video
+         * @memberof MediaBox
+         * @member MediaBox._supported.video
+         *
+         */
         this._supported.video = this._getVideoSupport();
-        
-        /**
-         *
-         * MediaBox information for each channel
-         * @memberof MediaBox
-         * @member MediaBox._channels
-         *
-         */
-        this._channels = {};
-        
-        /**
-         *
-         * MediaBox holds all audio tracks
-         * @memberof MediaBox
-         * @member MediaBox._audio
-         *
-         */
-        this._audio = {};
-        
-        /**
-         *
-         * MediaBox holds all video tracks
-         * @memberof MediaBox
-         * @member MediaBox._video
-         *
-         */
-        this._video = {};
-        
-        /**
-         *
-         * MediaBox boolean to stop/start all audio
-         * @memberof MediaBox
-         * @member MediaBox._audioPaused
-         *
-         */
-        this._audioPaused = false;
     },
     
     /**

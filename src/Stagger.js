@@ -24,6 +24,8 @@ var Stagger = function () {
 };
 
 Stagger.prototype = {
+    constructor: Stagger,
+    
     /**
      *
      * Step callback

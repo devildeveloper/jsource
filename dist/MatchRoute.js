@@ -14,8 +14,13 @@
 
 /**
  *
- * Performs a wildcard style match check against an array of routes given a url.
- * Valid wildcards are "any", "slug", "num" and "reg". Regex must be escaped for backslashes.
+ * Handles wildcard route matching against urls
+ * <ul>
+ * <li>route = "/some/random/path/:num"</li>
+ * <li>route = "/some/random/path/:slug"</li>
+ * <li>route = "/some/random/path/:any"</li>
+ * <li>route = "/some/random/path/:reg(^foo-)"</li>
+ * </ul>
  * @constructor MatchRoute
  * @memberof! <global>
  *
@@ -25,6 +30,8 @@ var MatchRoute = function () {
 };
 
 MatchRoute.prototype = {
+    constructor: MatchRoute,
+    
     /**
      *
      * Expression match http/https
@@ -77,6 +84,15 @@ MatchRoute.prototype = {
     
     /**
      *
+     * The routes config array
+     * @memberof MatchRoute
+     * @member MatchRoute._routes
+     *
+     */
+    _routes: null,
+    
+    /**
+     *
      * MatchRoute init constructor method
      * @memberof MatchRoute
      * @method MatchRoute.init
@@ -84,13 +100,6 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
-        /**
-         *
-         * The routes config array
-         * @memberof MatchRoute
-         * @member _routes
-         *
-         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     

@@ -14,7 +14,7 @@
 
 /**
  *
- * A vanilla javascript crossbrowser event api
+ * A basic cross-browser event api
  * @namespace EventApi
  * @memberof! <global>
  *
@@ -53,7 +53,7 @@ var EventApi = {
             element.addEventListener( name, handler, false );
             
         } else {
-            element.attachEvent( "on"+name, handler );
+            element.attachEvent( "on" + name, handler );
         }
     },
     
@@ -72,7 +72,7 @@ var EventApi = {
             element.removeEventListener( name, listener, false );
             
         } else {
-            element.detachEvent( "on"+name, listener );
+            element.detachEvent( "on" + name, listener );
         }
     },
     
@@ -148,7 +148,7 @@ var EventApi = {
             element.addEventListener( name, handler, false );
             
         } else {
-            element.attachEvent( "on"+name, handler );
+            element.attachEvent( "on" + name, handler );
         }
     }
 };
