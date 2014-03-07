@@ -134,18 +134,18 @@ Router.prototype = {
         this._matcher.config( [route] );
         
         // Bind the route to the callback
-        if ( callback._routes ) {
-            callback._routes.push( route );
+        if ( callback._routerRoutes ) {
+            callback._routerRoutes.push( route );
             
         } else {
-            callback._routes = [route];
+            callback._routerRoutes = [route];
         }
         
         // When binding multiple routes to a single
         // callback, we need to make sure the callbacks
         // routes array is updated above but the callback
         // only gets added to the list once.
-        if ( callback._routes.length === 1 ) {
+        if ( callback._routerRoutes.length === 1 ) {
             this._bind( "get", callback );
         }
     },
@@ -222,12 +222,13 @@ Router.prototype = {
     _fire: function ( event, url, response ) {
         if ( this._callbacks[ event ] ) {
             for ( var i = this._callbacks[ event ].length; i--; ) {
-                var compare = this._matcher.parse( url, this._callbacks[ event ][ i ]._routes );
+                var data = this._matcher.parse( url, this._callbacks[ event ][ i ]._routerRoutes );
                 
-                if ( compare.match ) {
+                if ( data.match ) {
                     this._callbacks[ event ][ i ].call( this, {
                         route: this._matcher._cleanRoute( url ),
-                        response: response
+                        response: response,
+                        matches: data.matches
                     });
                 }
             }

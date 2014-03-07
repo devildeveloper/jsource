@@ -175,9 +175,9 @@ TouchMe.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._timestamp = Date.now();
-            handler._selector = selector;
-            handler._eventType = event;
+            handler._touchmeTime = Date.now();
+            handler._touchmeSelector = selector;
+            handler._touchmeEvent = event;
             
             this._handlers[ event ].push( handler );
         }
@@ -198,7 +198,7 @@ TouchMe.prototype = {
         }
         
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._timestamp === this._handlers[ event ][ i ]._timestamp ) {
+            if ( handler._touchmeTime === this._handlers[ event ][ i ]._touchmeTime ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;
@@ -304,7 +304,7 @@ TouchMe.prototype = {
         }
         
         for ( var i = this._handlers[ eventName ].length; i--; ) {
-            var element = this.isDelegate( eventObject, this._handlers[ eventName ][ i ]._selector );
+            var element = this.isDelegate( eventObject, this._handlers[ eventName ][ i ]._touchmeSelector );
             
             if ( element ) {
                 this._handlers[ eventName ][ i ].call( element, eventObject );
@@ -329,7 +329,7 @@ TouchMe.prototype = {
         
         for ( var i in this._handlers ) {
             for ( var j = this._handlers[ i ].length; j--; ) {
-                ret = this.isDelegate( e, this._handlers[ i ][ j ]._selector );
+                ret = this.isDelegate( e, this._handlers[ i ][ j ]._touchmeSelector );
                 
                 if ( ret ) {
                     break;

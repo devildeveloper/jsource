@@ -383,6 +383,9 @@ PushState.prototype = {
                         }
                         
                     } catch ( error ) {}
+                    
+                } else if ( this.status === 404 ) {
+                    // Should we do anything here...
                 }
             }
         };

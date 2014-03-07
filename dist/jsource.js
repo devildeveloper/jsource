@@ -1449,7 +1449,7 @@ window.LazyLoader = LazyLoader;
 })( window );
 /*!
  *
- * Handles wildcard route matching against urls
+ * Handles wildcard route matching against urls with !num and !slug condition testing
  *
  * @MatchRoute
  * @author: kitajchuk
@@ -1463,12 +1463,11 @@ window.LazyLoader = LazyLoader;
 
 /**
  *
- * Handles wildcard route matching against urls
+ * Handles wildcard route matching against urls with !num and !slug condition testing
  * <ul>
- * <li>route = "/some/random/path/:num"</li>
- * <li>route = "/some/random/path/:slug"</li>
- * <li>route = "/some/random/path/:any"</li>
- * <li>route = "/some/random/path/:reg(^foo-)"</li>
+ * <li>route = "/some/random/path/:myvar"</li>
+ * <li>route = "/some/random/path/:myvar!num"</li>
+ * <li>route = "/some/random/path/:myvar!slug"</li>
  * </ul>
  * @constructor MatchRoute
  * @memberof! <global>
@@ -1510,25 +1509,23 @@ MatchRoute.prototype = {
     
     /**
      *
-     * Expression match supported wildcards
+     * Expression match wildcards
      * @memberof MatchRoute
      * @member MatchRoute._rWild
      *
      */
-    _rWild: /^:num|^:slug|^:any|^:reg/,
+    _rWild: /^:/,
     
     /**
      *
-     * Expressions to match wildcards to uri segment
+     * Expressions to match wildcards with supported conditions
      * @memberof MatchRoute
      * @member MatchRoute._wilders
      *
      */
     _wilders: {
-        ":slug": /^[A-Za-z0-9-_.]*/,
-        ":num": /^[0-9]+$/,
-        ":any": /^.*/,
-        ":reg": /:reg|\(|\)/g
+        num: /^[0-9]+$/,
+        slug: /^[A-Za-z0-9-_.]*/
     },
     
     /**
@@ -1619,16 +1616,18 @@ MatchRoute.prototype = {
     parse: function ( url, routes ) {
         var segMatches,
             matches,
-            route = this._cleanRoute( url ),
             match,
+            route = this._cleanRoute( url ),
             ruris,
             regex,
+            cond,
             uris = route.split( "/" ),
             uLen = uris.length,
             iLen = routes.length,
             ret = {
                 match: false,
-                matches: []
+                route: null,
+                matches: {}
             };
         
         for ( var i = 0; i < iLen; i++ ) {
@@ -1637,11 +1636,13 @@ MatchRoute.prototype = {
             // Handle route === "/"
             if ( route === "/" && routes[ i ] === "/" ) {
                 ret.match = true;
-                ret.matches.push( routes[ i ] );
+                ret.route = routes[ i ];
                 
                 break;
             }
             
+            // If the actual url doesn't match the route in segment length,
+            // it cannot possibly be considered for matching so just skip it
             if ( ruris.length !== uris.length ) {
                 continue;
             }
@@ -1649,22 +1650,38 @@ MatchRoute.prototype = {
             segMatches = 0;
             
             for ( var j = 0; j < uLen; j++ ) {
-                matches = ruris[ j ].match( this._rWild );
-                
-                if ( matches ) {
+                // Matched a variable uri segment
+                if ( this._rWild.test( ruris[ j ] ) ) {
+                    // Try to split on conditions
+                    matches = ruris[ j ].split( "!" );
+                    
+                    // The variable segment
                     match = matches[ 0 ];
                     
-                    if ( match === ":reg" ) {
-                        regex = new RegExp( ruris[ j ].replace( this._wilders[ match ], "" ) );
-                        
-                    } else {
-                        regex = this._wilders[ match ];
-                    }
+                    // The match condition
+                    cond = matches[ 1 ];
                     
-                    if ( regex.test( uris[ j ] ) ) {
+                    // Add the match to the config data
+                    ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
+                    
+                    // With conditions
+                    if ( cond ) {
+                        // We support this condition
+                        if ( this._wilders[ cond ] ) {
+                            regex = this._wilders[ cond ];
+                        }
+                        
+                        // Test against the condition
+                        if ( regex && regex.test( uris[ j ] ) ) {
+                            segMatches++;
+                        }
+                    
+                    // No conditions, anything goes    
+                    } else {
                         segMatches++;
                     }
-                    
+                
+                // Defined segment always goes    
                 } else {
                     if ( uris[ j ] === ruris[ j ] ) {
                         segMatches++;
@@ -1674,7 +1691,7 @@ MatchRoute.prototype = {
             
             if ( segMatches === uris.length ) {
                 ret.match = true;
-                ret.matches.push( routes[ i ] );
+                ret.route = routes[ i ];
                 
                 break;
             }
@@ -3041,6 +3058,9 @@ PushState.prototype = {
                         }
                         
                     } catch ( error ) {}
+                    
+                } else if ( this.status === 404 ) {
+                    // Should we do anything here...
                 }
             }
         };
@@ -3268,18 +3288,18 @@ Router.prototype = {
         this._matcher.config( [route] );
         
         // Bind the route to the callback
-        if ( callback._routes ) {
-            callback._routes.push( route );
+        if ( callback._routerRoutes ) {
+            callback._routerRoutes.push( route );
             
         } else {
-            callback._routes = [route];
+            callback._routerRoutes = [route];
         }
         
         // When binding multiple routes to a single
         // callback, we need to make sure the callbacks
         // routes array is updated above but the callback
         // only gets added to the list once.
-        if ( callback._routes.length === 1 ) {
+        if ( callback._routerRoutes.length === 1 ) {
             this._bind( "get", callback );
         }
     },
@@ -3356,12 +3376,13 @@ Router.prototype = {
     _fire: function ( event, url, response ) {
         if ( this._callbacks[ event ] ) {
             for ( var i = this._callbacks[ event ].length; i--; ) {
-                var compare = this._matcher.parse( url, this._callbacks[ event ][ i ]._routes );
+                var data = this._matcher.parse( url, this._callbacks[ event ][ i ]._routerRoutes );
                 
-                if ( compare.match ) {
+                if ( data.match ) {
                     this._callbacks[ event ][ i ].call( this, {
                         route: this._matcher._cleanRoute( url ),
-                        response: response
+                        response: response,
+                        matches: data.matches
                     });
                 }
             }
@@ -3858,9 +3879,9 @@ TouchMe.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._timestamp = Date.now();
-            handler._selector = selector;
-            handler._eventType = event;
+            handler._touchmeTime = Date.now();
+            handler._touchmeSelector = selector;
+            handler._touchmeEvent = event;
             
             this._handlers[ event ].push( handler );
         }
@@ -3881,7 +3902,7 @@ TouchMe.prototype = {
         }
         
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._timestamp === this._handlers[ event ][ i ]._timestamp ) {
+            if ( handler._touchmeTime === this._handlers[ event ][ i ]._touchmeTime ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;
@@ -3987,7 +4008,7 @@ TouchMe.prototype = {
         }
         
         for ( var i = this._handlers[ eventName ].length; i--; ) {
-            var element = this.isDelegate( eventObject, this._handlers[ eventName ][ i ]._selector );
+            var element = this.isDelegate( eventObject, this._handlers[ eventName ][ i ]._touchmeSelector );
             
             if ( element ) {
                 this._handlers[ eventName ][ i ].call( element, eventObject );
@@ -4012,7 +4033,7 @@ TouchMe.prototype = {
         
         for ( var i in this._handlers ) {
             for ( var j = this._handlers[ i ].length; j--; ) {
-                ret = this.isDelegate( e, this._handlers[ i ][ j ]._selector );
+                ret = this.isDelegate( e, this._handlers[ i ][ j ]._touchmeSelector );
                 
                 if ( ret ) {
                     break;
