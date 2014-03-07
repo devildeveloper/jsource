@@ -1631,6 +1631,14 @@ MatchRoute.prototype = {
             };
         
         for ( var i = 0; i < iLen; i++ ) {
+            // Start fresh each iteration
+            // Only one matched route allowed
+            ret = {
+                match: false,
+                route: null,
+                matches: {}
+            };
+            
             ruris = routes[ i ].split( "/" );
             
             // Handle route === "/"
