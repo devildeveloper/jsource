@@ -555,7 +555,7 @@ MatchRoute.prototype = {
      */
     _wilders: {
         num: /^[0-9]+$/,
-        slug: /^[A-Za-z0-9-_.]*/
+        slug: /^[A-Za-z]+[A-Za-z0-9-_.]*$/
     },
     
     /**
