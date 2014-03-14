@@ -2822,7 +2822,7 @@ PushState.prototype = {
          * @member _async
          *
          */
-        this._async = ( options.async !== undefined ) ? options.async : true;
+        this._async = ( options && options.async !== undefined ) ? options.async : true;
         
         /**
          *
@@ -2831,7 +2831,7 @@ PushState.prototype = {
          * @member _caching
          *
          */
-        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        this._caching = ( options && options.caching !== undefined ) ? options.caching : true;
         
         // Set initial state
         this._states[ url ] = {
@@ -3815,9 +3815,16 @@ TouchMe.prototype = {
          *
          */
         this._options = {
-            preventDefault: ( typeof options.preventDefault !== undefined ) ? options.preventDefault : true,
-            preventMouseEvents: (options.preventMouseEvents || false)
+            preventDefault: true,
+            preventMouseEvents: false
         };
+        
+        // Merge options with defaults
+        for ( var i in this._options ) {
+            if ( options && (typeof options[ i ] !== undefined) ) {
+                this._options[ i ] = options[ i ];
+            }
+        }
         
         // Apply touch events, using bubbling, not capturing
         document.addEventListener( "touchstart", function ( e ) { self._onTouchStart( this, e ); }, false );

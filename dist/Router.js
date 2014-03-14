@@ -151,7 +151,7 @@ PushState.prototype = {
          * @member _async
          *
          */
-        this._async = ( options.async !== undefined ) ? options.async : true;
+        this._async = ( options && options.async !== undefined ) ? options.async : true;
         
         /**
          *
@@ -160,7 +160,7 @@ PushState.prototype = {
          * @member _caching
          *
          */
-        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        this._caching = ( options && options.caching !== undefined ) ? options.caching : true;
         
         // Set initial state
         this._states[ url ] = {
