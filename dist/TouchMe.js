@@ -28,108 +28,6 @@ TouchMe.prototype = {
     
     /**
      *
-     * TouchMe events across entire start/move/end stack
-     * @memberof TouchMe
-     * @member TouchMe._events
-     *
-     */
-    _events: {},
-    
-    /**
-     *
-     * TouchMe touches tracking object
-     * @memberof TouchMe
-     * @member TouchMe._touches
-     *
-     */
-    _touches: {},
-    
-    /**
-     *
-     * TouchMe gestures array
-     * @memberof TouchMe
-     * @member TouchMe._gestures
-     *
-     */
-    _gestures: [],
-    
-    /**
-     *
-     * TouchMe event handlers object
-     * @memberof TouchMe
-     * @member TouchMe._handlers
-     *
-     */
-    _handlers: {},
-    
-    /**
-     *
-     * TouchMe the last swipe registered
-     * @memberof TouchMe
-     * @member TouchMe._lastSwipe
-     *
-     */
-    _lastSwipe: "",
-    
-    /**
-     *
-     * TouchMe the last touch registered
-     * @memberof TouchMe
-     * @member TouchMe._lastTouch
-     *
-     */
-    _lastTouch: 0,
-    
-    /**
-     *
-     * TouchMe threshold within which to register gestures
-     * @memberof TouchMe
-     * @member TouchMe._threshold
-     *
-     */
-    _threshold: 60,
-    
-    /**
-     *
-     * TouchMe timestamp of when touchstart happened
-     * @memberof TouchMe
-     * @member TouchMe._tapstart
-     *
-     */
-    _tapstart: null,
-    
-    /**
-     *
-     * TouchMe window.scrollY at time of touchstart
-     * @memberof TouchMe
-     * @member TouchMe._windowScrollY
-     *
-     */
-    _windowScrollY: 0,
-    
-    /**
-     *
-     * TouchMe Flag if touch is happening
-     * @memberof TouchMe
-     * @member TouchMe._isTouchDown
-     *
-     */
-    _isTouchDown: false,
-    
-    /**
-     *
-     * TouchMe Store user options
-     * @memberof TouchMe
-     * @member TouchMe._options
-     *
-     */
-    _options: {
-        preventDefault: true,
-        preventMouseEvents: false
-    },
-    
-    /**
-     *
      * TouchMe init constructor method
      * @memberof TouchMe
      * @method TouchMe.init
@@ -139,12 +37,107 @@ TouchMe.prototype = {
     init: function ( options ) {
         var self = this;
         
-        // Merge options with defaults
-        for ( var i in this._options ) {
-            if ( options && (typeof options[ i ] !== undefined) ) {
-                this._options[ i ] = options[ i ];
-            }
-        }
+        /**
+         *
+         * TouchMe events across entire start/move/end stack
+         * @memberof TouchMe
+         * @member TouchMe._events
+         *
+         */
+        this._events = {};
+        
+        /**
+         *
+         * TouchMe touches tracking object
+         * @memberof TouchMe
+         * @member TouchMe._touches
+         *
+         */
+        this._touches = {};
+        
+        /**
+         *
+         * TouchMe gestures array
+         * @memberof TouchMe
+         * @member TouchMe._gestures
+         *
+         */
+        this._gestures = [];
+        
+        /**
+         *
+         * TouchMe event handlers object
+         * @memberof TouchMe
+         * @member TouchMe._handlers
+         *
+         */
+        this._handlers = {};
+        
+        /**
+         *
+         * TouchMe the last swipe registered
+         * @memberof TouchMe
+         * @member TouchMe._lastSwipe
+         *
+         */
+        this._lastSwipe = "";
+        
+        /**
+         *
+         * TouchMe the last touch registered
+         * @memberof TouchMe
+         * @member TouchMe._lastTouch
+         *
+         */
+        this._lastTouch = 0;
+        
+        /**
+         *
+         * TouchMe threshold within which to register gestures
+         * @memberof TouchMe
+         * @member TouchMe._threshold
+         *
+         */
+        this._threshold = 60;
+        
+        /**
+         *
+         * TouchMe timestamp of when touchstart happened
+         * @memberof TouchMe
+         * @member TouchMe._tapstart
+         *
+         */
+        this._tapstart = null;
+        
+        /**
+         *
+         * TouchMe window.scrollY at time of touchstart
+         * @memberof TouchMe
+         * @member TouchMe._windowScrollY
+         *
+         */
+        this._windowScrollY = 0;
+        
+        /**
+         *
+         * TouchMe Flag if touch is happening
+         * @memberof TouchMe
+         * @member TouchMe._isTouchDown
+         *
+         */
+        this._isTouchDown = false;
+        
+        /**
+         *
+         * TouchMe Store user options
+         * @memberof TouchMe
+         * @member TouchMe._options
+         *
+         */
+        this._options = {
+            preventDefault: ( typeof options.preventDefault !== undefined ) ? options.preventDefault : true,
+            preventMouseEvents: (options.preventMouseEvents || false)
+        };
         
         // Apply touch events, using bubbling, not capturing
         document.addEventListener( "touchstart", function ( e ) { self._onTouchStart( this, e ); }, false );

@@ -30,53 +30,6 @@ Router.prototype = {
     
     /**
      *
-     * Internal MatchRoute instance
-     * @memberof Router
-     * @member _matcher
-     *
-     */
-    _matcher: new MatchRoute(),
-    
-    /**
-     *
-     * Internal PushState instance
-     * @memberof Router
-     * @member _pusher
-     *
-     */
-    _pusher: null,
-    
-    /**
-     *
-     * Event handling callbacks
-     * @memberof Router
-     * @member _callbacks
-     *
-     */
-    _callbacks: {
-        get: []
-    },
-    
-    /**
-     *
-     * Router Store user options
-     * @memberof Router
-     * @member Router._options
-     *
-     */
-    _options: {
-        /**
-         *
-         * Router prevent event default when routes are matched
-         * @memberof Router
-         * @member Router._options.preventDefault
-         *
-         */
-        preventDefault: false
-    },
-    
-    /**
-     *
      * Router init constructor method
      * @memberof Router
      * @method Router.init
@@ -90,13 +43,52 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        // Handle router options
-        if ( options.preventDefault !== undefined ) {
-            this._options.preventDefault = options.preventDefault;
-        }
+        /**
+         *
+         * Internal MatchRoute instance
+         * @memberof Router
+         * @member _matcher
+         *
+         */
+        this._matcher = new MatchRoute();
         
-        // Pass options to pushstate
+        /**
+         *
+         * Internal PushState instance
+         * @memberof Router
+         * @member _pusher
+         *
+         */
         this._pusher = new PushState( options );
+        
+        /**
+         *
+         * Event handling callbacks
+         * @memberof Router
+         * @member _callbacks
+         *
+         */
+        this._callbacks = {
+            get: []
+        };
+        
+        /**
+         *
+         * Router Store user options
+         * @memberof Router
+         * @member Router._options
+         *
+         */
+        this._options = {
+            /**
+             *
+             * Router prevent event default when routes are matched
+             * @memberof Router
+             * @member Router._options.preventDefault
+             *
+             */
+            preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
+        };
         
         // Bind GET requests to links
         if ( document.addEventListener ) {

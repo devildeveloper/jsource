@@ -47,15 +47,6 @@ PushState.prototype = {
     
     /**
      *
-     * Flag whether state is enabled
-     * @memberof PushState
-     * @member _enabled
-     *
-     */
-    _enabled: false,
-    
-    /**
-     *
      * Flag whether pushState is enabled
      * @memberof PushState
      * @member _pushable
@@ -81,74 +72,6 @@ PushState.prototype = {
     
     /**
      *
-     * Flag when hash is changed by PushState
-     * This allows appropriate replication of popstate
-     * @memberof PushState
-     * @member _ishashpushed
-     *
-     */
-    _ishashpushed: false,
-    
-    /**
-     *
-     * Unique ID ticker
-     * @memberof PushState
-     * @member _uid
-     *
-     */
-    _uid: 0,
-    
-    /**
-     *
-     * Stored state objects
-     * @memberof PushState
-     * @member _states
-     *
-     */
-    _states: {},
-    
-    /**
-     *
-     * Stored response objects
-     * @memberof PushState
-     * @member _responses
-     *
-     */
-    _responses: {},
-    
-    /**
-     *
-     * Event callbacks
-     * @memberof PushState
-     * @member _callbacks
-     *
-     */
-    _callbacks: {
-        pop: [],
-        before: [],
-        after: []
-    },
-    
-    /**
-     *
-     * Flag whether to use ajax
-     * @memberof PushState
-     * @member _async
-     *
-     */
-    _async: true,
-    
-    /**
-     *
-     * Flag whether to use cached responses
-     * @memberof PushState
-     * @member _caching
-     *
-     */
-    _caching: true,
-    
-    /**
-     *
      * PushState init constructor method
      * @memberof PushState
      * @method PushState.init
@@ -162,19 +85,88 @@ PushState.prototype = {
     init: function ( options ) {
         var url = window.location.href;
         
+        /**
+         *
+         * Flag whether state is enabled
+         * @memberof PushState
+         * @member _enabled
+         *
+         */
+        this._enabled = false;
+        
+        /**
+         *
+         * Flag when hash is changed by PushState
+         * This allows appropriate replication of popstate
+         * @memberof PushState
+         * @member _ishashpushed
+         *
+         */
+        this._ishashpushed = false;
+        
+        /**
+         *
+         * Unique ID ticker
+         * @memberof PushState
+         * @member _uid
+         *
+         */
+        this._uid = 0;
+        
+        /**
+         *
+         * Stored state objects
+         * @memberof PushState
+         * @member _states
+         *
+         */
+        this._states = {};
+        
+        /**
+         *
+         * Stored response objects
+         * @memberof PushState
+         * @member _responses
+         *
+         */
+        this._responses = {};
+        
+        /**
+         *
+         * Event callbacks
+         * @memberof PushState
+         * @member _callbacks
+         *
+         */
+        this._callbacks = {
+            pop: [],
+            before: [],
+            after: []
+        };
+        
+        /**
+         *
+         * Flag whether to use ajax
+         * @memberof PushState
+         * @member _async
+         *
+         */
+        this._async = ( options.async !== undefined ) ? options.async : true;
+        
+        /**
+         *
+         * Flag whether to use cached responses
+         * @memberof PushState
+         * @member _caching
+         *
+         */
+        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        
         // Set initial state
         this._states[ url ] = {
             uid: this._getUid(),
             cached: false
         };
-
-        if ( options.async !== undefined ) {
-            this._async = options.async;
-        }
-        
-        if ( options.caching !== undefined ) {
-            this._caching = options.caching;
-        }
 
         // Enable the popstate event
         this._stateEnable();
@@ -558,14 +550,6 @@ MatchRoute.prototype = {
         slug: /^[A-Za-z]+[A-Za-z0-9-_.]*$/
     },
     
-    /**
-     *
-     * The routes config array
-     * @memberof MatchRoute
-     * @member MatchRoute._routes
-     *
-     */
-    _routes: null,
     
     /**
      *
@@ -576,6 +560,13 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
+        /**
+         *
+         * The routes config array
+         * @memberof MatchRoute
+         * @member MatchRoute._routes
+         *
+         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     
@@ -818,53 +809,6 @@ Router.prototype = {
     
     /**
      *
-     * Internal MatchRoute instance
-     * @memberof Router
-     * @member _matcher
-     *
-     */
-    _matcher: new MatchRoute(),
-    
-    /**
-     *
-     * Internal PushState instance
-     * @memberof Router
-     * @member _pusher
-     *
-     */
-    _pusher: null,
-    
-    /**
-     *
-     * Event handling callbacks
-     * @memberof Router
-     * @member _callbacks
-     *
-     */
-    _callbacks: {
-        get: []
-    },
-    
-    /**
-     *
-     * Router Store user options
-     * @memberof Router
-     * @member Router._options
-     *
-     */
-    _options: {
-        /**
-         *
-         * Router prevent event default when routes are matched
-         * @memberof Router
-         * @member Router._options.preventDefault
-         *
-         */
-        preventDefault: false
-    },
-    
-    /**
-     *
      * Router init constructor method
      * @memberof Router
      * @method Router.init
@@ -878,13 +822,52 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        // Handle router options
-        if ( options.preventDefault !== undefined ) {
-            this._options.preventDefault = options.preventDefault;
-        }
+        /**
+         *
+         * Internal MatchRoute instance
+         * @memberof Router
+         * @member _matcher
+         *
+         */
+        this._matcher = new MatchRoute();
         
-        // Pass options to pushstate
+        /**
+         *
+         * Internal PushState instance
+         * @memberof Router
+         * @member _pusher
+         *
+         */
         this._pusher = new PushState( options );
+        
+        /**
+         *
+         * Event handling callbacks
+         * @memberof Router
+         * @member _callbacks
+         *
+         */
+        this._callbacks = {
+            get: []
+        };
+        
+        /**
+         *
+         * Router Store user options
+         * @memberof Router
+         * @member Router._options
+         *
+         */
+        this._options = {
+            /**
+             *
+             * Router prevent event default when routes are matched
+             * @memberof Router
+             * @member Router._options.preventDefault
+             *
+             */
+            preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
+        };
         
         // Bind GET requests to links
         if ( document.addEventListener ) {

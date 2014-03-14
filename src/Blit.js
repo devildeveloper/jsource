@@ -33,114 +33,6 @@ Blit.prototype = {
     
     /**
      *
-     * Frame rate callback
-     * @memberof Blit
-     * @member Blit._blit
-     *
-     */
-    _blit: null,
-    
-    /**
-     *
-     * FPS defaults to 60fps
-     * @memberof Blit
-     * @member Blit._fps
-     *
-     */
-    _fps: 60,
-    
-    /**
-     *
-     * Timer interval based on FPS
-     * @memberof Blit
-     * @member Blit._interval
-     *
-     */
-    _interval: (1000 / 60),
-    
-    /**
-     *
-     * Time now in ms
-     * @memberof Blit
-     * @member Blit._now
-     *
-     */
-    _now: null,
-    
-    /**
-     *
-     * Time then in ms
-     * @memberof Blit
-     * @member Blit._then
-     *
-     */
-    _then: null,
-    
-    /**
-     *
-     * Diff between now and then
-     * @memberof Blit
-     * @member Blit._delta
-     *
-     */
-    _delta: null,
-    
-    /**
-     *
-     * Start time in ms
-     * @memberof Blit
-     * @member Blit._first
-     *
-     */
-    _first: null,
-    
-    /**
-     *
-     * Elapsed time in ms
-     * @memberof Blit
-     * @member Blit._time
-     *
-     */
-    _time: null,
-    
-    /**
-     *
-     * Current frame
-     * @memberof Blit
-     * @member Blit._frame
-     *
-     */
-    _frame: 0,
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof Blit
-     * @member Blit._timeout
-     *
-     */
-    _cycle: null,
-    
-    /**
-     *
-     * Paused flag
-     * @memberof Blit
-     * @member Blit._paused
-     *
-     */
-    _paused: false,
-    
-    /**
-     *
-     * Started iteration flag
-     * @memberof Blit
-     * @member Blit._started
-     *
-     */
-    _started: false,
-    
-    /**
-     *
      * Blit init constructor method
      * @memberof Blit
      * @method Blit.init
@@ -153,17 +45,113 @@ Blit.prototype = {
      *
      */
     init: function ( options ) {
-        // Set FPS
-        this._fps = (options.fps || this._fps);
+        /**
+         *
+         * Time now in ms
+         * @memberof Blit
+         * @member Blit._now
+         *
+         */
+        this._now = null;
         
-        // Update interval
+        /**
+         *
+         * Time then in ms
+         * @memberof Blit
+         * @member Blit._then
+         *
+         */
+        this._then = null;
+        
+        /**
+         *
+         * Diff between now and then
+         * @memberof Blit
+         * @member Blit._delta
+         *
+         */
+        this._delta = null;
+        
+        /**
+         *
+         * Start time in ms
+         * @memberof Blit
+         * @member Blit._first
+         *
+         */
+        this._first = null;
+        
+        /**
+         *
+         * Elapsed time in ms
+         * @memberof Blit
+         * @member Blit._time
+         *
+         */
+        this._time = null;
+        
+        /**
+         *
+         * Current frame
+         * @memberof Blit
+         * @member Blit._frame
+         *
+         */
+        this._frame = 0;
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof Blit
+         * @member Blit._timeout
+         *
+         */
+        this._cycle = null;
+        
+        /**
+         *
+         * Started iteration flag
+         * @memberof Blit
+         * @member Blit._started
+         *
+         */
+        this._started = false;
+        
+        /**
+         *
+         * FPS defaults to 60fps
+         * @memberof Blit
+         * @member Blit._fps
+         *
+         */
+        this._fps = (options.fps || 60);
+        
+        /**
+         *
+         * Timer interval based on FPS
+         * @memberof Blit
+         * @member Blit._interval
+         *
+         */
         this._interval = (1000 / this._fps);
         
-        // Set blit callback
-        this._blit = (options.blit || this._blit);
+        /**
+         *
+         * Frame rate callback
+         * @memberof Blit
+         * @member Blit._blit
+         *
+         */
+        this._blit = (options.blit || null);
         
-        // Set paused on instantiation
-        this._paused = (options.paused || this._paused);
+        /**
+         *
+         * Paused flag
+         * @memberof Blit
+         * @member Blit._paused
+         *
+         */
+        this._paused = (options.paused || false);
         
         // Start if we can
         if ( !this._started && !this._paused ) {

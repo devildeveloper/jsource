@@ -33,114 +33,6 @@ Blit.prototype = {
     
     /**
      *
-     * Frame rate callback
-     * @memberof Blit
-     * @member Blit._blit
-     *
-     */
-    _blit: null,
-    
-    /**
-     *
-     * FPS defaults to 60fps
-     * @memberof Blit
-     * @member Blit._fps
-     *
-     */
-    _fps: 60,
-    
-    /**
-     *
-     * Timer interval based on FPS
-     * @memberof Blit
-     * @member Blit._interval
-     *
-     */
-    _interval: (1000 / 60),
-    
-    /**
-     *
-     * Time now in ms
-     * @memberof Blit
-     * @member Blit._now
-     *
-     */
-    _now: null,
-    
-    /**
-     *
-     * Time then in ms
-     * @memberof Blit
-     * @member Blit._then
-     *
-     */
-    _then: null,
-    
-    /**
-     *
-     * Diff between now and then
-     * @memberof Blit
-     * @member Blit._delta
-     *
-     */
-    _delta: null,
-    
-    /**
-     *
-     * Start time in ms
-     * @memberof Blit
-     * @member Blit._first
-     *
-     */
-    _first: null,
-    
-    /**
-     *
-     * Elapsed time in ms
-     * @memberof Blit
-     * @member Blit._time
-     *
-     */
-    _time: null,
-    
-    /**
-     *
-     * Current frame
-     * @memberof Blit
-     * @member Blit._frame
-     *
-     */
-    _frame: 0,
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof Blit
-     * @member Blit._timeout
-     *
-     */
-    _cycle: null,
-    
-    /**
-     *
-     * Paused flag
-     * @memberof Blit
-     * @member Blit._paused
-     *
-     */
-    _paused: false,
-    
-    /**
-     *
-     * Started iteration flag
-     * @memberof Blit
-     * @member Blit._started
-     *
-     */
-    _started: false,
-    
-    /**
-     *
      * Blit init constructor method
      * @memberof Blit
      * @method Blit.init
@@ -153,17 +45,113 @@ Blit.prototype = {
      *
      */
     init: function ( options ) {
-        // Set FPS
-        this._fps = (options.fps || this._fps);
+        /**
+         *
+         * Time now in ms
+         * @memberof Blit
+         * @member Blit._now
+         *
+         */
+        this._now = null;
         
-        // Update interval
+        /**
+         *
+         * Time then in ms
+         * @memberof Blit
+         * @member Blit._then
+         *
+         */
+        this._then = null;
+        
+        /**
+         *
+         * Diff between now and then
+         * @memberof Blit
+         * @member Blit._delta
+         *
+         */
+        this._delta = null;
+        
+        /**
+         *
+         * Start time in ms
+         * @memberof Blit
+         * @member Blit._first
+         *
+         */
+        this._first = null;
+        
+        /**
+         *
+         * Elapsed time in ms
+         * @memberof Blit
+         * @member Blit._time
+         *
+         */
+        this._time = null;
+        
+        /**
+         *
+         * Current frame
+         * @memberof Blit
+         * @member Blit._frame
+         *
+         */
+        this._frame = 0;
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof Blit
+         * @member Blit._timeout
+         *
+         */
+        this._cycle = null;
+        
+        /**
+         *
+         * Started iteration flag
+         * @memberof Blit
+         * @member Blit._started
+         *
+         */
+        this._started = false;
+        
+        /**
+         *
+         * FPS defaults to 60fps
+         * @memberof Blit
+         * @member Blit._fps
+         *
+         */
+        this._fps = (options.fps || 60);
+        
+        /**
+         *
+         * Timer interval based on FPS
+         * @memberof Blit
+         * @member Blit._interval
+         *
+         */
         this._interval = (1000 / this._fps);
         
-        // Set blit callback
-        this._blit = (options.blit || this._blit);
+        /**
+         *
+         * Frame rate callback
+         * @memberof Blit
+         * @member Blit._blit
+         *
+         */
+        this._blit = (options.blit || null);
         
-        // Set paused on instantiation
-        this._paused = (options.paused || this._paused);
+        /**
+         *
+         * Paused flag
+         * @memberof Blit
+         * @member Blit._paused
+         *
+         */
+        this._paused = (options.paused || false);
         
         // Start if we can
         if ( !this._started && !this._paused ) {
@@ -828,51 +816,6 @@ Isearch.prototype = {
     
     /**
      *
-     * Flag for input escaping
-     * @memberof Isearch
-     * @member Isearch.escapeInputs
-     *
-     */
-    escapeInputs: false,
-    
-    /**
-     *
-     * Flag for only matching from front of input
-     * @memberof Isearch
-     * @member Isearch.matchFront
-     *
-     */
-    matchFront: false,
-    
-    /**
-     *
-     * Flag for matching anywhere in input
-     * @memberof Isearch
-     * @member Isearch.matchAny
-     *
-     */
-    matchAny: true,
-    
-    /**
-     *
-     * Flag for case sensitivity on matching
-     * @memberof Isearch
-     * @member Isearch.matchCase
-     *
-     */
-    matchCase: false,
-    
-    /**
-     *
-     * Flag for sorting results alphabetically
-     * @memberof Isearch
-     * @member Isearch.alphaResults
-     *
-     */
-    alphaResults: false,
-    
-    /**
-     *
      * Expression for characters to escape from input
      * @memberof Isearch
      * @member Isearch._rEscChars
@@ -889,6 +832,52 @@ Isearch.prototype = {
      *
      */
     init: function ( options ) {
+        /**
+         *
+         * Flag for input escaping
+         * @memberof Isearch
+         * @member Isearch.escapeInputs
+         *
+         */
+        this.escapeInputs = false;
+        
+        /**
+         *
+         * Flag for only matching from front of input
+         * @memberof Isearch
+         * @member Isearch.matchFront
+         *
+         */
+        this.matchFront = false;
+        
+        /**
+         *
+         * Flag for matching anywhere in input
+         * @memberof Isearch
+         * @member Isearch.matchAny
+         *
+         */
+        this.matchAny = true;
+        
+        /**
+         *
+         * Flag for case sensitivity on matching
+         * @memberof Isearch
+         * @member Isearch.matchCase
+         *
+         */
+        this.matchCase = false;
+        
+        /**
+         *
+         * Flag for sorting results alphabetically
+         * @memberof Isearch
+         * @member Isearch.alphaResults
+         *
+         */
+        this.alphaResults = false;
+        
+        // Set all option overrides at once
         for ( var option in options ) {
             this.set( option, options[ option ] );
         }
@@ -1065,39 +1054,39 @@ KonamiCode.prototype = {
     
     /**
      *
-     * Timeout between key inputs to reset
-     * @memberof KonamiCode
-     * @member KonamiCode._delay
-     *
-     */
-    _delay: 500,
-    
-    /**
-     *
-     * All supplied callbacks to this instance
-     * @memberof KonamiCode
-     * @member KonamiCode._callbacks
-     *
-     */
-    _callbacks: [],
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof KonamiCode
-     * @member KonamiCode._timeout
-     *
-     */
-    _timeout: null,
-    
-    /**
-     *
      * KonamiCode init constructor method
      * @memberof KonamiCode
      * @method KonamiCode.init
      *
      */
     init: function () {
+        /**
+         *
+         * Timeout between key inputs to reset
+         * @memberof KonamiCode
+         * @member KonamiCode._delay
+         *
+         */
+        this._delay = 500;
+        
+        /**
+         *
+         * All supplied callbacks to this instance
+         * @memberof KonamiCode
+         * @member KonamiCode._callbacks
+         *
+         */
+        this._callbacks = [];
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof KonamiCode
+         * @member KonamiCode._timeout
+         *
+         */
+        this._timeout = null;
+        
         var code = "",
             self = this,
             handler = function ( e ) {
@@ -1528,14 +1517,6 @@ MatchRoute.prototype = {
         slug: /^[A-Za-z]+[A-Za-z0-9-_.]*$/
     },
     
-    /**
-     *
-     * The routes config array
-     * @memberof MatchRoute
-     * @member MatchRoute._routes
-     *
-     */
-    _routes: null,
     
     /**
      *
@@ -1546,6 +1527,13 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
+        /**
+         *
+         * The routes config array
+         * @memberof MatchRoute
+         * @member MatchRoute._routes
+         *
+         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     
@@ -1833,51 +1821,6 @@ MediaBox.prototype = {
     
     /**
      *
-     * MediaBox supports
-     * @memberof MediaBox
-     * @member MediaBox._supported
-     *
-     */
-    _supported: {},
-    
-    /**
-     *
-     * MediaBox information for each channel
-     * @memberof MediaBox
-     * @member MediaBox._channels
-     *
-     */
-    _channels: {},
-    
-    /**
-     *
-     * MediaBox holds all audio tracks
-     * @memberof MediaBox
-     * @member MediaBox._audio
-     *
-     */
-    _audio: {},
-    
-    /**
-     *
-     * MediaBox holds all video tracks
-     * @memberof MediaBox
-     * @member MediaBox._video
-     *
-     */
-    _video: {},
-    
-    /**
-     *
-     * MediaBox boolean to stop/start all audio
-     * @memberof MediaBox
-     * @member MediaBox._audioPaused
-     *
-     */
-    _audioPaused: false,
-    
-    /**
-     *
      * MediaBox init constructor method
      * @memberof MediaBox
      * @method MediaBox.init
@@ -1885,6 +1828,51 @@ MediaBox.prototype = {
      */
     init: function () {
         var self = this;
+        
+        /**
+         *
+         * MediaBox information for each channel
+         * @memberof MediaBox
+         * @member MediaBox._channels
+         *
+         */
+        this._channels = {};
+        
+        /**
+         *
+         * MediaBox holds all audio tracks
+         * @memberof MediaBox
+         * @member MediaBox._audio
+         *
+         */
+        this._audio = {};
+        
+        /**
+         *
+         * MediaBox holds all video tracks
+         * @memberof MediaBox
+         * @member MediaBox._video
+         *
+         */
+        this._video = {};
+        
+        /**
+         *
+         * MediaBox boolean to stop/start all audio
+         * @memberof MediaBox
+         * @member MediaBox._audioPaused
+         *
+         */
+        this._audioPaused = false;
+        
+        /**
+         *
+         * MediaBox supports
+         * @memberof MediaBox
+         * @member MediaBox._supported
+         *
+         */
+        this._supported = {};
         
         /**
          *
@@ -2730,15 +2718,6 @@ PushState.prototype = {
     
     /**
      *
-     * Flag whether state is enabled
-     * @memberof PushState
-     * @member _enabled
-     *
-     */
-    _enabled: false,
-    
-    /**
-     *
      * Flag whether pushState is enabled
      * @memberof PushState
      * @member _pushable
@@ -2764,74 +2743,6 @@ PushState.prototype = {
     
     /**
      *
-     * Flag when hash is changed by PushState
-     * This allows appropriate replication of popstate
-     * @memberof PushState
-     * @member _ishashpushed
-     *
-     */
-    _ishashpushed: false,
-    
-    /**
-     *
-     * Unique ID ticker
-     * @memberof PushState
-     * @member _uid
-     *
-     */
-    _uid: 0,
-    
-    /**
-     *
-     * Stored state objects
-     * @memberof PushState
-     * @member _states
-     *
-     */
-    _states: {},
-    
-    /**
-     *
-     * Stored response objects
-     * @memberof PushState
-     * @member _responses
-     *
-     */
-    _responses: {},
-    
-    /**
-     *
-     * Event callbacks
-     * @memberof PushState
-     * @member _callbacks
-     *
-     */
-    _callbacks: {
-        pop: [],
-        before: [],
-        after: []
-    },
-    
-    /**
-     *
-     * Flag whether to use ajax
-     * @memberof PushState
-     * @member _async
-     *
-     */
-    _async: true,
-    
-    /**
-     *
-     * Flag whether to use cached responses
-     * @memberof PushState
-     * @member _caching
-     *
-     */
-    _caching: true,
-    
-    /**
-     *
      * PushState init constructor method
      * @memberof PushState
      * @method PushState.init
@@ -2845,19 +2756,88 @@ PushState.prototype = {
     init: function ( options ) {
         var url = window.location.href;
         
+        /**
+         *
+         * Flag whether state is enabled
+         * @memberof PushState
+         * @member _enabled
+         *
+         */
+        this._enabled = false;
+        
+        /**
+         *
+         * Flag when hash is changed by PushState
+         * This allows appropriate replication of popstate
+         * @memberof PushState
+         * @member _ishashpushed
+         *
+         */
+        this._ishashpushed = false;
+        
+        /**
+         *
+         * Unique ID ticker
+         * @memberof PushState
+         * @member _uid
+         *
+         */
+        this._uid = 0;
+        
+        /**
+         *
+         * Stored state objects
+         * @memberof PushState
+         * @member _states
+         *
+         */
+        this._states = {};
+        
+        /**
+         *
+         * Stored response objects
+         * @memberof PushState
+         * @member _responses
+         *
+         */
+        this._responses = {};
+        
+        /**
+         *
+         * Event callbacks
+         * @memberof PushState
+         * @member _callbacks
+         *
+         */
+        this._callbacks = {
+            pop: [],
+            before: [],
+            after: []
+        };
+        
+        /**
+         *
+         * Flag whether to use ajax
+         * @memberof PushState
+         * @member _async
+         *
+         */
+        this._async = ( options.async !== undefined ) ? options.async : true;
+        
+        /**
+         *
+         * Flag whether to use cached responses
+         * @memberof PushState
+         * @member _caching
+         *
+         */
+        this._caching = ( options.caching !== undefined ) ? options.caching : true;
+        
         // Set initial state
         this._states[ url ] = {
             uid: this._getUid(),
             cached: false
         };
-
-        if ( options.async !== undefined ) {
-            this._async = options.async;
-        }
-        
-        if ( options.caching !== undefined ) {
-            this._caching = options.caching;
-        }
 
         // Enable the popstate event
         this._stateEnable();
@@ -3192,53 +3172,6 @@ Router.prototype = {
     
     /**
      *
-     * Internal MatchRoute instance
-     * @memberof Router
-     * @member _matcher
-     *
-     */
-    _matcher: new MatchRoute(),
-    
-    /**
-     *
-     * Internal PushState instance
-     * @memberof Router
-     * @member _pusher
-     *
-     */
-    _pusher: null,
-    
-    /**
-     *
-     * Event handling callbacks
-     * @memberof Router
-     * @member _callbacks
-     *
-     */
-    _callbacks: {
-        get: []
-    },
-    
-    /**
-     *
-     * Router Store user options
-     * @memberof Router
-     * @member Router._options
-     *
-     */
-    _options: {
-        /**
-         *
-         * Router prevent event default when routes are matched
-         * @memberof Router
-         * @member Router._options.preventDefault
-         *
-         */
-        preventDefault: false
-    },
-    
-    /**
-     *
      * Router init constructor method
      * @memberof Router
      * @method Router.init
@@ -3252,13 +3185,52 @@ Router.prototype = {
     init: function ( options ) {
         var self = this;
         
-        // Handle router options
-        if ( options.preventDefault !== undefined ) {
-            this._options.preventDefault = options.preventDefault;
-        }
+        /**
+         *
+         * Internal MatchRoute instance
+         * @memberof Router
+         * @member _matcher
+         *
+         */
+        this._matcher = new MatchRoute();
         
-        // Pass options to pushstate
+        /**
+         *
+         * Internal PushState instance
+         * @memberof Router
+         * @member _pusher
+         *
+         */
         this._pusher = new PushState( options );
+        
+        /**
+         *
+         * Event handling callbacks
+         * @memberof Router
+         * @member _callbacks
+         *
+         */
+        this._callbacks = {
+            get: []
+        };
+        
+        /**
+         *
+         * Router Store user options
+         * @memberof Router
+         * @member Router._options
+         *
+         */
+        this._options = {
+            /**
+             *
+             * Router prevent event default when routes are matched
+             * @memberof Router
+             * @member Router._options.preventDefault
+             *
+             */
+            preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
+        };
         
         // Bind GET requests to links
         if ( document.addEventListener ) {
@@ -3434,96 +3406,6 @@ Stagger.prototype = {
     
     /**
      *
-     * Step callback
-     * @memberof Stagger
-     * @member Stagger._step
-     *
-     */
-    _step: null,
-    
-    /**
-     *
-     * When iteration callbacks
-     * @memberof Stagger
-     * @member Stagger._when
-     *
-     */
-    _when: {},
-    
-    /**
-     *
-     * Done callback
-     * @memberof Stagger
-     * @member Stagger._done
-     *
-     */
-    _done: null,
-    
-    /**
-     *
-     * Timeout delay
-     * @memberof Stagger
-     * @member Stagger._delay
-     *
-     */
-    _delay: 250,
-    
-    /**
-     *
-     * Current step iteration
-     * @memberof Stagger
-     * @member Stagger._current
-     *
-     */
-    _current: 0,
-    
-    /**
-     *
-     * Number of step occurrences
-     * @memberof Stagger
-     * @member Stagger._occurrences
-     *
-     */
-    _occurrences: 0,
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof Stagger
-     * @member Stagger._timeout
-     *
-     */
-    _timeout: null,
-    
-    /**
-     *
-     * Paused flag
-     * @memberof Stagger
-     * @member Stagger._paused
-     *
-     */
-    _paused: false,
-    
-    /**
-     *
-     * Started iteration flag
-     * @memberof Stagger
-     * @member Stagger._started
-     *
-     */
-    _started: false,
-    
-    /**
-     *
-     * Resolved iteration flag
-     * @memberof Stagger
-     * @member Stagger._resolved
-     *
-     */
-    _resolved: false,
-    
-    /**
-     *
      * Stagger init constructor method
      * @memberof Stagger
      * @method Stagger.init
@@ -3536,9 +3418,95 @@ Stagger.prototype = {
      *
      */
     init: function ( options ) {
-        this._delay = options.delay || this._delay;
-        this._occurrences = options.occurrences;
-        this._paused = options.paused || this._paused;
+        /**
+         *
+         * Step callback
+         * @memberof Stagger
+         * @member Stagger._step
+         *
+         */
+        this._step = null;
+        
+        /**
+         *
+         * When iteration callbacks
+         * @memberof Stagger
+         * @member Stagger._when
+         *
+         */
+        this._when = {};
+        
+        /**
+         *
+         * Done callback
+         * @memberof Stagger
+         * @member Stagger._done
+         *
+         */
+        this._done = null;
+        
+        /**
+         *
+         * Timeout delay
+         * @memberof Stagger
+         * @member Stagger._delay
+         *
+         */
+        this._delay = options.delay || 250;
+        
+        /**
+         *
+         * Current step iteration
+         * @memberof Stagger
+         * @member Stagger._current
+         *
+         */
+        this._current = 0;
+        
+        /**
+         *
+         * Number of step occurrences
+         * @memberof Stagger
+         * @member Stagger._occurrences
+         *
+         */
+        this._occurrences = options.occurrences || 0;
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof Stagger
+         * @member Stagger._timeout
+         *
+         */
+        this._timeout = null;
+        
+        /**
+         *
+         * Paused flag
+         * @memberof Stagger
+         * @member Stagger._paused
+         *
+         */
+        this._paused = options.paused || false;
+        
+        /**
+         *
+         * Started iteration flag
+         * @memberof Stagger
+         * @member Stagger._started
+         *
+         */
+        this._started = false;
+        
+        /**
+         *
+         * Resolved iteration flag
+         * @memberof Stagger
+         * @member Stagger._resolved
+         *
+         */
+        this._resolved = false;
         
         if ( !this._started && !this._paused ) {
             this.start();
@@ -3740,108 +3708,6 @@ TouchMe.prototype = {
     
     /**
      *
-     * TouchMe events across entire start/move/end stack
-     * @memberof TouchMe
-     * @member TouchMe._events
-     *
-     */
-    _events: {},
-    
-    /**
-     *
-     * TouchMe touches tracking object
-     * @memberof TouchMe
-     * @member TouchMe._touches
-     *
-     */
-    _touches: {},
-    
-    /**
-     *
-     * TouchMe gestures array
-     * @memberof TouchMe
-     * @member TouchMe._gestures
-     *
-     */
-    _gestures: [],
-    
-    /**
-     *
-     * TouchMe event handlers object
-     * @memberof TouchMe
-     * @member TouchMe._handlers
-     *
-     */
-    _handlers: {},
-    
-    /**
-     *
-     * TouchMe the last swipe registered
-     * @memberof TouchMe
-     * @member TouchMe._lastSwipe
-     *
-     */
-    _lastSwipe: "",
-    
-    /**
-     *
-     * TouchMe the last touch registered
-     * @memberof TouchMe
-     * @member TouchMe._lastTouch
-     *
-     */
-    _lastTouch: 0,
-    
-    /**
-     *
-     * TouchMe threshold within which to register gestures
-     * @memberof TouchMe
-     * @member TouchMe._threshold
-     *
-     */
-    _threshold: 60,
-    
-    /**
-     *
-     * TouchMe timestamp of when touchstart happened
-     * @memberof TouchMe
-     * @member TouchMe._tapstart
-     *
-     */
-    _tapstart: null,
-    
-    /**
-     *
-     * TouchMe window.scrollY at time of touchstart
-     * @memberof TouchMe
-     * @member TouchMe._windowScrollY
-     *
-     */
-    _windowScrollY: 0,
-    
-    /**
-     *
-     * TouchMe Flag if touch is happening
-     * @memberof TouchMe
-     * @member TouchMe._isTouchDown
-     *
-     */
-    _isTouchDown: false,
-    
-    /**
-     *
-     * TouchMe Store user options
-     * @memberof TouchMe
-     * @member TouchMe._options
-     *
-     */
-    _options: {
-        preventDefault: true,
-        preventMouseEvents: false
-    },
-    
-    /**
-     *
      * TouchMe init constructor method
      * @memberof TouchMe
      * @method TouchMe.init
@@ -3851,12 +3717,107 @@ TouchMe.prototype = {
     init: function ( options ) {
         var self = this;
         
-        // Merge options with defaults
-        for ( var i in this._options ) {
-            if ( options && (typeof options[ i ] !== undefined) ) {
-                this._options[ i ] = options[ i ];
-            }
-        }
+        /**
+         *
+         * TouchMe events across entire start/move/end stack
+         * @memberof TouchMe
+         * @member TouchMe._events
+         *
+         */
+        this._events = {};
+        
+        /**
+         *
+         * TouchMe touches tracking object
+         * @memberof TouchMe
+         * @member TouchMe._touches
+         *
+         */
+        this._touches = {};
+        
+        /**
+         *
+         * TouchMe gestures array
+         * @memberof TouchMe
+         * @member TouchMe._gestures
+         *
+         */
+        this._gestures = [];
+        
+        /**
+         *
+         * TouchMe event handlers object
+         * @memberof TouchMe
+         * @member TouchMe._handlers
+         *
+         */
+        this._handlers = {};
+        
+        /**
+         *
+         * TouchMe the last swipe registered
+         * @memberof TouchMe
+         * @member TouchMe._lastSwipe
+         *
+         */
+        this._lastSwipe = "";
+        
+        /**
+         *
+         * TouchMe the last touch registered
+         * @memberof TouchMe
+         * @member TouchMe._lastTouch
+         *
+         */
+        this._lastTouch = 0;
+        
+        /**
+         *
+         * TouchMe threshold within which to register gestures
+         * @memberof TouchMe
+         * @member TouchMe._threshold
+         *
+         */
+        this._threshold = 60;
+        
+        /**
+         *
+         * TouchMe timestamp of when touchstart happened
+         * @memberof TouchMe
+         * @member TouchMe._tapstart
+         *
+         */
+        this._tapstart = null;
+        
+        /**
+         *
+         * TouchMe window.scrollY at time of touchstart
+         * @memberof TouchMe
+         * @member TouchMe._windowScrollY
+         *
+         */
+        this._windowScrollY = 0;
+        
+        /**
+         *
+         * TouchMe Flag if touch is happening
+         * @memberof TouchMe
+         * @member TouchMe._isTouchDown
+         *
+         */
+        this._isTouchDown = false;
+        
+        /**
+         *
+         * TouchMe Store user options
+         * @memberof TouchMe
+         * @member TouchMe._options
+         *
+         */
+        this._options = {
+            preventDefault: ( typeof options.preventDefault !== undefined ) ? options.preventDefault : true,
+            preventMouseEvents: (options.preventMouseEvents || false)
+        };
         
         // Apply touch events, using bubbling, not capturing
         document.addEventListener( "touchstart", function ( e ) { self._onTouchStart( this, e ); }, false );

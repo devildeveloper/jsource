@@ -75,51 +75,6 @@ MediaBox.prototype = {
     
     /**
      *
-     * MediaBox supports
-     * @memberof MediaBox
-     * @member MediaBox._supported
-     *
-     */
-    _supported: {},
-    
-    /**
-     *
-     * MediaBox information for each channel
-     * @memberof MediaBox
-     * @member MediaBox._channels
-     *
-     */
-    _channels: {},
-    
-    /**
-     *
-     * MediaBox holds all audio tracks
-     * @memberof MediaBox
-     * @member MediaBox._audio
-     *
-     */
-    _audio: {},
-    
-    /**
-     *
-     * MediaBox holds all video tracks
-     * @memberof MediaBox
-     * @member MediaBox._video
-     *
-     */
-    _video: {},
-    
-    /**
-     *
-     * MediaBox boolean to stop/start all audio
-     * @memberof MediaBox
-     * @member MediaBox._audioPaused
-     *
-     */
-    _audioPaused: false,
-    
-    /**
-     *
      * MediaBox init constructor method
      * @memberof MediaBox
      * @method MediaBox.init
@@ -127,6 +82,51 @@ MediaBox.prototype = {
      */
     init: function () {
         var self = this;
+        
+        /**
+         *
+         * MediaBox information for each channel
+         * @memberof MediaBox
+         * @member MediaBox._channels
+         *
+         */
+        this._channels = {};
+        
+        /**
+         *
+         * MediaBox holds all audio tracks
+         * @memberof MediaBox
+         * @member MediaBox._audio
+         *
+         */
+        this._audio = {};
+        
+        /**
+         *
+         * MediaBox holds all video tracks
+         * @memberof MediaBox
+         * @member MediaBox._video
+         *
+         */
+        this._video = {};
+        
+        /**
+         *
+         * MediaBox boolean to stop/start all audio
+         * @memberof MediaBox
+         * @member MediaBox._audioPaused
+         *
+         */
+        this._audioPaused = false;
+        
+        /**
+         *
+         * MediaBox supports
+         * @memberof MediaBox
+         * @member MediaBox._supported
+         *
+         */
+        this._supported = {};
         
         /**
          *

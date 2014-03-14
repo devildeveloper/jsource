@@ -28,51 +28,6 @@ Isearch.prototype = {
     
     /**
      *
-     * Flag for input escaping
-     * @memberof Isearch
-     * @member Isearch.escapeInputs
-     *
-     */
-    escapeInputs: false,
-    
-    /**
-     *
-     * Flag for only matching from front of input
-     * @memberof Isearch
-     * @member Isearch.matchFront
-     *
-     */
-    matchFront: false,
-    
-    /**
-     *
-     * Flag for matching anywhere in input
-     * @memberof Isearch
-     * @member Isearch.matchAny
-     *
-     */
-    matchAny: true,
-    
-    /**
-     *
-     * Flag for case sensitivity on matching
-     * @memberof Isearch
-     * @member Isearch.matchCase
-     *
-     */
-    matchCase: false,
-    
-    /**
-     *
-     * Flag for sorting results alphabetically
-     * @memberof Isearch
-     * @member Isearch.alphaResults
-     *
-     */
-    alphaResults: false,
-    
-    /**
-     *
      * Expression for characters to escape from input
      * @memberof Isearch
      * @member Isearch._rEscChars
@@ -89,6 +44,52 @@ Isearch.prototype = {
      *
      */
     init: function ( options ) {
+        /**
+         *
+         * Flag for input escaping
+         * @memberof Isearch
+         * @member Isearch.escapeInputs
+         *
+         */
+        this.escapeInputs = false;
+        
+        /**
+         *
+         * Flag for only matching from front of input
+         * @memberof Isearch
+         * @member Isearch.matchFront
+         *
+         */
+        this.matchFront = false;
+        
+        /**
+         *
+         * Flag for matching anywhere in input
+         * @memberof Isearch
+         * @member Isearch.matchAny
+         *
+         */
+        this.matchAny = true;
+        
+        /**
+         *
+         * Flag for case sensitivity on matching
+         * @memberof Isearch
+         * @member Isearch.matchCase
+         *
+         */
+        this.matchCase = false;
+        
+        /**
+         *
+         * Flag for sorting results alphabetically
+         * @memberof Isearch
+         * @member Isearch.alphaResults
+         *
+         */
+        this.alphaResults = false;
+        
+        // Set all option overrides at once
         for ( var option in options ) {
             this.set( option, options[ option ] );
         }

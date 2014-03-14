@@ -53,39 +53,39 @@ KonamiCode.prototype = {
     
     /**
      *
-     * Timeout between key inputs to reset
-     * @memberof KonamiCode
-     * @member KonamiCode._delay
-     *
-     */
-    _delay: 500,
-    
-    /**
-     *
-     * All supplied callbacks to this instance
-     * @memberof KonamiCode
-     * @member KonamiCode._callbacks
-     *
-     */
-    _callbacks: [],
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof KonamiCode
-     * @member KonamiCode._timeout
-     *
-     */
-    _timeout: null,
-    
-    /**
-     *
      * KonamiCode init constructor method
      * @memberof KonamiCode
      * @method KonamiCode.init
      *
      */
     init: function () {
+        /**
+         *
+         * Timeout between key inputs to reset
+         * @memberof KonamiCode
+         * @member KonamiCode._delay
+         *
+         */
+        this._delay = 500;
+        
+        /**
+         *
+         * All supplied callbacks to this instance
+         * @memberof KonamiCode
+         * @member KonamiCode._callbacks
+         *
+         */
+        this._callbacks = [];
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof KonamiCode
+         * @member KonamiCode._timeout
+         *
+         */
+        this._timeout = null;
+        
         var code = "",
             self = this,
             handler = function ( e ) {

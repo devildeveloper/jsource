@@ -79,14 +79,6 @@ MatchRoute.prototype = {
         slug: /^[A-Za-z]+[A-Za-z0-9-_.]*$/
     },
     
-    /**
-     *
-     * The routes config array
-     * @memberof MatchRoute
-     * @member MatchRoute._routes
-     *
-     */
-    _routes: null,
     
     /**
      *
@@ -97,6 +89,13 @@ MatchRoute.prototype = {
      *
      */
     init: function ( routes ) {
+        /**
+         *
+         * The routes config array
+         * @memberof MatchRoute
+         * @member MatchRoute._routes
+         *
+         */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
     },
     

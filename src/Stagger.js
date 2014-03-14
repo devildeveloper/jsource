@@ -28,96 +28,6 @@ Stagger.prototype = {
     
     /**
      *
-     * Step callback
-     * @memberof Stagger
-     * @member Stagger._step
-     *
-     */
-    _step: null,
-    
-    /**
-     *
-     * When iteration callbacks
-     * @memberof Stagger
-     * @member Stagger._when
-     *
-     */
-    _when: {},
-    
-    /**
-     *
-     * Done callback
-     * @memberof Stagger
-     * @member Stagger._done
-     *
-     */
-    _done: null,
-    
-    /**
-     *
-     * Timeout delay
-     * @memberof Stagger
-     * @member Stagger._delay
-     *
-     */
-    _delay: 250,
-    
-    /**
-     *
-     * Current step iteration
-     * @memberof Stagger
-     * @member Stagger._current
-     *
-     */
-    _current: 0,
-    
-    /**
-     *
-     * Number of step occurrences
-     * @memberof Stagger
-     * @member Stagger._occurrences
-     *
-     */
-    _occurrences: 0,
-    
-    /**
-     *
-     * Timeout reference
-     * @memberof Stagger
-     * @member Stagger._timeout
-     *
-     */
-    _timeout: null,
-    
-    /**
-     *
-     * Paused flag
-     * @memberof Stagger
-     * @member Stagger._paused
-     *
-     */
-    _paused: false,
-    
-    /**
-     *
-     * Started iteration flag
-     * @memberof Stagger
-     * @member Stagger._started
-     *
-     */
-    _started: false,
-    
-    /**
-     *
-     * Resolved iteration flag
-     * @memberof Stagger
-     * @member Stagger._resolved
-     *
-     */
-    _resolved: false,
-    
-    /**
-     *
      * Stagger init constructor method
      * @memberof Stagger
      * @method Stagger.init
@@ -130,9 +40,95 @@ Stagger.prototype = {
      *
      */
     init: function ( options ) {
-        this._delay = options.delay || this._delay;
-        this._occurrences = options.occurrences;
-        this._paused = options.paused || this._paused;
+        /**
+         *
+         * Step callback
+         * @memberof Stagger
+         * @member Stagger._step
+         *
+         */
+        this._step = null;
+        
+        /**
+         *
+         * When iteration callbacks
+         * @memberof Stagger
+         * @member Stagger._when
+         *
+         */
+        this._when = {};
+        
+        /**
+         *
+         * Done callback
+         * @memberof Stagger
+         * @member Stagger._done
+         *
+         */
+        this._done = null;
+        
+        /**
+         *
+         * Timeout delay
+         * @memberof Stagger
+         * @member Stagger._delay
+         *
+         */
+        this._delay = options.delay || 250;
+        
+        /**
+         *
+         * Current step iteration
+         * @memberof Stagger
+         * @member Stagger._current
+         *
+         */
+        this._current = 0;
+        
+        /**
+         *
+         * Number of step occurrences
+         * @memberof Stagger
+         * @member Stagger._occurrences
+         *
+         */
+        this._occurrences = options.occurrences || 0;
+        
+        /**
+         *
+         * Timeout reference
+         * @memberof Stagger
+         * @member Stagger._timeout
+         *
+         */
+        this._timeout = null;
+        
+        /**
+         *
+         * Paused flag
+         * @memberof Stagger
+         * @member Stagger._paused
+         *
+         */
+        this._paused = options.paused || false;
+        
+        /**
+         *
+         * Started iteration flag
+         * @memberof Stagger
+         * @member Stagger._started
+         *
+         */
+        this._started = false;
+        
+        /**
+         *
+         * Resolved iteration flag
+         * @memberof Stagger
+         * @member Stagger._resolved
+         *
+         */
+        this._resolved = false;
         
         if ( !this._started && !this._paused ) {
             this.start();
