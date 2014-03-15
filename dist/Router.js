@@ -942,6 +942,33 @@ Router.prototype = {
     },
     
     /**
+     *
+     * Router match an element to a selector
+     * @memberof Router
+     * @method Router._matchElement
+     * @param {object} el the element
+     * @param {string} selector the selector to match
+     * @returns element OR null
+     *
+     */
+    _matchElement: function ( el, selector ) {
+        var method = ( el.matches ) ? "matches" : ( el.webkitMatchesSelector ) ? "webkitMatchesSelector" : ( el.mozMatchesSelector ) ? "mozMatchesSelector" : ( el.msMatchesSelector ) ? "msMatchesSelector" : ( el.oMatchesSelector ) ? "oMatchesSelector" : null;
+        
+        // Try testing the element agains the selector
+        if ( method && el[ method ].call( el, selector ) ) {
+            return el;
+        
+        // Keep walking up the DOM if we can    
+        } else if ( el !== document.documentElement ) {
+            return this._matchElement( el.parentNode, selector );
+        
+        // Otherwise we should not execute an event    
+        } else {
+            return null;
+        }
+    },
+    
+    /**
      * GET click event handler
      * @memberof Router
      * @method _handler
@@ -949,12 +976,10 @@ Router.prototype = {
      *
      */
     _handler: function ( e ) {
-        var self = this;
+        var self = this,
+            elem = this._matchElement( e.target, "a" );
         
-        // Only capture <a> elements
-        if ( e.target.tagName.toLowerCase() === "a" ) {
-            var elem = e.target;
-            
+        if ( elem ) {
             if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
                 this._preventDefault( e );
                 
