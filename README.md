@@ -16,13 +16,13 @@ These javascript resources can be used standalone or with one another. They are 
  - [Isearch](https://github.com/kitajchuk/jsource/blob/master/src/Isearch.js) - Expression matching for term lists
  - [KonamiCode](https://github.com/kitajchuk/jsource/blob/master/src/KonamiCode.js) - A konami code easter egg handler
  - [MatchRoute](https://github.com/kitajchuk/jsource/blob/master/src/MatchRoute.js) - A wildcard route matcher
- - [MediaBox](https://github.com/kitajchuk/jsource/blob/master/src/MediaBox.js) - And audio and video box manager
- - [PushState](https://github.com/kitajchuk/jsource/blob/master/src/PushState.js) - A simple pushState Class to handle history
- - [Router](https://github.com/kitajchuk/jsource/blob/master/src/Router.js) - Handles basic get routing
- - [scroll2](https://github.com/kitajchuk/jsource/blob/master/src/scroll2.js) - A basic scrollto function without all the fuss
+ - [MediaBox](https://github.com/kitajchuk/jsource/blob/master/src/MediaBox.js) - An audio and video box manager
+ - [PushState](https://github.com/kitajchuk/jsource/blob/master/src/PushState.js) - A simple history pushState class utility
+ - [Router](https://github.com/kitajchuk/jsource/blob/master/src/Router.js) - Handles basic GET routing
+ - [scroll2](https://github.com/kitajchuk/jsource/blob/master/src/scroll2.js) - A basic window scroll-to function
  - [Stagger](https://github.com/kitajchuk/jsource/blob/master/src/Stagger.js) - A stepped timeout manager
  - [throttle](https://github.com/kitajchuk/jsource/blob/master/src/throttle.js) - The classic throttle pattern
- - [TouchMe](https://github.com/kitajchuk/jsource/blob/master/src/TouchMe.js) - A lightweight touch gesture event handler
+ - [TouchMe](https://github.com/kitajchuk/jsource/blob/master/src/TouchMe.js) - A lightweight touch gesture class utility
  - [Tween](https://github.com/kitajchuk/jsource/blob/master/src/Tween.js) - A simple tween class using requestAnimationFrame
 
 
