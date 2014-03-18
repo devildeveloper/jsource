@@ -1,6 +1,6 @@
 /*!
  *
- * A promising timeout utility
+ * A stepped timeout manager
  *
  * @Stagger
  * @author: kitajchuk

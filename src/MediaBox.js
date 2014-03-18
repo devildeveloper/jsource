@@ -1,6 +1,6 @@
 /*!
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  *
  * @MediaBox
  * @author: kitajchuk
@@ -14,7 +14,7 @@
 
 /**
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  * @constructor MediaBox
  * @requires Easing
  * @requires Tween
