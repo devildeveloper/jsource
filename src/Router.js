@@ -105,7 +105,7 @@ Router.prototype = {
         
         // Listen for pop events
         setTimeout(function () {
-            self._pusher.onPopState(function ( url, data ) {
+            self._pusher.on( "popstate", function ( url, data ) {
                 self._fire( "get", url, data );
             });
             

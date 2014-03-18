@@ -16,6 +16,12 @@
 /**
  *
  * A simple pushState Class
+ * Supported events with .on():
+ * <ul>
+ * <li>popstate</li>
+ * <li>beforestate</li>
+ * <li>afterstate</li>
+ * </ul>
  * @constructor PushState
  * @memberof! <global>
  *
@@ -138,11 +144,7 @@ PushState.prototype = {
          * @member _callbacks
          *
          */
-        this._callbacks = {
-            pop: [],
-            before: [],
-            after: []
-        };
+        this._callbacks = {};
         
         /**
          *
@@ -174,6 +176,28 @@ PushState.prototype = {
     
     /**
      *
+     * Bind a callback to an event
+     * @memberof PushState
+     * @method on
+     * @param {string} event The event to bind to
+     * @param {function} callback The function to call
+     *
+     */
+    on: function ( event, callback ) {
+        if ( typeof callback === "function" ) {
+            if ( !this._callbacks[ event ] ) {
+                this._callbacks[ event ] = [];
+            }
+            
+            callback._pushstateTime = Date.now();
+            callback._pushstateType = event;
+            
+            this._callbacks[ event ].push( callback );
+        }
+    },
+    
+    /**
+     *
      * Push onto the History state
      * @memberof PushState
      * @method push
@@ -184,7 +208,7 @@ PushState.prototype = {
     push: function ( url, callback ) {
         var self = this;
         
-        this._fire( "before" );
+        this._fire( "beforestate" );
         
         // Break on cached
         if ( this._stateCached( url ) ) {
@@ -203,7 +227,7 @@ PushState.prototype = {
                 this._getUrl( url, function ( response ) {
                     self._push( url );
     
-                    self._fire( "after", response );
+                    self._fire( "afterstate", response );
                     
                     if ( typeof callback === "function" ) {
                         callback( response );
@@ -213,7 +237,7 @@ PushState.prototype = {
             } else {
                 this._push( url );
 
-                this._fire( "after" );
+                this._fire( "afterstate" );
                 
                 if ( typeof callback === "function" ) {
                     callback();
@@ -224,49 +248,14 @@ PushState.prototype = {
     
     /**
      *
-     * Bind a callback to run before state is pushed
-     * @memberof PushState
-     * @method onBeforeState
-     * @param {function} callback function to call
-     *
-     */
-    onBeforeState: function ( callback ) {
-        this._bind( "before", callback );
-    },
-    
-    /**
-     *
-     * Bind a callback to run after state is pushed
-     * @memberof PushState
-     * @method onBeforeState
-     * @param {function} callback function to call
-     *
-     */
-    onAfterState: function ( callback ) {
-        this._bind( "after", callback );
-    },
-    
-    /**
-     *
-     * Bind a callback to run when the popstate event is fired
-     * @memberof PushState
-     * @method onBeforeState
-     * @param {function} callback function to call
-     *
-     */
-    onPopState: function ( callback ) {
-        this._bind( "pop", callback );
-    },
-    
-    /**
-     *
      * Manually go back in history state
      * @memberof PushState
      * @method goBack
      *
      */
     goBack: function () {
-        this._history.back();
+        window.history.back();
+        
         this._fire( "back" );
     },
     
@@ -278,7 +267,8 @@ PushState.prototype = {
      *
      */
     goForward: function () {
-        this._history.forward();
+        window.history.forward();
+        
         this._fire( "forward" );
     },
     
@@ -387,21 +377,6 @@ PushState.prototype = {
     
     /**
      *
-     * Bind a callback to an event
-     * @memberof PushState
-     * @method _bind
-     * @param {string} event The event to bind to
-     * @param {function} callback The function to call
-     *
-     */
-    _bind: function ( event, callback ) {
-        if ( this._callbacks[ event ] && typeof callback === "function" ) {
-            this._callbacks[ event ].push( callback );
-        }
-    },
-    
-    /**
-     *
      * Fire an events callbacks
      * @memberof PushState
      * @method _fire
@@ -410,8 +385,10 @@ PushState.prototype = {
      *
      */
     _fire: function ( event, url ) {
-        for ( var i = this._callbacks[ event ].length; i--; ) {
-            this._callbacks[ event ][ i ].apply( this, [].slice.call( arguments, 1 ) );
+        if ( this._callbacks[ event ] ) {
+            for ( var i = this._callbacks[ event ].length; i--; ) {
+                this._callbacks[ event ][ i ].apply( this, [].slice.call( arguments, 1 ) );
+            }
         }
     },
     
@@ -432,11 +409,11 @@ PushState.prototype = {
                 var url = window.location.href.replace( self._rHash, "/" );
                 
                 if ( self._stateCached( url ) ) {
-                    self._fire( "pop", url, self._responses[ url ] );
+                    self._fire( "popstate", url, self._responses[ url ] );
                     
                 } else {
                     self._getUrl( url, function ( response ) {
-                        self._fire( "pop", url, response );
+                        self._fire( "popstate", url, response );
                     });
                 }
             };
