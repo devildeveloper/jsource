@@ -41,6 +41,15 @@ Eventful.prototype = {
     
     /**
      *
+     * Eventful unique ID
+     * @memberof Eventful
+     * @member Eventful._uid
+     *
+     */
+    _uid: 0,
+    
+    /**
+     *
      * Eventful init constructor method
      * @memberof Eventful
      * @method Eventful.init
@@ -65,7 +74,7 @@ Eventful.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._eventfulTime = Date.now();
+            handler._eventfulID = this.getUID();
             handler._eventfulType = event;
             
             this._handlers[ event ].push( handler );
@@ -118,6 +127,20 @@ Eventful.prototype = {
     
     /**
      *
+     * Get a unique ID
+     * @memberof Eventful
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
+    },
+    
+    /**
+     *
      * Eventful internal off method assumes event AND handler are good
      * @memberof Eventful
      * @method Eventful._off
@@ -127,7 +150,7 @@ Eventful.prototype = {
      */
     _off: function ( event, handler ) {
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._eventfulTime === this._handlers[ event ][ i ]._eventfulTime ) {
+            if ( handler._eventfulID === this._handlers[ event ][ i ]._eventfulID ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;

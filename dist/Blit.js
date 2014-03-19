@@ -248,13 +248,13 @@ Blit.prototype = {
         }
         
         this._started = true;
-        this._then = new Date().getTime();
+        this._then = Date.now();
         this._first = this._then;
         
         var self = this,
             blit = function () {
                 self._cycle = raf( blit );
-                self._now = new Date().getTime();
+                self._now = Date.now();
                 self._delta = self._now - self._then;
                 
                 if ( self._delta > self._interval ) {

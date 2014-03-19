@@ -90,6 +90,15 @@ Router.prototype = {
             preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
         };
         
+        /**
+         *
+         * Router unique ID
+         * @memberof Router
+         * @member Router._uid
+         *
+         */
+        this._uid = 0;
+        
         // Bind GET requests to links
         if ( document.addEventListener ) {
             document.addEventListener( "click", function ( e ) {
@@ -166,6 +175,20 @@ Router.prototype = {
         if ( callback._routerRoutes.length === 1 ) {
             this._bind( "get", callback );
         }
+    },
+    
+    /**
+     *
+     * Get a unique ID
+     * @memberof Router
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
     },
     
     /**
@@ -252,7 +275,7 @@ Router.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._routerTime = Date.now();
+            callback._routerID = this.getUID();
             callback._routerType = event;
             
             this._callbacks[ event ].push( callback );

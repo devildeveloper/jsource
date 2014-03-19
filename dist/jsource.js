@@ -248,13 +248,13 @@ Blit.prototype = {
         }
         
         this._started = true;
-        this._then = new Date().getTime();
+        this._then = Date.now();
         this._first = this._then;
         
         var self = this,
             blit = function () {
                 self._cycle = raf( blit );
-                self._now = new Date().getTime();
+                self._now = Date.now();
                 self._delta = self._now - self._then;
                 
                 if ( self._delta > self._interval ) {
@@ -669,6 +669,15 @@ Eventful.prototype = {
     
     /**
      *
+     * Eventful unique ID
+     * @memberof Eventful
+     * @member Eventful._uid
+     *
+     */
+    _uid: 0,
+    
+    /**
+     *
      * Eventful init constructor method
      * @memberof Eventful
      * @method Eventful.init
@@ -693,7 +702,7 @@ Eventful.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._eventfulTime = Date.now();
+            handler._eventfulID = this.getUID();
             handler._eventfulType = event;
             
             this._handlers[ event ].push( handler );
@@ -746,6 +755,20 @@ Eventful.prototype = {
     
     /**
      *
+     * Get a unique ID
+     * @memberof Eventful
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
+    },
+    
+    /**
+     *
      * Eventful internal off method assumes event AND handler are good
      * @memberof Eventful
      * @method Eventful._off
@@ -755,7 +778,7 @@ Eventful.prototype = {
      */
     _off: function ( event, handler ) {
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._eventfulTime === this._handlers[ event ][ i ]._eventfulTime ) {
+            if ( handler._eventfulID === this._handlers[ event ][ i ]._eventfulID ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;
@@ -2837,7 +2860,7 @@ PushState.prototype = {
         
         // Set initial state
         this._states[ url ] = {
-            uid: this._getUid(),
+            uid: this.getUID(),
             cached: false
         };
 
@@ -2860,7 +2883,7 @@ PushState.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._pushstateTime = Date.now();
+            callback._pushstateID = this.getUID();
             callback._pushstateType = event;
             
             this._callbacks[ event ].push( callback );
@@ -2890,7 +2913,7 @@ PushState.prototype = {
         // Push new state    
         } else {
             this._states[ url ] = {
-                uid: this._getUid(),
+                uid: this.getUID(),
                 cached: false
             };
             
@@ -2945,6 +2968,20 @@ PushState.prototype = {
     
     /**
      *
+     * Get a unique ID
+     * @memberof PushState
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
+    },
+    
+    /**
+     *
      * Calls window.history.pushState
      * @memberof PushState
      * @method _push
@@ -2994,19 +3031,6 @@ PushState.prototype = {
             this._states[ url ].cached = true;
             this._responses[ url ] = response;
         }
-    },
-    
-    /**
-     *
-     * Get a unique ID
-     * @memberof PushState
-     * @method _getUid
-     *
-     */
-    _getUid: function () {
-        this._uid = (this._uid + 1);
-        
-        return this._uid;
     },
     
     /**
@@ -3209,6 +3233,15 @@ Router.prototype = {
             preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
         };
         
+        /**
+         *
+         * Router unique ID
+         * @memberof Router
+         * @member Router._uid
+         *
+         */
+        this._uid = 0;
+        
         // Bind GET requests to links
         if ( document.addEventListener ) {
             document.addEventListener( "click", function ( e ) {
@@ -3285,6 +3318,20 @@ Router.prototype = {
         if ( callback._routerRoutes.length === 1 ) {
             this._bind( "get", callback );
         }
+    },
+    
+    /**
+     *
+     * Get a unique ID
+     * @memberof Router
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
     },
     
     /**
@@ -3371,7 +3418,7 @@ Router.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._routerTime = Date.now();
+            callback._routerID = this.getUID();
             callback._routerType = event;
             
             this._callbacks[ event ].push( callback );
@@ -3863,6 +3910,15 @@ TouchMe.prototype = {
             preventMouseEvents: false
         };
         
+        /**
+         *
+         * TouchMe unique ID
+         * @memberof TouchMe
+         * @member TouchMe._uid
+         *
+         */
+        this._uid = 0;
+        
         // Merge options with defaults
         for ( var i in this._options ) {
             if ( options && (typeof options[ i ] !== undefined) ) {
@@ -3899,7 +3955,7 @@ TouchMe.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._touchmeTime = Date.now();
+            handler._touchmeID = this.getUID();
             handler._touchmeSelector = selector;
             handler._touchmeEvent = event;
             
@@ -3922,12 +3978,26 @@ TouchMe.prototype = {
         }
         
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._touchmeTime === this._handlers[ event ][ i ]._touchmeTime ) {
+            if ( handler._touchmeID === this._handlers[ event ][ i ]._touchmeID ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;
             }
         }
+    },
+    
+    /**
+     *
+     * Get a unique ID
+     * @memberof TouchMe
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
     },
     
     /**

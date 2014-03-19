@@ -139,6 +139,15 @@ TouchMe.prototype = {
             preventMouseEvents: false
         };
         
+        /**
+         *
+         * TouchMe unique ID
+         * @memberof TouchMe
+         * @member TouchMe._uid
+         *
+         */
+        this._uid = 0;
+        
         // Merge options with defaults
         for ( var i in this._options ) {
             if ( options && (typeof options[ i ] !== undefined) ) {
@@ -175,7 +184,7 @@ TouchMe.prototype = {
                 this._handlers[ event ] = [];
             }
             
-            handler._touchmeTime = Date.now();
+            handler._touchmeID = this.getUID();
             handler._touchmeSelector = selector;
             handler._touchmeEvent = event;
             
@@ -198,12 +207,26 @@ TouchMe.prototype = {
         }
         
         for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._touchmeTime === this._handlers[ event ][ i ]._touchmeTime ) {
+            if ( handler._touchmeID === this._handlers[ event ][ i ]._touchmeID ) {
                 this._handlers[ event ].splice( i, 1 );
                 
                 break;
             }
         }
+    },
+    
+    /**
+     *
+     * Get a unique ID
+     * @memberof TouchMe
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
     },
     
     /**

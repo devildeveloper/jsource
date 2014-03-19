@@ -166,7 +166,7 @@ PushState.prototype = {
         
         // Set initial state
         this._states[ url ] = {
-            uid: this._getUid(),
+            uid: this.getUID(),
             cached: false
         };
 
@@ -189,7 +189,7 @@ PushState.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._pushstateTime = Date.now();
+            callback._pushstateID = this.getUID();
             callback._pushstateType = event;
             
             this._callbacks[ event ].push( callback );
@@ -219,7 +219,7 @@ PushState.prototype = {
         // Push new state    
         } else {
             this._states[ url ] = {
-                uid: this._getUid(),
+                uid: this.getUID(),
                 cached: false
             };
             
@@ -274,6 +274,20 @@ PushState.prototype = {
     
     /**
      *
+     * Get a unique ID
+     * @memberof PushState
+     * @method getUID
+     * @returns number
+     *
+     */
+    getUID: function () {
+        this._uid = (this._uid + 1);
+        
+        return this._uid;
+    },
+    
+    /**
+     *
      * Calls window.history.pushState
      * @memberof PushState
      * @method _push
@@ -323,19 +337,6 @@ PushState.prototype = {
             this._states[ url ].cached = true;
             this._responses[ url ] = response;
         }
-    },
-    
-    /**
-     *
-     * Get a unique ID
-     * @memberof PushState
-     * @method _getUid
-     *
-     */
-    _getUid: function () {
-        this._uid = (this._uid + 1);
-        
-        return this._uid;
     },
     
     /**
