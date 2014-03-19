@@ -1746,7 +1746,7 @@ window.MatchRoute = MatchRoute;
 })( window );
 /*!
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  *
  * @MediaBox
  * @author: kitajchuk
@@ -1760,7 +1760,7 @@ window.MatchRoute = MatchRoute;
 
 /**
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  * @constructor MediaBox
  * @requires Easing
  * @requires Tween
@@ -3222,13 +3222,39 @@ Router.prototype = {
             });
         }
         
-        // Listen for pop events
-        setTimeout(function () {
-            self._pusher.on( "popstate", function ( url, data ) {
-                self._fire( "get", url, data );
-            });
-            
-        }, 1000 );
+        // Listen for popstate
+        this._pusher.on( "popstate", function ( url, data ) {
+            self._fire( "get", url, data );
+        });
+        
+        // Listen for beforestate
+        this._pusher.on( "beforestate", function () {
+            self._fire( "beforeget" );
+        });
+        
+        // Listen for afterstate
+        this._pusher.on( "afterstate", function () {
+            self._fire( "afterget" );
+        });
+    },
+    
+    /**
+     *
+     * This is merely a wrapper for PushState.on()
+     * It supports "beforeget", and "afterget" events
+     * @memberof Router
+     * @method on
+     * @param {string} event The event to bind to
+     * @param {function} callback The function to call
+     *
+     */
+    on: function ( event, callback ) {
+        // Force "get" event through Router.get()
+        if ( event === "get" ) {
+            return this;
+        }
+        
+        this._bind( event, callback );
     },
     
     /**
@@ -3340,7 +3366,14 @@ Router.prototype = {
      *
      */
     _bind: function ( event, callback ) {
-        if ( this._callbacks[ event ] && typeof callback === "function" ) {
+        if ( typeof callback === "function" ) {
+            if ( !this._callbacks[ event ] ) {
+                this._callbacks[ event ] = [];
+            }
+            
+            callback._routerTime = Date.now();
+            callback._routerType = event;
+            
             this._callbacks[ event ].push( callback );
         }
     },
@@ -3356,8 +3389,11 @@ Router.prototype = {
      *
      */
     _fire: function ( event, url, response ) {
-        if ( this._callbacks[ event ] ) {
-            for ( var i = this._callbacks[ event ].length; i--; ) {
+        var i;
+        
+        // GET events have routes and are special ;-P
+        if ( event === "get" ) {
+            for ( i = this._callbacks[ event ].length; i--; ) {
                 var data = this._matcher.parse( url, this._callbacks[ event ][ i ]._routerRoutes );
                 
                 if ( data.match ) {
@@ -3367,6 +3403,12 @@ Router.prototype = {
                         matches: data.matches
                     });
                 }
+            }
+        
+        // Fires basic timing events "beforeget" / "afterget"    
+        } else if ( this._callbacks[ event ] ) {
+            for ( i = this._callbacks[ event ].length; i--; ) {
+                this._callbacks[ event ][ i ].call( this );
             }
         }
     }
@@ -3380,7 +3422,7 @@ window.Router = Router;
 })( window );
 /*!
  *
- * A promising timeout utility
+ * A stepped timeout manager
  *
  * @Stagger
  * @author: kitajchuk

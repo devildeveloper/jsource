@@ -246,7 +246,7 @@ window.Tween = Tween;
 })( window );
 /*!
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  *
  * @MediaBox
  * @author: kitajchuk
@@ -260,7 +260,7 @@ window.Tween = Tween;
 
 /**
  *
- * Manage audio and video with playback
+ * And audio and video box manager
  * @constructor MediaBox
  * @requires Easing
  * @requires Tween
