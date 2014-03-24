@@ -381,7 +381,7 @@ TouchMe.prototype = {
             return el;
         
         // Keep walking up the DOM if we can    
-        } else if ( el !== document.documentElement ) {
+        } else if ( el !== document.documentElement && el.parentNode ) {
             return this._matchElement( el.parentNode, selector );
         
         // Otherwise we should not execute an event    
