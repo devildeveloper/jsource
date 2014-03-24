@@ -1,6 +1,6 @@
 /*!
  *
- * A lightweight touch gesture event Class
+ * A lightweight, singleton touch event api
  *
  * @TouchMe
  * @author: kitajchuk
@@ -12,15 +12,24 @@
 "use strict";
 
 
+// Singleton
+var _instance = null;
+
+
 /**
  *
- * A touch gesture event handler
+ * A lightweight, singleton touch event api. Events:
+ * <ul>
+ * <li>swipetap</li>
+ * <li>swipeleft</li>
+ * <li>swiperight</li>
+ * </ul>
  * @constructor TouchMe
  * @memberof! <global>
  *
  */
 var TouchMe = function () {
-    return this.init.apply( this, arguments );
+    return (_instance || this.init.apply( this, arguments ));
 };
 
 TouchMe.prototype = {
@@ -36,6 +45,8 @@ TouchMe.prototype = {
      */
     init: function ( options ) {
         var self = this;
+        
+        _instance = this;
         
         /**
          *
