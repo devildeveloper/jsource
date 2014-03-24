@@ -22,7 +22,7 @@ These javascript resources can be used standalone or with one another. They are 
  - [scroll2](https://github.com/kitajchuk/jsource/blob/master/src/scroll2.js) - A basic window scroll-to function
  - [Stagger](https://github.com/kitajchuk/jsource/blob/master/src/Stagger.js) - A stepped timeout manager
  - [throttle](https://github.com/kitajchuk/jsource/blob/master/src/throttle.js) - The classic throttle pattern
- - [TouchMe](https://github.com/kitajchuk/jsource/blob/master/src/TouchMe.js) - A lightweight touch gesture class utility
+ - [TouchMe](https://github.com/kitajchuk/jsource/blob/master/src/TouchMe.js) - A lightweight, singleton touch event api
  - [Tween](https://github.com/kitajchuk/jsource/blob/master/src/Tween.js) - A simple tween class using requestAnimationFrame
 
 
