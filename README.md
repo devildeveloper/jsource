@@ -8,6 +8,8 @@ These javascript resources can be used standalone or with one another. They are 
 
 
 ### Src
+ - [ajax](https://github.com/kitajchuk/jsource/blob/master/src/ajax.js) - Basic XMLHttpRequest handling using Promises
+   - You likely need a promise polyfill in the meantime, so [look no further](https://github.com/jakearchibald/es6-promise).
  - [Blit](https://github.com/kitajchuk/jsource/blob/master/src/Blit.js) - A simple gamecycle engine
  - [debounce](https://github.com/kitajchuk/jsource/blob/master/src/debounce.js) - The classic debounce pattern
  - [Easing](https://github.com/kitajchuk/jsource/blob/master/src/Easing.js) - A base set of easing methods
