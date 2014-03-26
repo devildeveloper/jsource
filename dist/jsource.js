@@ -4506,7 +4506,8 @@ var ajax = function ( url, type, options ) {
                             response = JSON.parse( response );
                         }
                         
-                        resolve( response );
+                        // Supply original xhr object as well...
+                        resolve( response, this );
                         
                     } catch ( error ) {
                         reject( error );
@@ -4534,6 +4535,18 @@ window.ajax = ajax;
 
 
 })( window );
+var cookie = ( document.cookie ) ? document.cookie.split( "; " ) : [],
+    cookies = {};
+
+for ( var i = cookie.length; i--; ) {
+    var parts = cookie[ i ].split( "=" ),
+        key = parts.shift(),
+        val = parts.join( "=" );
+    
+    cookies[ key ] = val;
+}
+
+console.log( "cookies", cookies );
 /*!
  *
  * Debounce methods

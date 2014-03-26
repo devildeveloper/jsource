@@ -100,7 +100,8 @@ var ajax = function ( url, type, options ) {
                             response = JSON.parse( response );
                         }
                         
-                        resolve( response );
+                        // Supply original xhr object as well...
+                        resolve( response, this );
                         
                     } catch ( error ) {
                         reject( error );
