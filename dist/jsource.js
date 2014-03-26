@@ -4507,7 +4507,10 @@ var ajax = function ( url, type, options ) {
                         }
                         
                         // Supply original xhr object as well...
-                        resolve( response, this );
+                        resolve({
+                            data: response,
+                            xhr: this
+                        });
                         
                     } catch ( error ) {
                         reject( error );
