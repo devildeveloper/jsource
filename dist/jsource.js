@@ -3791,6 +3791,7 @@ var _instance = null;
  *
  * A lightweight, singleton touch event api. Events:
  * <ul>
+ * <li>swipemove</li>
  * <li>swipetap</li>
  * <li>swipeleft</li>
  * <li>swiperight</li>
@@ -4287,6 +4288,9 @@ TouchMe.prototype = {
                 this._gestures.push( currSwipe );
             }
         }
+        
+        // Call all "swipemove" events as they are just touchmoves
+        this._call( "swipemove", el, e );
     },
     
     /**
@@ -4410,8 +4414,8 @@ window.Tween = Tween;
  *
  * @ajax
  * @author: kitajchuk
- *
  * @notes:
+ *
  * Ready State Description
  * 0 The request is not initialized
  * 1 The request has been set up
@@ -4425,6 +4429,9 @@ window.Tween = Tween;
  * blob
  * document
  *
+ * Upcoming XMLHttpRequest Level 2
+ * json
+ *
  */
 (function ( window, undefined ) {
 
@@ -4435,6 +4442,8 @@ window.Tween = Tween;
 /**
  *
  * Basic XMLHttpRequest handling using Promises
+ * @todo
+ * Support options.contentType for headers
  * @example
  * // Handling resolved / rejected states
  * ajax( "/some/api", "POST" ).then(
@@ -4449,53 +4458,77 @@ window.Tween = Tween;
  * @memberof! <global>
  * @method ajax
  * @param {string} url The endpoint to hit
- * @param {string} type The requeset method ( GET / POST )
+ * @param {string} method The requeset method ( GET / POST )
  * @param {object} options The options dataset
  * <ul>
  * <li>data - what is sent to the server</li>
  * <li>responseType - set the responseType on the xhr object</li>
+ * <li>contentType - set the "Content-Type" request header</li>
+ * <li>async - flag request as asynchronous or not</li>
+ * <li>headers - headers to be set using setRequestHeader</li>
  * </ul>
  * @returns new Promise()
  *
  */
-var ajax = function ( url, type, options ) {
+var ajax = function ( url, method, options ) {
     // Normalize options...
     options = options || {};
+    
+    // Request method if not set + uppercased
+    // @default: method is GET
+    method = (method || "get").toUpperCase();
     
     // Return request with a promise
     return new Promise(function ( resolve, reject ) {
         var xhr = new XMLHttpRequest(),
-            qsp = [];
+            qsp = [],
+            i;
         
-        // Apply case to request type
-        type = type.toUpperCase();
-        
-        // Format data string
-        for ( var i in options.data ) {
+        // Format data string if it has iterables
+        for ( i in options.data ) {
             qsp.push( i + "=" + options.data[ i ] );
         }
         
-        // Open the request
-        xhr.open( type, url, true );
+        // Open the request as asynchronous
+        // @default: true for async
+        xhr.open( method, url, (options.async || true) );
         
-        // Set content-type header on POSTs
-        if ( type === "POST" ) {
-            xhr.setRequestHeader(
-                "Content-Type",
-                "application/x-www-form-urlencoded"
-            );
+        // Set empty accept header
+        //xhr.setRequestHeader( "Accept", "" );
+        
+        // Set Content-Type request header
+        if ( options.contentType ) {
+            xhr.setRequestHeader( "Content-Type", options.contentType );
+        
+        // Set Content-Type for POST method
+        // @default: application/x-www-form-urlencoded
+        } else if ( method === "POST" ) {
+            xhr.setRequestHeader( "Content-Type", "application/x-www-form-urlencoded" );
         }
+        
+        // Set optional request headers
+        if ( options.headers ) {
+            for ( i in options.headers ) {
+                xhr.setRequestHeader( i, options.headers[ i ] );
+            }
+        }
+        
+        // Set requested with header
+        // @default: XMLHttpRequest since that is all we support here
+        xhr.setRequestHeader( "X-Requested-With", "XMLHttpRequest" );
         
         // Set the responseType
         if ( options.responseType ) {
             options.responseType = options.responseType.toLowerCase();
             
             // JSON will need to be parsed out from plain text
+            // #issue: Webkit has not implemented XMLHttpRequest Level 2 which supports json as a responseType
             xhr.responseType = ( options.responseType === "json" ) ? "text" : options.responseType;
         }
         
         // Apply the readystatechange event
         xhr.onreadystatechange = function ( e ) {
+            // Wait until we can interact with the xhr response
             if ( this.readyState === 4 ) {
                 if ( this.status === 200 ) {
                     try {
@@ -4527,7 +4560,7 @@ var ajax = function ( url, type, options ) {
             reject( new Error( "Network Error" ) );
         };
         
-        // Send the request
+        // Send the request with optional data
         xhr.send( qsp.join( "&" ) );
     });
 };
@@ -4538,6 +4571,7 @@ window.ajax = ajax;
 
 
 })( window );
+/*
 var cookie = ( document.cookie ) ? document.cookie.split( "; " ) : [],
     cookies = {};
 
@@ -4550,6 +4584,7 @@ for ( var i = cookie.length; i--; ) {
 }
 
 console.log( "cookies", cookies );
+*/
 /*!
  *
  * Debounce methods

@@ -20,6 +20,7 @@ var _instance = null;
  *
  * A lightweight, singleton touch event api. Events:
  * <ul>
+ * <li>swipemove</li>
  * <li>swipetap</li>
  * <li>swipeleft</li>
  * <li>swiperight</li>
@@ -516,6 +517,9 @@ TouchMe.prototype = {
                 this._gestures.push( currSwipe );
             }
         }
+        
+        // Call all "swipemove" events as they are just touchmoves
+        this._call( "swipemove", el, e );
     },
     
     /**
