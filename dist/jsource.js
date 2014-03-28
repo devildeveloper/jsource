@@ -3791,10 +3791,14 @@ var _instance = null;
  *
  * A lightweight, singleton touch event api. Events:
  * <ul>
- * <li>swipemove</li>
- * <li>swipetap</li>
- * <li>swipeleft</li>
- * <li>swiperight</li>
+ * <li>touchmove</li>
+ * <li>touchtap</li>
+ * <li>touchpinch</li>
+ * <li>touchpull</li>
+ * <li>touchswipeleft</li>
+ * <li>touchswiperight</li>
+ * <li>touchswipeup</li>
+ * <li>touchswipedown</li>
  * </ul>
  * @constructor TouchMe
  * @memberof! <global>
@@ -3813,6 +3817,12 @@ TouchMe.prototype = {
      * @memberof TouchMe
      * @method TouchMe.init
      * @param {object} options Settings for event handling
+     * <ul>
+     * <li>preventDefault - boolean - default is true</li>
+     * <li>preventMouseEvents - boolean - default is false</li>
+     * <li>touchThreshold - milliseconds - default is 60</li>
+     * <li>touchHoldThreshold - milliseconds - default is 300</li>
+     * </ul>
      *
      */
     init: function ( options ) {
@@ -3876,15 +3886,6 @@ TouchMe.prototype = {
         
         /**
          *
-         * TouchMe threshold within which to register gestures
-         * @memberof TouchMe
-         * @member TouchMe._threshold
-         *
-         */
-        this._threshold = 60;
-        
-        /**
-         *
          * TouchMe timestamp of when touchstart happened
          * @memberof TouchMe
          * @member TouchMe._tapstart
@@ -3919,7 +3920,9 @@ TouchMe.prototype = {
          */
         this._options = {
             preventDefault: true,
-            preventMouseEvents: false
+            preventMouseEvents: false,
+            touchThreshold: 60,
+            touchHoldThreshold: 300
         };
         
         /**
@@ -3938,12 +3941,12 @@ TouchMe.prototype = {
             }
         }
         
-        // Apply touch events, using bubbling, not capturing
+        // Apply touch events
         document.addEventListener( "touchstart", function ( e ) { self._onTouchStart( this, e ); }, false );
         document.addEventListener( "touchmove", function ( e ) { self._onTouchMove( this, e ); }, false );
         document.addEventListener( "touchend", function ( e ) { self._onTouchEnd( this, e ); }, false );
         
-        // Apply mouse events if we can, using bubbling, not capturing
+        // Apply mouse events if we can
         if ( !this._options.preventMouseEvents ) {
             document.addEventListener( "mousedown", function ( e ) { self._onTouchStart( this, e ); }, false );
             document.addEventListener( "mousemove", function ( e ) { self._onTouchMove( this, e ); }, false );
@@ -4060,6 +4063,23 @@ TouchMe.prototype = {
         ret *= 180 / Math.PI;
         
         return ret;
+    },
+    
+    /**
+     *
+     * TouchMe get the distance between 2 touch points
+     * @memberof TouchMe
+     * @method TouchMe.getDistance
+     * @param {number} t1 the first touch
+     * @param {number} t2 the second touch
+     * @returns number
+     *
+     */
+    getDistance: function ( t1, t2 ) {
+        var x = t1.pageX - t2.pageX,
+            y = t1.pageY - t2.pageY;
+        
+        return Math.sqrt( (x * x) + (y * y) );
     },
     
     /**
@@ -4221,6 +4241,10 @@ TouchMe.prototype = {
         }
     },
     
+    _onMultiTouch: function ( el, e ) {
+        // Working on this...
+    },
+    
     /**
      *
      * TouchMe handle the touchmove event
@@ -4231,9 +4255,15 @@ TouchMe.prototype = {
      *
      */
     _onTouchMove: function ( el, e ) {
+        // Like this could ever happen...
         if ( !this._isTouchDown ) {
             return;
         }
+        
+        // Pass off to handle multi-touch
+        //if ( e.touches && e.touches.length > 1 ) {
+        //    return this._onMultiTouch( el, e );
+        //}
         
         var swipeAngle,
             currSwipe,
@@ -4262,14 +4292,15 @@ TouchMe.prototype = {
         );
         
         // Disable document scroll if horizontal swiping
+        // Accounts for currSwipe being either "left" or "right"
         // Accounts for matching the event element to bound event handlers
         // Accounts for ensuring we only ever do this when the angle of swipe is below 45deg
         // Accounts for the enabled option of preventDefault
-        if ( this._isDelegated( e ) && this.is45ish( swipeAngle ) && this._options.preventDefault ) {
+        if ( (currSwipe === "left" || currSwipe === "right") && this._isDelegated( e ) && this.is45ish( swipeAngle ) && this._options.preventDefault ) {
             e.preventDefault();
         }
         
-        if ( distX > this._threshold || distY > this._threshold ) {
+        if ( distX > this._options.touchThreshold || distY > this._options.touchThreshold ) {
             currSwipe = this.getSwipe(
                 this._touches.x1,
                 this._touches.x2,
@@ -4289,8 +4320,8 @@ TouchMe.prototype = {
             }
         }
         
-        // Call all "swipemove" events as they are just touchmoves
-        this._call( "swipemove", el, e );
+        // Call all "touchmove" events as they are just that, touchmoves
+        this._call( "touchmove", el, e );
     },
     
     /**
@@ -4318,24 +4349,25 @@ TouchMe.prototype = {
         // Original touchstart event
         e.originalEvent = this._events.touchstart;
         
-        // Handle tapping
-        if ( !this._gestures.length && scroll < this._threshold ) {
+        // Handle touchtap
+        if ( !this._gestures.length /* && scroll < this._options.touchThreshold */ ) {
             now = Date.now();
             
-            if ( now - this._tapstart >= this._threshold ) {
+            // Between minimum time to trigger event and less than maximum hold negation
+            if ( now - this._tapstart >= this._options.touchThreshold && now - this._tapstart < this._options.touchHoldThreshold ) {
                 e.gestures = ["tap"];
                 
-                this._call( "swipetap", el, e );
+                this._call( "touchtap", el, e );
             }
             
             this._tapstart = null;
         
-        // Handle swiping    
+        // Handle touchswipeleft, touchswiperight, touchswipeup, touchswipedown
         } else {
             for ( var i = 0, len = this._gestures.length; i < len; i++ ) {
                 e.gestures = this._gestures;
                 
-                this._call( "swipe" + this._gestures[ i ], el, e );
+                this._call( "touchswipe" + this._gestures[ i ], el, e );
             }
         }
     }
