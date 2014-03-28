@@ -14,9 +14,6 @@ npm-debug.log
 ########################
 # testing
 ########################
-/dist/cookieJar.js
-/dist/cookieJar.min.js
-/src/cookieJar.js
 /index.html
 /docs
 /test

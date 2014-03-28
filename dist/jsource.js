@@ -3822,6 +3822,8 @@ TouchMe.prototype = {
      * <li>preventMouseEvents - boolean - default is false</li>
      * <li>touchThreshold - milliseconds - default is 60</li>
      * <li>touchHoldThreshold - milliseconds - default is 300</li>
+     * <li>touchPinchThreshold - number - default is 150</li>
+     * <li>touchPullThreshold - number - default is 150</li>
      * </ul>
      *
      */
@@ -3829,15 +3831,6 @@ TouchMe.prototype = {
         var self = this;
         
         _instance = this;
-        
-        /**
-         *
-         * TouchMe events across entire start/move/end stack
-         * @memberof TouchMe
-         * @member TouchMe._events
-         *
-         */
-        this._events = {};
         
         /**
          *
@@ -3913,6 +3906,15 @@ TouchMe.prototype = {
         
         /**
          *
+         * TouchMe Origin distance on multitouchstart
+         * @memberof TouchMe
+         * @member TouchMe._multiOriginDistance
+         *
+         */
+        this._multiOriginDistance = 0;
+        
+        /**
+         *
          * TouchMe Store user options
          * @memberof TouchMe
          * @member TouchMe._options
@@ -3922,7 +3924,9 @@ TouchMe.prototype = {
             preventDefault: true,
             preventMouseEvents: false,
             touchThreshold: 60,
-            touchHoldThreshold: 300
+            touchHoldThreshold: 300,
+            touchPinchThreshold: 150,
+            touchPullThreshold: 150
         };
         
         /**
@@ -4215,9 +4219,10 @@ TouchMe.prototype = {
         // Get current window scroll
         this._windowScrollY = window.scrollY;
         
-        // New event object tracking
-        this._events = {};
-        this._events.touchstart = e;
+        // Pass off to handle multi-touch
+        if ( e.touches && e.touches.length > 1 ) {
+            return this._onMultiTouchStart( el, e );
+        }
         
         if ( e.touches ) {
             this._lastTouch = e.touches.length - 1;
@@ -4241,10 +4246,6 @@ TouchMe.prototype = {
         }
     },
     
-    _onMultiTouch: function ( el, e ) {
-        // Working on this...
-    },
-    
     /**
      *
      * TouchMe handle the touchmove event
@@ -4261,16 +4262,14 @@ TouchMe.prototype = {
         }
         
         // Pass off to handle multi-touch
-        //if ( e.touches && e.touches.length > 1 ) {
-        //    return this._onMultiTouch( el, e );
-        //}
+        if ( e.touches && e.touches.length > 1 ) {
+            return this._onMultiTouchMove( el, e );
+        }
         
         var swipeAngle,
             currSwipe,
             distX,
             distY;
-        
-        this._events.touchmove = e;
         
         if ( e.touches ) {
             this._touches.x2 = e.touches[ this._lastTouch ].pageX;
@@ -4316,11 +4315,12 @@ TouchMe.prototype = {
             
             } else {
                 this._lastSwipe = currSwipe;
-                this._gestures.push( currSwipe );
+                this._gestures.push( "swipe" + currSwipe );
             }
         }
         
-        // Call all "touchmove" events as they are just that, touchmoves
+        // Handle move event
+        // This has to be called here as it is just the native touchmove
         this._call( "touchmove", el, e );
     },
     
@@ -4335,7 +4335,6 @@ TouchMe.prototype = {
      */
     _onTouchEnd: function ( el, e ) {
         this._isTouchDown = false;
-        this._events.touchend = e;
         
         var swipeAngle = this.getSwipeAngle(
                 this._touches.x0,
@@ -4346,28 +4345,78 @@ TouchMe.prototype = {
             scroll = Math.abs( window.scrollY - this._windowScrollY ),
             now;
         
-        // Original touchstart event
-        e.originalEvent = this._events.touchstart;
-        
-        // Handle touchtap
-        if ( !this._gestures.length /* && scroll < this._options.touchThreshold */ ) {
+        // Handle tap event
+        if ( !this._gestures.length ) {
             now = Date.now();
             
             // Between minimum time to trigger event and less than maximum hold negation
             if ( now - this._tapstart >= this._options.touchThreshold && now - this._tapstart < this._options.touchHoldThreshold ) {
-                e.gestures = ["tap"];
-                
-                this._call( "touchtap", el, e );
+                this._gestures.push( "tap" );
             }
             
             this._tapstart = null;
+        }
         
-        // Handle touchswipeleft, touchswiperight, touchswipeup, touchswipedown
-        } else {
-            for ( var i = 0, len = this._gestures.length; i < len; i++ ) {
-                e.gestures = this._gestures;
+        // Now loop over all gestures
+        // Handle swipeleft, swiperight, swipeup, swipedown, pinch, pull, tap
+        for ( var i = 0, len = this._gestures.length; i < len; i++ ) {
+            e.gestures = this._gestures;
+            
+            this._call( "touch" + this._gestures[ i ], el, e );
+        }
+    },
+    
+    /**
+     *
+     * TouchMe handle multi-touch starts
+     * @memberof TouchMe
+     * @method TouchMe._onMultiTouchStart
+     * @param {object} el the element that triggered the event
+     * @param {object} e the event object passed in
+     *
+     */
+    _onMultiTouchStart: function ( el, e ) {
+        // 2 fingers pinch / pull
+        if ( e.touches.length === 2 ) {
+            this._multiOriginDistance = this.getDistance( e.touches[ 0 ], e.touches[ 1 ] );
+        }
+    },
+    
+    /**
+     *
+     * TouchMe handle multi-touch moves
+     * @memberof TouchMe
+     * @method TouchMe._onMultiTouchMove
+     * @param {object} el the element that triggered the event
+     * @param {object} e the event object passed in
+     *
+     */
+    _onMultiTouchMove: function ( el, e ) {
+        // 2 fingers pinch / pull
+        if ( e.touches.length === 2 ) {
+            var currDistance = this.getDistance( e.touches[ 0 ], e.touches[ 1 ] );
+            
+            // Pinching
+            if ( currDistance < this._multiOriginDistance ) {
+                var currPinch = Math.abs( this._multiOriginDistance - currDistance );
                 
-                this._call( "touchswipe" + this._gestures[ i ], el, e );
+                if ( currPinch >= this._options.touchPinchThreshold ) {
+                    // Only allow one pinch per sequence...?
+                    if ( this._gestures.indexOf( "pinch" ) === -1 ) {
+                        this._gestures.push( "pinch" );
+                    }
+                }
+            
+            // Pulling    
+            } else {
+                var currPull = Math.abs( currDistance - this._multiOriginDistance );
+                
+                if ( currPull >= this._options.touchPullThreshold ) {
+                    // Only allow one pull per sequence...?
+                    if ( this._gestures.indexOf( "pull" ) === -1 ) {
+                        this._gestures.push( "pull" );
+                    }
+                }
             }
         }
     }
@@ -4603,20 +4652,6 @@ window.ajax = ajax;
 
 
 })( window );
-/*
-var cookie = ( document.cookie ) ? document.cookie.split( "; " ) : [],
-    cookies = {};
-
-for ( var i = cookie.length; i--; ) {
-    var parts = cookie[ i ].split( "=" ),
-        key = parts.shift(),
-        val = parts.join( "=" );
-    
-    cookies[ key ] = val;
-}
-
-console.log( "cookies", cookies );
-*/
 /*!
  *
  * Debounce methods
