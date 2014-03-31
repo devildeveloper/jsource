@@ -22,7 +22,6 @@ var _instance = null;
  * <ul>
  * <li>touchmove</li>
  * <li>touchtap</li>
- * <li>touchdoubletap</li>
  * <li>touchpinch</li>
  * <li>touchpull</li>
  * <li>touchswipeleft</li>
@@ -54,7 +53,6 @@ TouchMe.prototype = {
      * <li>touchHoldThreshold - milliseconds - default is 300</li>
      * <li>touchPinchThreshold - number - default is 150</li>
      * <li>touchPullThreshold - number - default is 150</li>
-     * <li>touchDoubleTapThreshold - number - default is 300</li>
      * </ul>
      *
      */
@@ -71,16 +69,6 @@ TouchMe.prototype = {
          *
          */
         this._touches = {};
-        
-        /**
-         *
-         * TouchMe timeout for tapping
-         * @memberof TouchMe
-         * @member TouchMe._tapTimeout
-         *
-         */
-        this._tapTimeout = null;
-        this._tapList = [];
         
         /**
          *
@@ -122,10 +110,10 @@ TouchMe.prototype = {
          *
          * TouchMe timestamp of when touchstart happened
          * @memberof TouchMe
-         * @member TouchMe._tapStart
+         * @member TouchMe._tapstart
          *
          */
-        this._tapStart = null;
+        this._tapstart = null;
         
         /**
          *
@@ -167,8 +155,7 @@ TouchMe.prototype = {
             touchThreshold: 60,
             touchHoldThreshold: 300,
             touchPinchThreshold: 150,
-            touchPullThreshold: 150,
-            touchDoubleTapThreshold: 300
+            touchPullThreshold: 150
         };
         
         /**
@@ -456,7 +443,7 @@ TouchMe.prototype = {
         this._lastSwipe = "";
         
         // Get timestamp
-        this._tapStart = Date.now();
+        this._tapstart = Date.now();
         
         // Get current window scroll
         this._windowScrollY = window.scrollY;
@@ -578,67 +565,33 @@ TouchMe.prototype = {
     _onTouchEnd: function ( el, e ) {
         this._isTouchDown = false;
         
-        // The handler that fires events
-        var handler = function () {
-            // Event gestures
-            e.gestures = _instance._gestures;
-            
-            // Now loop over all gestures
-            // Handle swipeleft, swiperight, swipeup, swipedown, pinch, pull, tap, doubletap
-            for ( var i = 0, len = _instance._gestures.length; i < len; i++ ) {
-                _instance._call( "touch" + _instance._gestures[ i ], el, e );
-            }
-        };
+        var swipeAngle = this.getSwipeAngle(
+                this._touches.x0,
+                this._touches.x2,
+                this._touches.y0,
+                this._touches.y2
+            ),
+            scroll = Math.abs( window.scrollY - this._windowScrollY ),
+            now;
         
-        // Always clear tap timeout
-        try {
-            clearTimeout( this._tapTimeout );
-            
-        } catch ( error ) {}
-        
-        // If no gestures, handle tapping
-        // All other gestures are pushed elsewhere
+        // Handle tap event
         if ( !this._gestures.length ) {
-            this._tapList.push({
-                start: this._tapStart,
-                ended: Date.now()
-            });
+            now = Date.now();
             
-            this._tapTimeout = setTimeout(function () {
-                // 0.1 The duration is long enough to be considered a hold
-                if ( (Date.now() - _instance._tapStart) >= _instance._options.touchHoldThreshold ) {
-                    //console.log( "cancel tap" );
-                    
-                    _instance._tapList = [];
-                
-                // 0.2 Another tap is pushed within required timeframe
-                } else if ( _instance._tapList.length === 2 && (_instance._tapList[ 1 ].start - _instance._tapList[ 0 ].ended <= _instance._options.touchDoubleTapThreshold) ) {
-                    // Only allow one doubletap per sequence...?
-                    if ( _instance._gestures.indexOf( "doubletap" ) === -1 ) {
-                        _instance._gestures.push( "doubletap" );
-                    }
-                    
-                    _instance._tapList = [];
-                    
-                    handler();
-                    
-                // 0.3 Single tap within required timeframe    
-                } else if ( _instance._tapList.length === 1 && (Date.now() - _instance._tapStart) >= _instance._options.touchThreshold ) {
-                    // Only allow one tap per sequence...?
-                    if ( _instance._gestures.indexOf( "tap" ) === -1 ) {
-                        _instance._gestures.push( "tap" );
-                    }
-                    
-                    _instance._tapList = [];
-                    
-                    handler();
-                }
-                
-            }, this._options.touchThreshold );
+            // Between minimum time to trigger event and less than maximum hold negation
+            if ( now - this._tapstart >= this._options.touchThreshold && now - this._tapstart < this._options.touchHoldThreshold ) {
+                this._gestures.push( "tap" );
+            }
+            
+            this._tapstart = null;
+        }
         
-        // Just call the handler     
-        } else {
-            handler();
+        // Now loop over all gestures
+        // Handle swipeleft, swiperight, swipeup, swipedown, pinch, pull, tap
+        for ( var i = 0, len = this._gestures.length; i < len; i++ ) {
+            e.gestures = this._gestures;
+            
+            this._call( "touch" + this._gestures[ i ], el, e );
         }
     },
     
