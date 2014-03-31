@@ -607,7 +607,7 @@ TouchMe.prototype = {
             this._tapTimeout = setTimeout(function () {
                 // 0.1 The duration is long enough to be considered a hold
                 if ( (Date.now() - _instance._tapStart) >= _instance._options.touchHoldThreshold ) {
-                    console.log( "cancel tap" );
+                    //console.log( "cancel tap" );
                     
                     _instance._tapList = [];
                 
