@@ -798,7 +798,8 @@ Router.prototype = {
      *
      */
     init: function ( options ) {
-        var self = this;
+        var self = this,
+            isReady = false;
         
         /**
          *
@@ -869,9 +870,18 @@ Router.prototype = {
             });
         }
         
-        // Listen for popstate
+        // Listen for popstate;
         this._pusher.on( "popstate", function ( url, data ) {
-            self._fire( "get", url, data );
+            if ( !isReady ) {
+                isReady = true;
+                
+                self._fire( "get", url, data );
+                
+            } else {
+                self._fire( "beforeget" );
+                self._fire( "get", url, data );
+                self._fire( "afterget" );
+            }
         });
         
         // Listen for beforestate
