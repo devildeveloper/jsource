@@ -870,17 +870,16 @@ Router.prototype = {
             });
         }
         
-        // Listen for popstate;
+        // Listen for popstate
         this._pusher.on( "popstate", function ( url, data ) {
-            if ( !isReady ) {
-                isReady = true;
-                
-                self._fire( "get", url, data );
-                
-            } else {
+            // Hook around browsers firing popstate on pageload
+            if ( isReady ) {
                 self._fire( "beforeget" );
                 self._fire( "get", url, data );
                 self._fire( "afterget" );
+                
+            } else {
+                isReady = true;
             }
         });
         
@@ -892,6 +891,13 @@ Router.prototype = {
         // Listen for afterstate
         this._pusher.on( "afterstate", function () {
             self._fire( "afterget" );
+        });
+        
+        // Manually fire first GET
+        this._pusher.push( window.location.href, function ( response ) {
+            self._fire( "get", window.location.href, response );
+            
+            isReady = true;
         });
     },
     
