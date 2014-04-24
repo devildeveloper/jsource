@@ -221,7 +221,7 @@ Blit.prototype = {
     
     /**
      *
-     * Stope the gamecycle
+     * Stop the gamecycle
      * @memberof Blit
      * @method Blit.stop
      *

@@ -11,6 +11,7 @@ These javascript resources can be used standalone or with one another. They are 
  - [ajax](https://github.com/kitajchuk/jsource/blob/master/src/ajax.js) - Basic XMLHttpRequest handling using Promises
    - You likely need a promise polyfill in the meantime, so [look no further](https://github.com/jakearchibald/es6-promise).
  - [Blit](https://github.com/kitajchuk/jsource/blob/master/src/Blit.js) - A simple gamecycle engine
+ - [Controller](https://github.com/kitajchuk/jsource/blob/master/src/Controller.js) - An extendable Event / Animation cycle manager
  - [debounce](https://github.com/kitajchuk/jsource/blob/master/src/debounce.js) - The classic debounce pattern
  - [Easing](https://github.com/kitajchuk/jsource/blob/master/src/Easing.js) - A base set of easing methods
  - [EventApi](https://github.com/kitajchuk/jsource/blob/master/src/EventApi.js) - A basic cross-browser event api
@@ -20,11 +21,12 @@ These javascript resources can be used standalone or with one another. They are 
  - [MatchRoute](https://github.com/kitajchuk/jsource/blob/master/src/MatchRoute.js) - A wildcard route matcher
  - [MediaBox](https://github.com/kitajchuk/jsource/blob/master/src/MediaBox.js) - An audio and video box manager
  - [PushState](https://github.com/kitajchuk/jsource/blob/master/src/PushState.js) - A simple history pushState class utility
+ - [Resizer](https://github.com/kitajchuk/jsource/blob/master/src/Resizer.js) - Manager for window resize / orientationchange events. Extends Controller
  - [Router](https://github.com/kitajchuk/jsource/blob/master/src/Router.js) - Handles basic GET routing
  - [scroll2](https://github.com/kitajchuk/jsource/blob/master/src/scroll2.js) - A basic window scroll-to function
+ - [Scroller](https://github.com/kitajchuk/jsource/blob/master/src/Scroller.js) - Manager for window scroll events. Extends Controller
  - [Stagger](https://github.com/kitajchuk/jsource/blob/master/src/Stagger.js) - A stepped timeout manager
  - [throttle](https://github.com/kitajchuk/jsource/blob/master/src/throttle.js) - The classic throttle pattern
- - [TouchMe](https://github.com/kitajchuk/jsource/blob/master/src/TouchMe.js) - A lightweight, singleton touch event api
  - [Tween](https://github.com/kitajchuk/jsource/blob/master/src/Tween.js) - A simple tween class using requestAnimationFrame
 
 

@@ -69,16 +69,23 @@ Eventful.prototype = {
      *
      */
     on: function ( event, handler ) {
-        if ( typeof handler === "function" ) {
-            if ( !this._handlers[ event ] ) {
-                this._handlers[ event ] = [];
+        var events = event.split( " " );
+
+        // One unique ID per handler
+        handler._eventfulID = this.getUID();
+
+        for ( var i = events.length; i--; ) {
+            if ( typeof handler === "function" ) {
+                if ( !this._handlers[ events[ i ] ] ) {
+                    this._handlers[ events[ i ] ] = [];
+                }
+
+                // Handler can be stored with multiple events
+                this._handlers[ events[ i ] ].push( handler );
             }
-            
-            handler._eventfulID = this.getUID();
-            handler._eventfulType = event;
-            
-            this._handlers[ event ].push( handler );
         }
+
+        return this;
     },
     
     /**
