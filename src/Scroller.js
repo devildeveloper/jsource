@@ -13,6 +13,12 @@
 "use strict";
 
 
+// Break on no Controller
+if ( !window.Controller ) {
+    throw new Error( "Scroller Class requires Controller Class" );
+}
+
+
 // Current scroll position
 var _currentY = null,
 
@@ -23,7 +29,6 @@ var _currentY = null,
  *
  * Window scroll event controller
  * @constructor Scroller
- * @requires Controller
  * @memberof! <global>
  *
  */

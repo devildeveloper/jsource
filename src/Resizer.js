@@ -13,6 +13,12 @@
 "use strict";
 
 
+// Break on no Controller
+if ( !window.Controller ) {
+    throw new Error( "Resizer Class requires Controller Class" );
+}
+
+
 // Current window viewport
 var _currentView = {
         width: null,
@@ -27,7 +33,6 @@ var _currentView = {
  *
  * Window resize / orientationchange event controller
  * @constructor Resizer
- * @requires Controller
  * @memberof! <global>
  *
  */

@@ -306,7 +306,7 @@ Controller.prototype = {
 
 
 // Expose
-window.Controller = Controller;
+window.Controller = null;
 
 
 })( window );

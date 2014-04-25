@@ -588,7 +588,7 @@ Controller.prototype = {
 
 
 // Expose
-window.Controller = Controller;
+window.Controller = null;
 
 
 })( window );
@@ -3475,6 +3475,12 @@ window.PushState = PushState;
 "use strict";
 
 
+// Break on no Controller
+if ( !window.Controller ) {
+    throw new Error( "Resizer Class requires Controller Class" );
+}
+
+
 // Current window viewport
 var _currentView = {
         width: null,
@@ -3489,7 +3495,6 @@ var _currentView = {
  *
  * Window resize / orientationchange event controller
  * @constructor Resizer
- * @requires Controller
  * @memberof! <global>
  *
  */
@@ -3915,6 +3920,12 @@ window.Router = Router;
 "use strict";
 
 
+// Break on no Controller
+if ( !window.Controller ) {
+    throw new Error( "Scroller Class requires Controller Class" );
+}
+
+
 // Current scroll position
 var _currentY = null,
 
@@ -3925,7 +3936,6 @@ var _currentY = null,
  *
  * Window scroll event controller
  * @constructor Scroller
- * @requires Controller
  * @memberof! <global>
  *
  */
