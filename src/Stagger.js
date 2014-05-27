@@ -89,10 +89,10 @@ Stagger.prototype = {
          *
          * Number of step occurrences
          * @memberof Stagger
-         * @member Stagger._occurrences
+         * @member Stagger._steps
          *
          */
-        this._occurrences = options.occurrences || 0;
+        this._occurrences = options.steps || 0;
         
         /**
          *
@@ -110,7 +110,7 @@ Stagger.prototype = {
          * @member Stagger._paused
          *
          */
-        this._paused = options.paused || false;
+        this._paused = false;
         
         /**
          *
@@ -129,10 +129,6 @@ Stagger.prototype = {
          *
          */
         this._resolved = false;
-        
-        if ( !this._started && !this._paused ) {
-            this.start();
-        }
     },
     
     /**
@@ -164,7 +160,7 @@ Stagger.prototype = {
         if ( typeof fn === "function" ) {
             this._when[ i ] = fn;
         }
-                            
+
         return this;
     },
     
@@ -218,13 +214,9 @@ Stagger.prototype = {
      *
      */
     start: function () {
-        this._started = true;
+        this.play()._stagger();
         
-        if ( this._paused ) {
-            this.play();
-        }
-        
-        this._stagger();
+        return this;
     },
     
     /**
@@ -237,6 +229,8 @@ Stagger.prototype = {
     _resolve: function () {
         this._resolved = true;
         this._timeout = null;
+        
+        return this;
     },
     
     /**
@@ -247,48 +241,53 @@ Stagger.prototype = {
      *
      */
     _stagger: function () {
-        var self = this;
+        if ( this._started ) {
+            return this;
+        }
         
-        var stagger = function () {
-            self._timeout = setTimeout(function () {
-                clearTimeout( self._timeout );
-                
-                // If resolved, stop timeout loop
-                if ( self._resolved ) {
-                    self._timeout = null;
+        this._started = true;
+        
+        var self = this,
+            stagger = function () {
+                self._timeout = setTimeout(function () {
+                    clearTimeout( self._timeout );
                     
-                    return;
-                
-                // If paused, keep loop going but wait    
-                } else if ( self._paused ) {
-                    stagger();
+                    // If resolved, stop timeout loop
+                    if ( self._resolved ) {
+                        self._timeout = null;
+                        
+                        return;
                     
-                    return;
-                }
-                
-                if ( typeof self._step === "function" ) {
-                    self._step( self._current );
-                }
-                
-                if ( typeof self._when[ self._current ] === "function" ) {
-                    self._when[ self._current ]( self._current );
-                }
-                
-                self._current++;
-                
-                if ( self._current === self._occurrences ) {
-                    if ( typeof self._done === "function" ) {
-                        self._done();
+                    // If paused, keep loop going but wait    
+                    } else if ( self._paused ) {
+                        stagger();
+                        
+                        return;
                     }
                     
-                    self._resolve();
+                    if ( typeof self._step === "function" ) {
+                        self._step( self._current );
+                    }
                     
-                } else {
-                    stagger();
-                }
-                            
-            }, self._delay );
-        };
+                    if ( typeof self._when[ self._current ] === "function" ) {
+                        self._when[ self._current ]( self._current );
+                    }
+                    
+                    self._current++;
+                    
+                    if ( self._current === self._occurrences ) {
+                        self._resolve();
+                        
+                        if ( typeof self._done === "function" ) {
+                            self._done();
+                        }
+                        
+                    } else {
+                        stagger();
+                    }
+                                
+                }, self._delay );
+            };
         
         stagger();
     }

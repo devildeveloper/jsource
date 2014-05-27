@@ -37,7 +37,8 @@ PushState.prototype = {
      *
      * Expression match #
      * @memberof PushState
-     * @member PushState._rHash
+     * @member _rHash
+     * @private
      *
      */
     _rHash: /#/,
@@ -46,7 +47,8 @@ PushState.prototype = {
      *
      * Expression match http/https
      * @memberof PushState
-     * @member PushState._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -56,6 +58,7 @@ PushState.prototype = {
      * Flag whether pushState is enabled
      * @memberof PushState
      * @member _pushable
+     * @private
      *
      */
     _pushable: ("history" in window && "pushState" in window.history),
@@ -72,6 +75,7 @@ PushState.prototype = {
      * </ul>
      * @memberof PushState
      * @member _hashable
+     * @private
      *
      */
     _hashable: ("onhashchange" in window),
@@ -96,6 +100,7 @@ PushState.prototype = {
          * Flag whether state is enabled
          * @memberof PushState
          * @member _enabled
+         * @private
          *
          */
         this._enabled = false;
@@ -106,6 +111,7 @@ PushState.prototype = {
          * This allows appropriate replication of popstate
          * @memberof PushState
          * @member _ishashpushed
+         * @private
          *
          */
         this._ishashpushed = false;
@@ -115,6 +121,7 @@ PushState.prototype = {
          * Unique ID ticker
          * @memberof PushState
          * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -124,6 +131,7 @@ PushState.prototype = {
          * Stored state objects
          * @memberof PushState
          * @member _states
+         * @private
          *
          */
         this._states = {};
@@ -133,6 +141,7 @@ PushState.prototype = {
          * Stored response objects
          * @memberof PushState
          * @member _responses
+         * @private
          *
          */
         this._responses = {};
@@ -142,6 +151,7 @@ PushState.prototype = {
          * Event callbacks
          * @memberof PushState
          * @member _callbacks
+         * @private
          *
          */
         this._callbacks = {};
@@ -151,6 +161,7 @@ PushState.prototype = {
          * Flag whether to use ajax
          * @memberof PushState
          * @member _async
+         * @private
          *
          */
         this._async = ( options && options.async !== undefined ) ? options.async : true;
@@ -160,6 +171,7 @@ PushState.prototype = {
          * Flag whether to use cached responses
          * @memberof PushState
          * @member _caching
+         * @private
          *
          */
         this._caching = ( options && options.caching !== undefined ) ? options.caching : true;
@@ -203,6 +215,9 @@ PushState.prototype = {
      * @method push
      * @param {string} url address to push to history
      * @param {function} callback function to call when done
+     *
+     * @fires beforestate
+     * @fires afterstate
      *
      */
     push: function ( url, callback ) {
@@ -252,11 +267,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goBack
      *
+     * @fires backstate
+     *
      */
     goBack: function () {
         window.history.back();
         
-        this._fire( "back" );
+        this._fire( "backstate" );
     },
     
     /**
@@ -265,11 +282,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goForward
      *
+     * @fires forwardstate
+     *
      */
     goForward: function () {
         window.history.forward();
         
-        this._fire( "forward" );
+        this._fire( "forwardstate" );
     },
     
     /**
@@ -292,6 +311,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _push
      * @param {string} url The url to push
+     * @private
      *
      */
     _push: function ( url ) {
@@ -311,6 +331,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _stateCached
      * @param {string} url The url to check
+     * @private
      *
      */
     _stateCached: function ( url ) {
@@ -330,6 +351,7 @@ PushState.prototype = {
      * @method _cacheState
      * @param {string} url The url to cache for
      * @param {object} response The XMLHttpRequest response object
+     * @private
      *
      */
     _cacheState: function ( url, response ) {
@@ -346,6 +368,7 @@ PushState.prototype = {
      * @method _getUrl
      * @param {string} url The url to request
      * @param {function} callback The function to call when done
+     * @private
      *
      */
     _getUrl: function ( url, callback ) {
@@ -383,6 +406,7 @@ PushState.prototype = {
      * @method _fire
      * @param {string} event The event to fire
      * @param {string} url The current url
+     * @private
      *
      */
     _fire: function ( event, url ) {
@@ -398,6 +422,9 @@ PushState.prototype = {
      * Bind this instances state handler
      * @memberof PushState
      * @method _stateEnabled
+     * @private
+     *
+     * @fires popstate
      *
      */
     _stateEnable: function () {
@@ -484,7 +511,8 @@ MatchRoute.prototype = {
      *
      * Expression match http/https
      * @memberof MatchRoute
-     * @member MatchRoute._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -493,7 +521,8 @@ MatchRoute.prototype = {
      *
      * Expression match trail slashes
      * @memberof MatchRoute
-     * @member MatchRoute._rTrails
+     * @member _rTrails
+     * @private
      *
      */
     _rTrails: /^\/|\/$/g,
@@ -502,7 +531,8 @@ MatchRoute.prototype = {
      *
      * Expression match hashbang/querystring
      * @memberof MatchRoute
-     * @member MatchRoute._rHashQuery
+     * @member _rHashQuery
+     * @private
      *
      */
     _rHashQuery: /#.*$|\?.*$/g,
@@ -511,7 +541,8 @@ MatchRoute.prototype = {
      *
      * Expression match wildcards
      * @memberof MatchRoute
-     * @member MatchRoute._rWild
+     * @member _rWild
+     * @private
      *
      */
     _rWild: /^:/,
@@ -520,7 +551,8 @@ MatchRoute.prototype = {
      *
      * Expressions to match wildcards with supported conditions
      * @memberof MatchRoute
-     * @member MatchRoute._wilders
+     * @member _wilders
+     * @private
      *
      */
     _wilders: {
@@ -533,7 +565,7 @@ MatchRoute.prototype = {
      *
      * MatchRoute init constructor method
      * @memberof MatchRoute
-     * @method MatchRoute.init
+     * @method init
      * @param {array} routes Config routes can be passed on instantiation
      *
      */
@@ -542,10 +574,23 @@ MatchRoute.prototype = {
          *
          * The routes config array
          * @memberof MatchRoute
-         * @member MatchRoute._routes
+         * @member _routes
+         * @private
          *
          */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
+    },
+
+    /**
+     *
+     * Get the internal route array
+     * @memberof MatchRoute
+     * @method MatchRoute.getRoutes
+     * @returns {array}
+     *
+     */
+    getRoutes: function () {
+        return this._routes;
     },
     
     /**
@@ -557,6 +602,9 @@ MatchRoute.prototype = {
      *
      */
     config: function ( routes ) {
+        // Force array on routes
+        routes = ( typeof routes === "string" ) ? [ routes ] : routes;
+
         this._routes = this._routes.concat( this._cleanRoutes( routes ) );
         
         return this;
@@ -635,6 +683,7 @@ MatchRoute.prototype = {
             ret = {
                 match: false,
                 route: null,
+                uri: [],
                 matches: {}
             };
             
@@ -668,9 +717,6 @@ MatchRoute.prototype = {
                     // The match condition
                     cond = matches[ 1 ];
                     
-                    // Add the match to the config data
-                    ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
-                    
                     // With conditions
                     if ( cond ) {
                         // We support this condition
@@ -681,14 +727,18 @@ MatchRoute.prototype = {
                         // Test against the condition
                         if ( regex && regex.test( uris[ j ] ) ) {
                             segMatches++;
+                            
+                            // Add the match to the config data
+                            ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
+                            ret.uri.push( uris[ j ] );
                         }
                     
-                    // No conditions, anything goes    
+                    // No conditions, anything goes   
                     } else {
                         segMatches++;
                     }
                 
-                // Defined segment always goes    
+                // Defined segment always goes   
                 } else {
                     if ( uris[ j ] === ruris[ j ] ) {
                         segMatches++;
@@ -699,6 +749,7 @@ MatchRoute.prototype = {
             if ( segMatches === uris.length ) {
                 ret.match = true;
                 ret.route = routes[ i ];
+                ret.uri = ret.uri.join( "/" );
                 
                 break;
             }
@@ -712,9 +763,10 @@ MatchRoute.prototype = {
      * Clean a route string
      * If the route === "/" then it is returned as is
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoute
      * @param {string} route the route to clean
      * @returns cleaned route string
+     * @private
      *
      */
     _cleanRoute: function ( route ) {
@@ -735,9 +787,10 @@ MatchRoute.prototype = {
      *
      * Clean an array of route strings
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoutes
      * @param {array} routes the routes to clean
      * @returns cleaned routes array
+     * @private
      *
      */
     _cleanRoutes: function ( routes ) {
@@ -757,6 +810,57 @@ window.MatchRoute = MatchRoute;
 })( window );
 /*!
  *
+ * Use native element selector matching
+ *
+ * @matchElement
+ * @author: kitajchuk
+ *
+ */
+(function ( window, undefined ) {
+
+
+"use strict";
+
+
+/**
+ *
+ * Use native element selector matching
+ * @memberof! <global>
+ * @method matchElement
+ * @param {object} el the element
+ * @param {string} selector the selector to match
+ * @returns element OR null
+ *
+ */
+var matchElement = function ( el, selector ) {
+    var method = ( el.matches ) ? "matches" : ( el.webkitMatchesSelector ) ? 
+                                  "webkitMatchesSelector" : ( el.mozMatchesSelector ) ? 
+                                  "mozMatchesSelector" : ( el.msMatchesSelector ) ? 
+                                  "msMatchesSelector" : ( el.oMatchesSelector ) ? 
+                                  "oMatchesSelector" : null;
+    
+    // Try testing the element agains the selector
+    if ( method && el[ method ].call( el, selector ) ) {
+        return el;
+    
+    // Keep walking up the DOM if we can
+    } else if ( el !== document.documentElement && el.parentNode ) {
+        return matchElement( el.parentNode, selector );
+    
+    // Otherwise we should not execute an event
+    } else {
+        return null;
+    }
+};
+
+
+// Expose
+window.matchElement = matchElement;
+
+
+})( window );
+/*!
+ *
  * Handles basic get routing
  *
  * @Router
@@ -769,12 +873,17 @@ window.MatchRoute = MatchRoute;
 "use strict";
 
 
+var _initDelay = 200,
+    _triggerEl;
+
+
 /**
  *
  * A simple router Class
  * @constructor Router
  * @requires PushState
  * @requires MatchRoute
+ * @requires matchElement
  * @memberof! <global>
  *
  */
@@ -789,12 +898,16 @@ Router.prototype = {
      *
      * Router init constructor method
      * @memberof Router
-     * @method Router.init
+     * @method init
      * @param {object} options Settings for PushState
      * <ul>
      * <li>options.async</li>
      * <li>options.caching</li>
      * </ul>
+     *
+     * @fires beforeget
+     * @fires afterget
+     * @fires get
      *
      */
     init: function ( options ) {
@@ -806,6 +919,7 @@ Router.prototype = {
          * Internal MatchRoute instance
          * @memberof Router
          * @member _matcher
+         * @private
          *
          */
         this._matcher = new MatchRoute();
@@ -815,6 +929,7 @@ Router.prototype = {
          * Internal PushState instance
          * @memberof Router
          * @member _pusher
+         * @private
          *
          */
         this._pusher = new PushState( options );
@@ -824,25 +939,25 @@ Router.prototype = {
          * Event handling callbacks
          * @memberof Router
          * @member _callbacks
+         * @private
          *
          */
-        this._callbacks = {
-            get: []
-        };
+        this._callbacks = {};
         
         /**
          *
          * Router Store user options
          * @memberof Router
-         * @member Router._options
+         * @member _options
+         * @private
          *
          */
         this._options = {
             /**
              *
              * Router prevent event default when routes are matched
-             * @memberof Router
-             * @member Router._options.preventDefault
+             * @memberof _options
+             * @member preventDefault
              *
              */
             preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
@@ -852,7 +967,8 @@ Router.prototype = {
          *
          * Router unique ID
          * @memberof Router
-         * @member Router._uid
+         * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -860,17 +976,21 @@ Router.prototype = {
         // Bind GET requests to links
         if ( document.addEventListener ) {
             document.addEventListener( "click", function ( e ) {
-                self._handler( e );
+                self._handler( this, e );
                 
             }, false );
             
         } else if ( document.attachEvent ) {
             document.attachEvent( "onclick", function ( e ) {
-                self._handler( e );
+                self._handler( this, e );
             });
         }
         
-        // Listen for popstate
+        /**
+         *
+         * @event popstate
+         *
+         */
         this._pusher.on( "popstate", function ( url, data ) {
             // Hook around browsers firing popstate on pageload
             if ( isReady ) {
@@ -883,28 +1003,41 @@ Router.prototype = {
             }
         });
         
-        // Listen for beforestate
+        /**
+         *
+         * @event beforestate
+         *
+         */
         this._pusher.on( "beforestate", function () {
             self._fire( "beforeget" );
         });
         
-        // Listen for afterstate
+        /**
+         *
+         * @event afterstate
+         *
+         */
         this._pusher.on( "afterstate", function () {
             self._fire( "afterget" );
         });
         
         // Manually fire first GET
-        this._pusher.push( window.location.href, function ( response ) {
-            self._fire( "get", window.location.href, response );
-            
-            isReady = true;
-        });
+        // Async this in order to allow .get() to work after instantiation
+        setTimeout(function () {
+            self._pusher.push( window.location.href, function ( response ) {
+                self._fire( "get", window.location.href, response );
+                
+                isReady = true;
+            });
+
+        }, _initDelay );
     },
     
     /**
      *
-     * This is merely a wrapper for PushState.on()
-     * It supports "beforeget", and "afterget" events
+     * Add an event listener
+     * Binding "beforeget" and "afterget" is a wrapper
+     * to hook into the PushState classes "beforestate" and "afterstate".
      * @memberof Router
      * @method on
      * @param {string} event The event to bind to
@@ -912,12 +1045,40 @@ Router.prototype = {
      *
      */
     on: function ( event, callback ) {
-        // Force "get" event through Router.get()
-        if ( event === "get" ) {
-            return this;
-        }
-        
         this._bind( event, callback );
+    },
+
+    /**
+     *
+     * Remove an event listener
+     * @memberof Router
+     * @method off
+     * @param {string} event The event to unbind
+     * @param {function} callback The function to reference
+     *
+     */
+    off: function ( event, callback ) {
+        this._unbind( event, callback );
+    },
+
+    /**
+     *
+     * Support router triggers by url
+     * @memberof Router
+     * @method trigger
+     * @param {string} url The url to route to
+     *
+     */
+    trigger: function ( url ) {
+        if ( !_triggerEl ) {
+            _triggerEl = document.createElement( "a" );
+        }
+
+        _triggerEl.href = url;
+
+        this._handler( _triggerEl, {
+            target: _triggerEl
+        });
     },
     
     /**
@@ -949,6 +1110,32 @@ Router.prototype = {
             this._bind( "get", callback );
         }
     },
+
+    /**
+     *
+     * Get a sanitized route for a url
+     * @memberof Router
+     * @method getRouteForUrl
+     * @param {string} url The url to use
+     * @returns {string}
+     *
+     */
+    getRouteForUrl: function ( url ) {
+        return this._matcher._cleanRoute( url );
+    },
+
+    /**
+     *
+     * Get the match data for a url against the routes config
+     * @memberof Router
+     * @method getRouteDataForUrl
+     * @param {string} url The url to use
+     * @returns {object}
+     *
+     */
+    getRouteDataForUrl: function ( url ) {
+        return this._matcher.parse( url, this._matcher.getRoutes() ).matches;
+    },
     
     /**
      *
@@ -969,6 +1156,7 @@ Router.prototype = {
      * @memberof Router
      * @method _preventDefault
      * @param {object} e The event object
+     * @private
      *
      */
     _preventDefault: function ( e ) {
@@ -985,42 +1173,19 @@ Router.prototype = {
     },
     
     /**
-     *
-     * Router match an element to a selector
-     * @memberof Router
-     * @method Router._matchElement
-     * @param {object} el the element
-     * @param {string} selector the selector to match
-     * @returns element OR null
-     *
-     */
-    _matchElement: function ( el, selector ) {
-        var method = ( el.matches ) ? "matches" : ( el.webkitMatchesSelector ) ? "webkitMatchesSelector" : ( el.mozMatchesSelector ) ? "mozMatchesSelector" : ( el.msMatchesSelector ) ? "msMatchesSelector" : ( el.oMatchesSelector ) ? "oMatchesSelector" : null;
-        
-        // Try testing the element agains the selector
-        if ( method && el[ method ].call( el, selector ) ) {
-            return el;
-        
-        // Keep walking up the DOM if we can    
-        } else if ( el !== document.documentElement && el.parentNode ) {
-            return this._matchElement( el.parentNode, selector );
-        
-        // Otherwise we should not execute an event    
-        } else {
-            return null;
-        }
-    },
-    
-    /**
      * GET click event handler
      * @memberof Router
      * @method _handler
+     * @param {object} el The event context element
      * @param {object} e The event object
+     * @private
+     *
+     * @fires get
      *
      */
-    _handler: function ( e ) {
+    _handler: function ( el, e ) {
         var self = this,
-            elem = this._matchElement( e.target, "a" );
+            elem = (matchElement( el, "a" ) || matchElement( e.target, "a" ));
         
         if ( elem ) {
             if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
@@ -1040,6 +1205,7 @@ Router.prototype = {
      * @method _bind
      * @param {string} event what to bind on
      * @param {function} callback fired on event
+     * @private
      *
      */
     _bind: function ( event, callback ) {
@@ -1048,10 +1214,44 @@ Router.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._routerID = this.getUID();
-            callback._routerType = event;
+            callback._jsRouterID = this.getUID();
             
             this._callbacks[ event ].push( callback );
+        }
+    },
+
+    /**
+     *
+     * Unbind an event to a callback(s)
+     * @memberof Router
+     * @method _bind
+     * @param {string} event what to bind on
+     * @param {function} callback fired on event
+     * @private
+     *
+     */
+    _unbind: function ( event, callback ) {
+        if ( !this._callbacks[ event ] ) {
+            return this;
+        }
+
+        // Remove a single callback
+        if ( callback ) {
+            for ( var i = 0, len = this._callbacks[ event ].length; i < len; i++ ) {
+                if ( callback._jsRouterID === this._callbacks[ event ][ i ]._jsRouterID ) {
+                    this._callbacks[ event ].splice( i, 1 );
+    
+                    break;
+                }
+            }
+
+        // Remove all callbacks for event
+        } else {
+            for ( var j = this._callbacks[ event ].length; j--; ) {
+                this._callbacks[ event ][ j ] = null;
+            }
+    
+            delete this._callbacks[ event ];
         }
     },
     
@@ -1063,6 +1263,7 @@ Router.prototype = {
      * @param {string} event what to bind on
      * @param {string} url fired on event
      * @param {string} response html from responseText
+     * @private
      *
      */
     _fire: function ( event, url, response ) {

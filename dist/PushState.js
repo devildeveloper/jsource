@@ -37,7 +37,8 @@ PushState.prototype = {
      *
      * Expression match #
      * @memberof PushState
-     * @member PushState._rHash
+     * @member _rHash
+     * @private
      *
      */
     _rHash: /#/,
@@ -46,7 +47,8 @@ PushState.prototype = {
      *
      * Expression match http/https
      * @memberof PushState
-     * @member PushState._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -56,6 +58,7 @@ PushState.prototype = {
      * Flag whether pushState is enabled
      * @memberof PushState
      * @member _pushable
+     * @private
      *
      */
     _pushable: ("history" in window && "pushState" in window.history),
@@ -72,6 +75,7 @@ PushState.prototype = {
      * </ul>
      * @memberof PushState
      * @member _hashable
+     * @private
      *
      */
     _hashable: ("onhashchange" in window),
@@ -96,6 +100,7 @@ PushState.prototype = {
          * Flag whether state is enabled
          * @memberof PushState
          * @member _enabled
+         * @private
          *
          */
         this._enabled = false;
@@ -106,6 +111,7 @@ PushState.prototype = {
          * This allows appropriate replication of popstate
          * @memberof PushState
          * @member _ishashpushed
+         * @private
          *
          */
         this._ishashpushed = false;
@@ -115,6 +121,7 @@ PushState.prototype = {
          * Unique ID ticker
          * @memberof PushState
          * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -124,6 +131,7 @@ PushState.prototype = {
          * Stored state objects
          * @memberof PushState
          * @member _states
+         * @private
          *
          */
         this._states = {};
@@ -133,6 +141,7 @@ PushState.prototype = {
          * Stored response objects
          * @memberof PushState
          * @member _responses
+         * @private
          *
          */
         this._responses = {};
@@ -142,6 +151,7 @@ PushState.prototype = {
          * Event callbacks
          * @memberof PushState
          * @member _callbacks
+         * @private
          *
          */
         this._callbacks = {};
@@ -151,6 +161,7 @@ PushState.prototype = {
          * Flag whether to use ajax
          * @memberof PushState
          * @member _async
+         * @private
          *
          */
         this._async = ( options && options.async !== undefined ) ? options.async : true;
@@ -160,6 +171,7 @@ PushState.prototype = {
          * Flag whether to use cached responses
          * @memberof PushState
          * @member _caching
+         * @private
          *
          */
         this._caching = ( options && options.caching !== undefined ) ? options.caching : true;
@@ -203,6 +215,9 @@ PushState.prototype = {
      * @method push
      * @param {string} url address to push to history
      * @param {function} callback function to call when done
+     *
+     * @fires beforestate
+     * @fires afterstate
      *
      */
     push: function ( url, callback ) {
@@ -252,11 +267,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goBack
      *
+     * @fires backstate
+     *
      */
     goBack: function () {
         window.history.back();
         
-        this._fire( "back" );
+        this._fire( "backstate" );
     },
     
     /**
@@ -265,11 +282,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goForward
      *
+     * @fires forwardstate
+     *
      */
     goForward: function () {
         window.history.forward();
         
-        this._fire( "forward" );
+        this._fire( "forwardstate" );
     },
     
     /**
@@ -292,6 +311,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _push
      * @param {string} url The url to push
+     * @private
      *
      */
     _push: function ( url ) {
@@ -311,6 +331,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _stateCached
      * @param {string} url The url to check
+     * @private
      *
      */
     _stateCached: function ( url ) {
@@ -330,6 +351,7 @@ PushState.prototype = {
      * @method _cacheState
      * @param {string} url The url to cache for
      * @param {object} response The XMLHttpRequest response object
+     * @private
      *
      */
     _cacheState: function ( url, response ) {
@@ -346,6 +368,7 @@ PushState.prototype = {
      * @method _getUrl
      * @param {string} url The url to request
      * @param {function} callback The function to call when done
+     * @private
      *
      */
     _getUrl: function ( url, callback ) {
@@ -383,6 +406,7 @@ PushState.prototype = {
      * @method _fire
      * @param {string} event The event to fire
      * @param {string} url The current url
+     * @private
      *
      */
     _fire: function ( event, url ) {
@@ -398,6 +422,9 @@ PushState.prototype = {
      * Bind this instances state handler
      * @memberof PushState
      * @method _stateEnabled
+     * @private
+     *
+     * @fires popstate
      *
      */
     _stateEnable: function () {

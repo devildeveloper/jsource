@@ -1,5 +1,29 @@
 /*!
  *
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) <%= grunt.template.today('yyyy') %> Brandon Lee Kitajchuk
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+/*!
+ *
  * A simple gamecycle engine
  *
  * @Blit
@@ -307,6 +331,7 @@ var raf = window.requestAnimationFrame,
  *
  * Event / Animation cycle manager
  * @constructor Controller
+ * @requires raf
  * @memberof! <global>
  *
  */
@@ -329,7 +354,8 @@ Controller.prototype = {
          *
          * Controller event handlers object
          * @memberof Controller
-         * @member Controller._handlers
+         * @member _handlers
+         * @private
          *
          */
         this._handlers = {};
@@ -338,7 +364,8 @@ Controller.prototype = {
          *
          * Controller unique ID
          * @memberof Controller
-         * @member Controller._uid
+         * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -347,7 +374,8 @@ Controller.prototype = {
          *
          * Started iteration flag
          * @memberof Controller
-         * @member Controller._started
+         * @member _started
+         * @private
          *
          */
         this._started = false;
@@ -356,7 +384,8 @@ Controller.prototype = {
          *
          * Paused flag
          * @memberof Controller
-         * @member Controller._paused
+         * @member _paused
+         * @private
          *
          */
         this._paused = false;
@@ -365,7 +394,8 @@ Controller.prototype = {
          *
          * Timeout reference
          * @memberof Controller
-         * @member Controller._timeout
+         * @member _cycle
+         * @private
          *
          */
         this._cycle = null;
@@ -375,11 +405,11 @@ Controller.prototype = {
      *
      * Controller go method to start frames
      * @memberof Controller
-     * @method Controller.go
+     * @method go
      *
      */
     go: function ( fn ) {
-        if ( this._started ) {
+        if ( this._started && this._cycle ) {
             return this;
         }
 
@@ -389,7 +419,7 @@ Controller.prototype = {
             anim = function () {
                 self._cycle = raf( anim );
 
-                if ( !self._paused ) {
+                if ( self._started ) {
                     if ( typeof fn === "function" ) {
                         fn();
                     }
@@ -403,7 +433,7 @@ Controller.prototype = {
      *
      * Pause the cycle
      * @memberof Controller
-     * @method Controller.pause
+     * @method pause
      *
      */
     pause: function () {
@@ -416,7 +446,7 @@ Controller.prototype = {
      *
      * Play the cycle
      * @memberof Controller
-     * @method Controller.play
+     * @method play
      *
      */
     play: function () {
@@ -427,32 +457,15 @@ Controller.prototype = {
 
     /**
      *
-     * Start the cycle
-     * @memberof Controller
-     * @method Controller.start
-     *
-     */
-    start: function () {
-        if ( this._started ) {
-            return this;
-        }
-
-        this._paused = false;
-        this._blitInit();
-
-        return this;
-    },
-
-    /**
-     *
      * Stop the cycle
      * @memberof Controller
-     * @method Controller.stop
+     * @method stop
      *
      */
     stop: function () {
         caf( this._cycle );
 
+        this._paused = false;
         this._started = false;
         this._cycle = null;
 
@@ -463,7 +476,7 @@ Controller.prototype = {
      *
      * Controller add event handler
      * @memberof Controller
-     * @method Controller.on
+     * @method on
      * @param {string} event the event to listen for
      * @param {function} handler the handler to call
      *
@@ -492,7 +505,7 @@ Controller.prototype = {
      *
      * Controller remove event handler
      * @memberof Controller
-     * @method Controller.off
+     * @method off
      * @param {string} event the event to remove handler for
      * @param {function} handler the handler to remove
      *
@@ -506,7 +519,7 @@ Controller.prototype = {
         if ( handler ) {
             this._off( event, handler );
 
-        // Remove all handlers for event    
+        // Remove all handlers for event
         } else {
             this._offed( event );
         }
@@ -518,7 +531,7 @@ Controller.prototype = {
      *
      * Controller fire an event
      * @memberof Controller
-     * @method Controller.fire
+     * @method fire
      * @param {string} event the event to fire
      *
      */
@@ -554,9 +567,10 @@ Controller.prototype = {
      *
      * Controller internal off method assumes event AND handler are good
      * @memberof Controller
-     * @method Controller._off
+     * @method _off
      * @param {string} event the event to remove handler for
      * @param {function} handler the handler to remove
+     * @private
      *
      */
     _off: function ( event, handler ) {
@@ -573,8 +587,9 @@ Controller.prototype = {
      *
      * Controller completely remove all handlers and an event type
      * @memberof Controller
-     * @method Controller._offed
+     * @method _offed
      * @param {string} event the event to remove handler for
+     * @private
      *
      */
     _offed: function ( event ) {
@@ -779,355 +794,620 @@ window.Easing = Easing;
 })( window );
 /*!
  *
- * A basic cross-browser event api
+ * Hammerjs event delegation wrapper
+ * http://eightmedia.github.io/hammer.js/
  *
- * @EventApi
+ * @Hammered
  * @author: kitajchuk
  *
+ *
  */
-(function ( window, undefined ) {
+(function ( window, Hammer ) {
 
 
 "use strict";
 
 
+// Break on no Hammer
+if ( !Hammer ) {
+    throw new Error( "Hammered Class requires Hammerjs!" );
+}
+
+
 /**
  *
- * A basic cross-browser event api
- * @namespace EventApi
+ * Single instanceof Hammer
+ *
+ */
+var _instance = null;
+
+
+/**
+ *
+ * Hammerjs event delegation wrapper
+ * @constructor Hammered
+ * @requires matchElement
  * @memberof! <global>
  *
  */
-var EventApi = {
+var Hammered = function () {
+    return (_instance || this.init.apply( this, arguments ));
+};
+
+
+Hammered.prototype = {
+    constructor: Hammered,
+
     /**
      *
-     * Add an event handler
-     * @memberof EventApi
-     * @method addEvent
-     * @param {string} name The event to bind
-     * @param {DOMElement} element The element to bind too
-     * @param {function} callback The event handler to fire
+     * Match version of hammerjs for compatibility
+     * @member _version
+     * @memberof Hammered
+     * @private
      *
      */
-    addEvent: function ( name, element, callback ) {
-        var handler = function ( e ) {
-            e = (e || window.event);
-            
-            if ( !e.target ) {
-                e.target = e.srcElement;
-            }
-            
-            if ( !e.preventDefault ) {
-                e.preventDefault = function () {
-                    e.returnValue = false;
-                };
-            }
-            
-            if ( typeof callback === "function" ) {
-                return callback.call( this, e );
-            }
-        };
-        
-        if ( element.addEventListener ) {
-            element.addEventListener( name, handler, false );
-            
-        } else {
-            element.attachEvent( "on" + name, handler );
-        }
+    _version: "1.1.2",
+
+    /**
+     *
+     * The stored handlers
+     * @member _handlers
+     * @memberof Hammered
+     * @private
+     *
+     */
+    _handlers: {},
+
+    /**
+     *
+     * Hammered constructor method
+     * {@link https://github.com/EightMedia/hammer.js/wiki/Getting-Started#gesture-options}
+     * @memberof Hammered
+     * @param {object} element DOMElement to delegate from, default is document.body
+     * @param {object} options Hammerjs options to be passed to instance
+     * @method init
+     *
+     */
+    init: function ( element, options ) {
+        _instance = this;
+
+        /**
+         *
+         * The stored Hammer instance
+         * @member _hammer
+         * @memberof Hammered
+         * @private
+         *
+         */
+        this._hammer = new Hammer( (element || document.body), options );
     },
-    
+
     /**
      *
-     * Remove an event handler
-     * @memberof EventApi
-     * @method removeEvent
-     * @param {string} name The event to unbind
-     * @param {DOMElement} element The element to unbind from
-     * @param {function} listener The event handler to unbind from
+     * Retrieve the original Hammer instance
+     * @method getInstance
+     * @memberof Hammered
+     * @returns instanceof Hammer
      *
      */
-    removeEvent: function ( name, element, listener ) {
-        if ( element.removeEventListener ) {
-            element.removeEventListener( name, listener, false );
-            
-        } else {
-            element.detachEvent( "on" + name, listener );
-        }
+    getInstance: function () {
+        return this._hammer;
     },
-    
+
     /**
      *
-     * Delegate an event handler
-     * Does NOT handle complex selectors: "[data-effit].nodoit"
-     * DOES handle simple selectors: "#id", ".class", "element"
-     * @memberof EventApi
-     * @method delegateEvent
-     * @param {string} name The event to unbind
-     * @param {DOMElement} element The element to unbind from
-     * @param {string} selector The target selector to match
-     * @param {function} callback The event handler
+     * Retrieve the handlers reference object
+     * @method getHandlers
+     * @memberof Hammered
+     * @returns object
      *
      */
-    delegateEvent: function ( name, element, selector, callback ) {
-        var isClass = /^\./.test( selector ),
-            isId = /^\#/.test( selector ),
-            isNode = ( isClass || isId ) ? false : true,
-            lookup = function ( target ) {
-                var elem;
-                
-                if ( isNode && target && target.nodeName.toLowerCase() === selector ) {
-                    elem = target;
-                    
-                } else if ( isClass && target ) {
-                    var classes = target.className.split( " " );
-                    
-                    for ( var i = 0, len = classes.length; i < len; i++ ) {
-                        if ( classes[ i ] === selector.replace( ".", "" ) ) {
-                            elem = target;
-                            break;
-                        }
-                    }
-                    
-                } else if ( isId && target ) {
-                    if ( target.id === selector.replace( "#", "" ) ) {
-                        elem = target;
-                    }
-                }
-                
-                // Walked all the way up the DOM, found nothing :-/
-                if ( !elem && target === document.documentElement ) {
-                    return undefined;
-                
-                // We can keep walking, either have a match or test parentNode    
-                } else {
-                    return elem || lookup( target.parentNode );
-                }
-            },
+    getHandlers: function () {
+        return this._handlers;
+    },
+
+    /**
+     *
+     * Allow binding hammer event via delegation
+     * @method on
+     * @param {string} event The Hammer event
+     * @param {string} selector The delegated selector to match
+     * @param {function} callback The handler to call
+     * @memberof Hammered
+     *
+     */
+    on: function ( event, selector, callback ) {
+        var uid = ("Hammered" + ((this._version + Math.random()) + (event + "-" + selector)).replace( /\W/g, "" )),
             handler = function ( e ) {
-                var elem = lookup( e.target );
-                
-                e = e || window.event;
-                
-                if ( !e.target ) {
-                    e.target = e.srcElement;
-                }
-                
-                if ( !e.preventDefault ) {
-                    e.preventDefault = function () {
-                        e.returnValue = false;
-                    };
-                }
-                
-                if ( elem && typeof callback === "function" ) {
-                    return callback.call( elem, e );
+                var element = matchElement( e.target, selector );
+
+                // Either match target element
+                // or walk up to match ancestral element.
+                // If the target is not desired, exit
+                if ( element ) {
+                    // Call the handler with normalized context
+                    callback.call( element, e );
                 }
             };
-        
-        if ( element.addEventListener ) {
-            element.addEventListener( name, handler, false );
-            
-        } else {
-            element.attachEvent( "on" + name, handler );
+
+        // Bind the methods on ID
+        handler._hammerUID = uid;
+        callback._hammerUID = uid;
+
+        // Apply the event via Hammerjs
+        this._hammer.on( event, handler );
+
+        // Push the wrapper handler onto the stack
+        this._handlers[ uid ] = handler;
+    },
+
+    /**
+     *
+     * Effectively off an event wrapped with Hammered
+     * @method off
+     * @param {string} event The Hammer event
+     * @param {function} callback The handler to remove
+     * @memberof Hammered
+     *
+     */
+    off: function ( event, callback ) {
+        var i;
+
+        for ( i in this._handlers ) {
+            if ( i === callback._hammerUID && this._handlers[ i ]._hammerUID === callback._hammerUID ) {
+                this._hammer.off( event, this._handlers[ i ] );
+
+                delete this._handlers[ i ];
+
+                break;
+            }
+        }
+    },
+
+    /**
+     *
+     * Effectively trigger an event through Hammer-js
+     * @method trigger
+     * @param {string} event The Hammer event
+     * @param {object} element The DOMElement to invoke event on
+     * @memberof Hammered
+     *
+     */
+    trigger: function ( event, element ) {
+        element = ( typeof element === "object" && element.nodeType === 1 ) ? element : null;
+
+        // Only proceed if the element is legit
+        if ( element ) {
+            var eventObject = new Event( "hammered-" + event ),
+                eventData = Hammer.event.collectEventData(
+                    element,
+                    Hammer.EVENT_END,
+                    Hammer.event.getTouchList( eventObject, Hammer.EVENT_END ),
+                    eventObject
+                );
+
+            eventData.target = element;
+
+            this._hammer.trigger( event, eventData );
         }
     }
 };
 
 
 // Expose
-window.EventApi = EventApi;
+window.Hammered = Hammered;
 
 
-})( window );
+})( window, window.Hammer );
 /*!
  *
- * A singleton event dispatching utility
+ * Handle lazy-loading images with unique callback conditions
  *
- * @Eventful
+ * @ImageLoader
  * @author: kitajchuk
  *
+ *
  */
-(function ( window, undefined ) {
+(function ( $ ) {
 
 
 "use strict";
 
 
-// Singleton
-var _instance = null;
+var _i,
+    _all = 0,
+    _num = 0,
+    _raf = null,
+    _ini = false,
+    _instances = [];
+
+
+// Break on no $
+if ( !$ ) {
+    throw new Error( "ImageLoader Class requires jQuery, ender, Zepto or something like that..." );
+}
+
+
+// Should support elements as null, undefined, jquery/ender/zepto object, string selector
+function setElements( elements ) {
+    // Allow null, undefined to be set
+    // Check right away if this is a jQuery object
+    if ( !elements || elements.jquery ) {
+        return elements;
+    }
+
+    // Handles string selector
+    if ( typeof elements === "string" ) {
+        elements = $( elements );
+
+    // Handles objects that don't have the framework methods we need
+    } else if ( !("addClass" in elements) && !("removeClass" in elements) && !("attr" in elements) && !("not" in elements) ) {
+        elements = $( elements );
+    }
+
+    return elements;
+}
+
+
+// Called when instances are created
+function initializer( instance ) {
+    // Increment ALL
+    _all = _all + instance._num2Load;
+
+    // Private instances array
+    _instances.push( instance );
+
+    // One stop shopping
+    if ( !_ini ) {
+        _ini = true;
+        animate();
+    }
+}
+
+
+function animate() {
+    if ( _num !== _all ) {
+        _raf = window.requestAnimationFrame( animate );
+
+        for ( _i = _instances.length; _i--; ) {
+            if ( _instances[ _i ]._numLoaded !== _instances[ _i ]._num2Load ) {
+                _instances[ _i ].handle();
+            }
+        }
+
+    } else {
+        window.cancelAnimationFrame( _raf );
+
+        _raf = null;
+        _ini = false;
+    }
+}
 
 
 /**
  *
- * A singleton event dispatching utility
- * @constructor Eventful
+ * Handle lazy-loading images with unique callback conditions
  * @memberof! <global>
+ * @requires raf
+ * @constructor ImageLoader
+ * @param {object} options Controller settings
+ * <ul>
+ * <li>elements - The collection of elements to load against</li>
+ * <li>attribute - The property to pull the image source from</li>
+ * <li>transitionDelay - The timeout before transition starts</li>
+ * <li>transitionDuration - The length of the animation</li>
+ * </ul>
  *
  */
-var Eventful = function () {
-    return (_instance || this.init.apply( this, arguments ));
+var ImageLoader = function () {
+    return this.init.apply( this, arguments );
 };
 
-Eventful.prototype = {
-    constructor: Eventful,
+
+/**
+ *
+ * ClassName for the element loading state
+ * @member IS_LOADING
+ * @memberof ImageLoader
+ *
+ */
+ImageLoader.IS_LOADING = "-is-lazy-loading";
+
+
+/**
+ *
+ * ClassName for the element transitioning state
+ * @member IS_TRANSITION
+ * @memberof ImageLoader
+ *
+ */
+ImageLoader.IS_TRANSITION = "-is-lazy-transition";
+
+
+/**
+ *
+ * ClassName for the elements loaded state
+ * @member IS_LOADED
+ * @memberof ImageLoader
+ *
+ */
+ImageLoader.IS_LOADED = "-is-lazy-loaded";
+
+
+/**
+ *
+ * ClassName to define the element as having been loaded
+ * @member IS_HANDLED
+ * @memberof ImageLoader
+ *
+ */
+ImageLoader.IS_HANDLED = "-is-lazy-handled";
+
+
+ImageLoader.prototype = {
+    constructor: ImageLoader,
+
+    init: function ( options ) {
+        var self = this;
+
+        if ( !options ) {
+            throw new Error( "ImageLoader Class requires options to be passed" );
+        }
+
+        /**
+         *
+         * The Collection to load against
+         * @memberof ImageLoader
+         * @member _elements
+         * @private
+         *
+         */
+        this._elements = setElements( options.elements );
+
+        /**
+         *
+         * The property to get image source from
+         * @memberof ImageLoader
+         * @member _property
+         * @private
+         *
+         */
+        this._property = (options.property || "data-src");
+
+        /**
+         *
+         * The current amount of elements lazy loaded
+         * @memberof ImageLoader
+         * @member _numLoaded
+         * @private
+         *
+         */
+        this._numLoaded = 0;
+
+        /**
+         *
+         * The total amount of elements to lazy load
+         * @memberof ImageLoader
+         * @member _num2Load
+         * @private
+         *
+         */
+        this._num2Load = (this._elements ? this._elements.length : 0);
+
+        /**
+         *
+         * The delay to execute lazy loading on an element in ms
+         * @memberof ImageLoader
+         * @member _transitionDelay
+         * @default 100
+         * @private
+         *
+         */
+        this._transitionDelay = (options.transitionDelay || 100);
+
+        /**
+         *
+         * The duration on a lazy loaded elements fade in in ms
+         * @memberof ImageLoader
+         * @member _transitionDuration
+         * @default 600
+         * @private
+         *
+         */
+        this._transitionDuration = (options.transitionDuration || 600);
+
+        /**
+         *
+         * This flags that all elements have been loaded
+         * @memberof ImageLoader
+         * @member _resolved
+         * @private
+         *
+         */
+        this._resolved = false;
+
+        /**
+         *
+         * Defined event namespaced handlers
+         * @memberof ImageLoader
+         * @member _handlers
+         * @private
+         *
+         */
+        this._handlers = {
+            handle: null,
+            update: null,
+            done: null
+        };
     
-    /**
-     *
-     * Eventful event handlers object
-     * @memberof Eventful
-     * @member Eventful._handlers
-     *
-     */
-    _handlers: {},
-    
-    /**
-     *
-     * Eventful unique ID
-     * @memberof Eventful
-     * @member Eventful._uid
-     *
-     */
-    _uid: 0,
-    
-    /**
-     *
-     * Eventful init constructor method
-     * @memberof Eventful
-     * @method Eventful.init
-     *
-     */
-    init: function () {
-        _instance = this;
+        initializer( this );
     },
     
     /**
      *
-     * Eventful add event handler
-     * @memberof Eventful
-     * @method Eventful.on
-     * @param {string} event the event to listen for
-     * @param {function} handler the handler to call
+     * Add a callback handler for the specified event name
+     * @memberof ImageLoader
+     * @method on
+     * @param {string} event The event name to listen for
+     * @param {function} handler The handler callback to be fired
      *
      */
     on: function ( event, handler ) {
-        var events = event.split( " " );
-
-        // One unique ID per handler
-        handler._eventfulID = this.getUID();
-
-        for ( var i = events.length; i--; ) {
-            if ( typeof handler === "function" ) {
-                if ( !this._handlers[ events[ i ] ] ) {
-                    this._handlers[ events[ i ] ] = [];
-                }
-
-                // Handler can be stored with multiple events
-                this._handlers[ events[ i ] ].push( handler );
-            }
-        }
+        this._handlers[ event ] = handler;
 
         return this;
     },
     
     /**
      *
-     * Eventful remove event handler
-     * @memberof Eventful
-     * @method Eventful.off
-     * @param {string} event the event to remove handler for
-     * @param {function} handler the handler to remove
+     * Fire the given event for the loaded element
+     * @memberof ImageLoader
+     * @method fire
+     * @returns bool
      *
      */
-    off: function ( event, handler ) {
-        if ( !this._handlers[ event ] ) {
-            return this;
+    fire: function ( event, element ) {
+        var ret = false;
+
+        if ( typeof this._handlers[ event ] === "function" ) {
+            ret = this._handlers[ event ].call( this, element );
         }
-        
-        // Remove a single handler
-        if ( handler ) {
-            this._off( event, handler );
-        
-        // Remove all handlers for event    
+
+        return ret;
+    },
+
+    /**
+     *
+     * Iterate over elements and fire the update handler
+     * @memberof ImageLoader
+     * @method update
+     *
+     * @fires update
+     *
+     */
+    update: function () {
+        var self = this;
+
+        this._elements.each(function () {
+            var $this = $( this );
+
+            self.fire( "update", $this );
+        });
+    },
+    
+    /**
+     *
+     * Perform the image loading and set correct values on element
+     * @method load
+     * @memberof ImageLoader
+     * @param {object} $elem element object
+     * @param {function} callback optional callback for each load
+     *
+     * @fires done
+     *
+     */
+    load: function ( element, callback ) {
+        var self = this,
+            image = null,
+            timeout = null,
+            isImage = element.is( "img" ),
+            source = element.attr( this._property );
+
+        element.addClass( ImageLoader.IS_LOADING );
+
+        if ( isImage ) {
+            image = element[ 0 ];
+
         } else {
-            this._offed( event );
+            image = new Image();
         }
+
+        timeout = setTimeout(function () {
+            clearTimeout( timeout );
+
+            element.addClass( ImageLoader.IS_TRANSITION );
+
+            image.onload = function () {
+                if ( !isImage ) {
+                    image = null;
+
+                    element.css( "background-image", "url(" + source + ")" );
+                }
+
+                element.addClass( ImageLoader.IS_LOADED );
+
+                timeout = setTimeout(function () {
+                    clearTimeout( timeout );
+
+                    element.removeClass( ImageLoader.IS_LOADING + " " + ImageLoader.IS_TRANSITION + " " + ImageLoader.IS_LOADED ).addClass( ImageLoader.IS_HANDLED );
+
+                    if ( (self._numLoaded === self._num2Load) && !self._resolved ) {
+                        self._resolved = true;
+
+                        // Fires the predefined "done" event
+                        self.fire( "done" );
+
+                    } else if ( typeof callback === "function" ) {
+                        // Errors first
+                        callback( false );
+                    }
+
+                }, self._transitionDuration );
+            };
+
+            image.onerror = function () {
+                if ( (self._numLoaded === self._num2Load) && !self._resolved ) {
+                    self._resolved = true;
+
+                    // Fires the predefined "done" event
+                    self.fire( "done" );
+
+                } else if ( typeof callback === "function" ) {
+                    // Errors first
+                    callback( true );
+                }
+            };
+
+            image.src = source;
+
+        }, this._transitionDelay );
+
+        return this;
     },
-    
+
     /**
      *
-     * Eventful fire an event
-     * @memberof Eventful
-     * @method Eventful.fire
-     * @param {string} event the event to fire
+     * Handles element iterations and loading based on callbacks
+     * @memberof ImageLoader
+     * @method handle
+     *
+     * @fires handle
      *
      */
-    fire: function ( event ) {
-        if ( !this._handlers[ event ] ) {
-            return this;
-        }
-        
-        var args = [].slice.call( arguments, 1 );
-        
-        for ( var i = this._handlers[ event ].length; i--; ) {
-            this._handlers[ event ][ i ].apply( this, args );
-        }
-    },
-    
-    /**
-     *
-     * Get a unique ID
-     * @memberof Eventful
-     * @method getUID
-     * @returns number
-     *
-     */
-    getUID: function () {
-        this._uid = (this._uid + 1);
-        
-        return this._uid;
-    },
-    
-    /**
-     *
-     * Eventful internal off method assumes event AND handler are good
-     * @memberof Eventful
-     * @method Eventful._off
-     * @param {string} event the event to remove handler for
-     * @param {function} handler the handler to remove
-     *
-     */
-    _off: function ( event, handler ) {
-        for ( var i = 0, len = this._handlers[ event ].length; i < len; i++ ) {
-            if ( handler._eventfulID === this._handlers[ event ][ i ]._eventfulID ) {
-                this._handlers[ event ].splice( i, 1 );
-                
-                break;
+    handle: function () {
+        var self = this;
+
+        this._elements.not( "." + ImageLoader.IS_HANDLED + ", ." + ImageLoader.IS_LOADING ).each(function () {
+            var $this = $( this );
+
+            // Fires the predefined "handle" event
+            if ( self.fire( "handle", $this ) ) {
+                _num++;
+
+                self._numLoaded++;
+
+                self.load( $this );
             }
-        }
-    },
-    
-    /**
-     *
-     * Eventful completely remove all handlers and an event type
-     * @memberof Eventful
-     * @method Eventful._offed
-     * @param {string} event the event to remove handler for
-     *
-     */
-    _offed: function ( event ) {
-        for ( var i = this._handlers[ event ].length; i--; ) {
-            this._handlers[ event ][ i ] = null;
-        }
-        
-        delete this._handlers[ event ];
+        });
     }
 };
 
 
 // Expose
-window.Eventful = Eventful;
+window.ImageLoader = ImageLoader;
 
 
-})( window );
+})( (window.jQuery || window.ender || window.Zepto) );
 /*!
  *
  * Expression matching for term lists
@@ -1160,16 +1440,17 @@ Isearch.prototype = {
      *
      * Expression for characters to escape from input
      * @memberof Isearch
-     * @member Isearch._rEscChars
+     * @member _rEscChars
+     * @private
      *
      */
-    _rEscChars: /\/|\\|\.|\||\*|\&|\+|\(|\)|\[|\]|\?|\$|\^/g,
+    _rEscChars: /[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]/g,
     
     /**
      *
      * Isearch init constructor method
      * @memberof Isearch
-     * @method Isearch.init
+     * @method init
      * @param {object} options Any values used to perform search queries
      *
      */
@@ -1178,7 +1459,7 @@ Isearch.prototype = {
          *
          * Flag for input escaping
          * @memberof Isearch
-         * @member Isearch.escapeInputs
+         * @member escapeInputs
          *
          */
         this.escapeInputs = false;
@@ -1187,25 +1468,16 @@ Isearch.prototype = {
          *
          * Flag for only matching from front of input
          * @memberof Isearch
-         * @member Isearch.matchFront
+         * @member matchFront
          *
          */
         this.matchFront = false;
         
         /**
          *
-         * Flag for matching anywhere in input
-         * @memberof Isearch
-         * @member Isearch.matchAny
-         *
-         */
-        this.matchAny = true;
-        
-        /**
-         *
          * Flag for case sensitivity on matching
          * @memberof Isearch
-         * @member Isearch.matchCase
+         * @member matchCase
          *
          */
         this.matchCase = false;
@@ -1214,7 +1486,7 @@ Isearch.prototype = {
          *
          * Flag for sorting results alphabetically
          * @memberof Isearch
-         * @member Isearch.alphaResults
+         * @member alphaResults
          *
          */
         this.alphaResults = false;
@@ -1316,10 +1588,11 @@ Isearch.prototype = {
      *
      * Isearch alpha sorting used with [].sort
      * @memberof Isearch
-     * @method Isearch._sortAlpha
+     * @method _sortAlpha
      * @param {string} a First test case
      * @param {string} b Second test case
      * @returns -1, 1 or 0
+     * @private
      *
      */
     _sortAlpha: function ( a, b ) {
@@ -1498,288 +1771,6 @@ window.KonamiCode = KonamiCode;
 })( window );
 /*!
  *
- * A simple lazyloading class using requestAnimationFrame
- * Uses callbacks for handling updates per instance
- *
- * @LazyLoader
- * @author: kitajchuk
- *
- *
- */
-(function ( window, undefined ) {
-
-
-"use strict";
-
-
-// Animation tracking
-var raf = window.requestAnimationFrame,
-    caf = window.cancelAnimationFrame,
-    
-    _i,
-    _all = 0,
-    _num = 0,
-    _raf = null,
-    _ini = false,
-    _ani = function () {
-        if ( _num !== _all ) {
-            _raf = raf( _ani );
-            
-            for ( _i = _instances.length; _i--; ) {
-                if ( _instances[ _i ]._numLoaded !== _instances[ _i ]._num2Load ) {
-                    _instances[ _i ].handle();
-                }
-            }
-            
-        } else {
-            caf( _raf );
-            
-            _raf = null;
-            _ini = false;
-        }
-    },
-    
-    // Hold instances
-    _instances = [];
-
-
-/**
- *
- * A basic loader class with handling and callbacks
- * @constructor LazyLoader
- * @memberof! <global>
- *
- */
-var LazyLoader = function () {
-    return this.init.apply( this, arguments );
-};
-
-LazyLoader.prototype = {
-    /**
-     *
-     * LazyLoader init constructor method
-     * @memberof LazyLoader
-     * @method LazyLoader.init
-     * @param {DOMCollection} elements The elements to load against
-     *
-     */
-    init: function ( elements ) {
-        /**
-         *
-         * Internal reference to elements
-         * @memberof LazyLoader
-         * @member LazyLoader._elements
-         *
-         */
-        this._elements = elements;
-        
-        /**
-         *
-         * How many elements have been loaded
-         * @memberof LazyLoader
-         * @member LazyLoader._numLoaded
-         *
-         */
-        this._numLoaded = 0;
-        
-        /**
-         *
-         * How many total elements to load
-         * @memberof LazyLoader
-         * @member LazyLoader._num2Load
-         *
-         */
-        this._num2Load = elements.length;
-        
-        /**
-         *
-         * Update/Handler listeners
-         * @memberof LazyLoader
-         * @member LazyLoader._handlers
-         *
-         */
-        this._handlers = {
-            update: null,
-            handle: null
-        };
-        
-        /**
-         *
-         * Before load callback
-         * @memberof LazyLoader
-         * @member LazyLoader._before
-         *
-         */
-        this._before = null;
-        
-        /**
-         *
-         * After load callback
-         * @memberof LazyLoader
-         * @member LazyLoader._after
-         *
-         */
-        this._after = null;
-        
-        // Increment ALL
-        _all = _all+this._num2Load;
-        
-        // Private instances array
-        _instances.push( this );
-        
-        // Animate!
-        if ( !_ini ) {
-            _ani();
-            _ini = true;
-        }
-    },
-    
-    /**
-     *
-     * Apply handle and update listeners
-     * @memberof LazyLoader
-     * @method LazyLoader.on
-     * @param {string} event The event to listen for
-     * @param {function} handler The callback to fire
-     *
-     */
-    on: function ( event, handler ) {
-        this._handlers[ event ] = handler;
-        
-        return this;
-    },
-    
-    /**
-     *
-     * Fire the update event listeners
-     * @memberof LazyLoader
-     * @method LazyLoader.update
-     *
-     */
-    update: function () {
-        for ( var i = 0, len = this._elements.length; i < len; i++ ) {
-            this._fire( "update", this._elements[ i ] );
-        }
-        
-        return this;
-    },
-    
-    /**
-     *
-     * Fire the handle event listeners
-     * @memberof LazyLoader
-     * @method LazyLoader.handle
-     *
-     */
-    handle: function () {
-        var self = this;
-        
-        for ( var i = 0, len = this._elements.length; i < len; i++ ) {
-            if ( this._fire( "handle", this._elements[ i ] ) && (!this._elements[ i ].dataset.handled && !this._elements[ i ].dataset.loaded) ) {
-                _num++;
-            
-                this._numLoaded++;
-            }
-        }
-        
-        return this;
-    },
-    
-    /**
-     *
-     * Apply the before callback
-     * @memberof LazyLoader
-     * @method LazyLoader.before
-     * @param {function} fn The callback to apply
-     *
-     */
-    before: function ( fn ) {
-        if ( typeof fn === "function" ) {
-            this._before = fn;
-        }
-        
-        return this;
-    },
-    
-    /**
-     *
-     * Apply the after callback
-     * @memberof LazyLoader
-     * @method LazyLoader.after
-     * @param {function} fn The callback to apply
-     *
-     */
-    after: function ( fn ) {
-        if ( typeof fn === "function" ) {
-            this._after = fn;
-        }
-        
-        return this;
-    },
-    
-    /**
-     *
-     * Load an image for an element typically on the handle listener callback
-     * @memberof LazyLoader
-     * @method LazyLoader.loadImage
-     * @param {DOMElement} element The element to load for
-     * @param {string} url The image url to load
-     *
-     */
-    loadImage: function ( element, url ) {
-        var self = this,
-            image = new Image(),
-            timeout;
-        
-        element.dataset.loading = true;
-        
-        if ( typeof this._before === "function" ) {
-            this._before( element );
-        }
-        
-        image.onload = function () {
-            image = null;
-            
-            element.dataset.loaded = true;
-            element.dataset.handled = true;
-            element.dataset.loading = false;
-            
-            if ( typeof self._after === "function" ) {
-                self._after( element );
-            }
-        };
-        
-        image.src = url;
-    },
-    
-    /**
-     *
-     * Fire an event
-     * @memberof LazyLoader
-     * @method LazyLoader._fire
-     * @param {string} event The event to dispatch
-     * @param {DOMElement} element The element in iteration
-     *
-     */
-    _fire: function ( event, element ) {
-        var ret = false;
-        
-        if ( typeof this._handlers[ event ] === "function" ) {
-            ret = this._handlers[ event ].call( this, element );
-        }
-        
-        return ret;
-    }
-};
-
-
-// Expose
-window.LazyLoader = LazyLoader;
-
-
-})( window );
-/*!
- *
  * Handles wildcard route matching against urls with !num and !slug condition testing
  *
  * @MatchRoute
@@ -1815,7 +1806,8 @@ MatchRoute.prototype = {
      *
      * Expression match http/https
      * @memberof MatchRoute
-     * @member MatchRoute._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -1824,7 +1816,8 @@ MatchRoute.prototype = {
      *
      * Expression match trail slashes
      * @memberof MatchRoute
-     * @member MatchRoute._rTrails
+     * @member _rTrails
+     * @private
      *
      */
     _rTrails: /^\/|\/$/g,
@@ -1833,7 +1826,8 @@ MatchRoute.prototype = {
      *
      * Expression match hashbang/querystring
      * @memberof MatchRoute
-     * @member MatchRoute._rHashQuery
+     * @member _rHashQuery
+     * @private
      *
      */
     _rHashQuery: /#.*$|\?.*$/g,
@@ -1842,7 +1836,8 @@ MatchRoute.prototype = {
      *
      * Expression match wildcards
      * @memberof MatchRoute
-     * @member MatchRoute._rWild
+     * @member _rWild
+     * @private
      *
      */
     _rWild: /^:/,
@@ -1851,7 +1846,8 @@ MatchRoute.prototype = {
      *
      * Expressions to match wildcards with supported conditions
      * @memberof MatchRoute
-     * @member MatchRoute._wilders
+     * @member _wilders
+     * @private
      *
      */
     _wilders: {
@@ -1864,7 +1860,7 @@ MatchRoute.prototype = {
      *
      * MatchRoute init constructor method
      * @memberof MatchRoute
-     * @method MatchRoute.init
+     * @method init
      * @param {array} routes Config routes can be passed on instantiation
      *
      */
@@ -1873,10 +1869,23 @@ MatchRoute.prototype = {
          *
          * The routes config array
          * @memberof MatchRoute
-         * @member MatchRoute._routes
+         * @member _routes
+         * @private
          *
          */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
+    },
+
+    /**
+     *
+     * Get the internal route array
+     * @memberof MatchRoute
+     * @method MatchRoute.getRoutes
+     * @returns {array}
+     *
+     */
+    getRoutes: function () {
+        return this._routes;
     },
     
     /**
@@ -1888,6 +1897,9 @@ MatchRoute.prototype = {
      *
      */
     config: function ( routes ) {
+        // Force array on routes
+        routes = ( typeof routes === "string" ) ? [ routes ] : routes;
+
         this._routes = this._routes.concat( this._cleanRoutes( routes ) );
         
         return this;
@@ -1966,6 +1978,7 @@ MatchRoute.prototype = {
             ret = {
                 match: false,
                 route: null,
+                uri: [],
                 matches: {}
             };
             
@@ -1999,9 +2012,6 @@ MatchRoute.prototype = {
                     // The match condition
                     cond = matches[ 1 ];
                     
-                    // Add the match to the config data
-                    ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
-                    
                     // With conditions
                     if ( cond ) {
                         // We support this condition
@@ -2012,14 +2022,18 @@ MatchRoute.prototype = {
                         // Test against the condition
                         if ( regex && regex.test( uris[ j ] ) ) {
                             segMatches++;
+                            
+                            // Add the match to the config data
+                            ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
+                            ret.uri.push( uris[ j ] );
                         }
                     
-                    // No conditions, anything goes    
+                    // No conditions, anything goes   
                     } else {
                         segMatches++;
                     }
                 
-                // Defined segment always goes    
+                // Defined segment always goes   
                 } else {
                     if ( uris[ j ] === ruris[ j ] ) {
                         segMatches++;
@@ -2030,6 +2044,7 @@ MatchRoute.prototype = {
             if ( segMatches === uris.length ) {
                 ret.match = true;
                 ret.route = routes[ i ];
+                ret.uri = ret.uri.join( "/" );
                 
                 break;
             }
@@ -2043,9 +2058,10 @@ MatchRoute.prototype = {
      * Clean a route string
      * If the route === "/" then it is returned as is
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoute
      * @param {string} route the route to clean
      * @returns cleaned route string
+     * @private
      *
      */
     _cleanRoute: function ( route ) {
@@ -2066,9 +2082,10 @@ MatchRoute.prototype = {
      *
      * Clean an array of route strings
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoutes
      * @param {array} routes the routes to clean
      * @returns cleaned routes array
+     * @private
      *
      */
     _cleanRoutes: function ( routes ) {
@@ -3050,7 +3067,8 @@ PushState.prototype = {
      *
      * Expression match #
      * @memberof PushState
-     * @member PushState._rHash
+     * @member _rHash
+     * @private
      *
      */
     _rHash: /#/,
@@ -3059,7 +3077,8 @@ PushState.prototype = {
      *
      * Expression match http/https
      * @memberof PushState
-     * @member PushState._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -3069,6 +3088,7 @@ PushState.prototype = {
      * Flag whether pushState is enabled
      * @memberof PushState
      * @member _pushable
+     * @private
      *
      */
     _pushable: ("history" in window && "pushState" in window.history),
@@ -3085,6 +3105,7 @@ PushState.prototype = {
      * </ul>
      * @memberof PushState
      * @member _hashable
+     * @private
      *
      */
     _hashable: ("onhashchange" in window),
@@ -3109,6 +3130,7 @@ PushState.prototype = {
          * Flag whether state is enabled
          * @memberof PushState
          * @member _enabled
+         * @private
          *
          */
         this._enabled = false;
@@ -3119,6 +3141,7 @@ PushState.prototype = {
          * This allows appropriate replication of popstate
          * @memberof PushState
          * @member _ishashpushed
+         * @private
          *
          */
         this._ishashpushed = false;
@@ -3128,6 +3151,7 @@ PushState.prototype = {
          * Unique ID ticker
          * @memberof PushState
          * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -3137,6 +3161,7 @@ PushState.prototype = {
          * Stored state objects
          * @memberof PushState
          * @member _states
+         * @private
          *
          */
         this._states = {};
@@ -3146,6 +3171,7 @@ PushState.prototype = {
          * Stored response objects
          * @memberof PushState
          * @member _responses
+         * @private
          *
          */
         this._responses = {};
@@ -3155,6 +3181,7 @@ PushState.prototype = {
          * Event callbacks
          * @memberof PushState
          * @member _callbacks
+         * @private
          *
          */
         this._callbacks = {};
@@ -3164,6 +3191,7 @@ PushState.prototype = {
          * Flag whether to use ajax
          * @memberof PushState
          * @member _async
+         * @private
          *
          */
         this._async = ( options && options.async !== undefined ) ? options.async : true;
@@ -3173,6 +3201,7 @@ PushState.prototype = {
          * Flag whether to use cached responses
          * @memberof PushState
          * @member _caching
+         * @private
          *
          */
         this._caching = ( options && options.caching !== undefined ) ? options.caching : true;
@@ -3216,6 +3245,9 @@ PushState.prototype = {
      * @method push
      * @param {string} url address to push to history
      * @param {function} callback function to call when done
+     *
+     * @fires beforestate
+     * @fires afterstate
      *
      */
     push: function ( url, callback ) {
@@ -3265,11 +3297,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goBack
      *
+     * @fires backstate
+     *
      */
     goBack: function () {
         window.history.back();
         
-        this._fire( "back" );
+        this._fire( "backstate" );
     },
     
     /**
@@ -3278,11 +3312,13 @@ PushState.prototype = {
      * @memberof PushState
      * @method goForward
      *
+     * @fires forwardstate
+     *
      */
     goForward: function () {
         window.history.forward();
         
-        this._fire( "forward" );
+        this._fire( "forwardstate" );
     },
     
     /**
@@ -3305,6 +3341,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _push
      * @param {string} url The url to push
+     * @private
      *
      */
     _push: function ( url ) {
@@ -3324,6 +3361,7 @@ PushState.prototype = {
      * @memberof PushState
      * @method _stateCached
      * @param {string} url The url to check
+     * @private
      *
      */
     _stateCached: function ( url ) {
@@ -3343,6 +3381,7 @@ PushState.prototype = {
      * @method _cacheState
      * @param {string} url The url to cache for
      * @param {object} response The XMLHttpRequest response object
+     * @private
      *
      */
     _cacheState: function ( url, response ) {
@@ -3359,6 +3398,7 @@ PushState.prototype = {
      * @method _getUrl
      * @param {string} url The url to request
      * @param {function} callback The function to call when done
+     * @private
      *
      */
     _getUrl: function ( url, callback ) {
@@ -3396,6 +3436,7 @@ PushState.prototype = {
      * @method _fire
      * @param {string} event The event to fire
      * @param {string} url The current url
+     * @private
      *
      */
     _fire: function ( event, url ) {
@@ -3411,6 +3452,9 @@ PushState.prototype = {
      * Bind this instances state handler
      * @memberof PushState
      * @method _stateEnabled
+     * @private
+     *
+     * @fires popstate
      *
      */
     _stateEnable: function () {
@@ -3464,20 +3508,20 @@ window.PushState = PushState;
  *
  * Window resize / orientationchange event controller
  *
- * @Resizer
+ * @ResizeController
  * @author: kitajchuk
  *
  *
  */
-(function ( window, undefined ) {
+(function ( Controller ) {
 
 
 "use strict";
 
 
 // Break on no Controller
-if ( !window.Controller ) {
-    throw new Error( "Resizer Class requires Controller Class" );
+if ( !Controller ) {
+    throw new Error( "ResizeController Class requires Controller Class" );
 }
 
 
@@ -3494,11 +3538,20 @@ var _currentView = {
 /**
  *
  * Window resize / orientationchange event controller
- * @constructor Resizer
+ * @constructor ResizeController
+ * @augments Controller
+ * @requires Controller
  * @memberof! <global>
  *
+ * @fires resize
+ * @fires resizedown
+ * @fires resizeup
+ * @fires orientationchange
+ * @fires orientationportrait
+ * @fires orientationlandscape
+ *
  */
-var Resizer = function () {
+var ResizeController = function () {
     // Singleton
     if ( !_instance ) {
         _instance = this;
@@ -3516,27 +3569,57 @@ var Resizer = function () {
 
             // Fire blanket resize event
             if ( isResize ) {
+                /**
+                 *
+                 * @event resize
+                 *
+                 */
                 _instance.fire( "resize" );
             }
 
             // Fire resizeup and resizedown
             if ( isResizeDown ) {
+                /**
+                 *
+                 * @event resizedown
+                 *
+                 */
                 _instance.fire( "resizedown" );
 
             } else if ( isResizeUp ) {
+                /**
+                 *
+                 * @event resizeup
+                 *
+                 */
                 _instance.fire( "resizeup" );
             }
 
             // Fire blanket orientationchange event
             if ( isOrientation ) {
+                /**
+                 *
+                 * @event orientationchange
+                 *
+                 */
                 _instance.fire( "orientationchange" );
             }
 
             // Fire orientationportrait and orientationlandscape
             if ( isOrientationPortrait ) {
+                /**
+                 *
+                 * @event orientationportrait
+                 *
+                 */
                 _instance.fire( "orientationportrait" );
 
             } else if ( isOrientationLandscape ) {
+                /**
+                 *
+                 * @event orientationlandscape
+                 *
+                 */
                 _instance.fire( "orientationlandscape" );
             }
 
@@ -3547,9 +3630,17 @@ var Resizer = function () {
     return _instance;
 };
 
-Resizer.prototype = new Controller();
+ResizeController.prototype = new Controller();
 
-Resizer.prototype.getViewport = function () {
+/**
+ *
+ * Returns the current window viewport specs
+ * @memberof ResizeController
+ * @method getViewport
+ * @returns object
+ *
+ */
+ResizeController.prototype.getViewport = function () {
     return {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -3559,10 +3650,10 @@ Resizer.prototype.getViewport = function () {
 
 
 // Expose
-window.Resizer = Resizer;
+window.ResizeController = ResizeController;
 
 
-})( window );
+})( (window.Controller || window.funpack.Controller) );
 /*!
  *
  * Handles basic get routing
@@ -3577,12 +3668,17 @@ window.Resizer = Resizer;
 "use strict";
 
 
+var _initDelay = 200,
+    _triggerEl;
+
+
 /**
  *
  * A simple router Class
  * @constructor Router
  * @requires PushState
  * @requires MatchRoute
+ * @requires matchElement
  * @memberof! <global>
  *
  */
@@ -3597,12 +3693,16 @@ Router.prototype = {
      *
      * Router init constructor method
      * @memberof Router
-     * @method Router.init
+     * @method init
      * @param {object} options Settings for PushState
      * <ul>
      * <li>options.async</li>
      * <li>options.caching</li>
      * </ul>
+     *
+     * @fires beforeget
+     * @fires afterget
+     * @fires get
      *
      */
     init: function ( options ) {
@@ -3614,6 +3714,7 @@ Router.prototype = {
          * Internal MatchRoute instance
          * @memberof Router
          * @member _matcher
+         * @private
          *
          */
         this._matcher = new MatchRoute();
@@ -3623,6 +3724,7 @@ Router.prototype = {
          * Internal PushState instance
          * @memberof Router
          * @member _pusher
+         * @private
          *
          */
         this._pusher = new PushState( options );
@@ -3632,25 +3734,25 @@ Router.prototype = {
          * Event handling callbacks
          * @memberof Router
          * @member _callbacks
+         * @private
          *
          */
-        this._callbacks = {
-            get: []
-        };
+        this._callbacks = {};
         
         /**
          *
          * Router Store user options
          * @memberof Router
-         * @member Router._options
+         * @member _options
+         * @private
          *
          */
         this._options = {
             /**
              *
              * Router prevent event default when routes are matched
-             * @memberof Router
-             * @member Router._options.preventDefault
+             * @memberof _options
+             * @member preventDefault
              *
              */
             preventDefault: ( options.preventDefault !== undefined ) ? options.preventDefault : false
@@ -3660,7 +3762,8 @@ Router.prototype = {
          *
          * Router unique ID
          * @memberof Router
-         * @member Router._uid
+         * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -3668,17 +3771,21 @@ Router.prototype = {
         // Bind GET requests to links
         if ( document.addEventListener ) {
             document.addEventListener( "click", function ( e ) {
-                self._handler( e );
+                self._handler( this, e );
                 
             }, false );
             
         } else if ( document.attachEvent ) {
             document.attachEvent( "onclick", function ( e ) {
-                self._handler( e );
+                self._handler( this, e );
             });
         }
         
-        // Listen for popstate
+        /**
+         *
+         * @event popstate
+         *
+         */
         this._pusher.on( "popstate", function ( url, data ) {
             // Hook around browsers firing popstate on pageload
             if ( isReady ) {
@@ -3691,28 +3798,41 @@ Router.prototype = {
             }
         });
         
-        // Listen for beforestate
+        /**
+         *
+         * @event beforestate
+         *
+         */
         this._pusher.on( "beforestate", function () {
             self._fire( "beforeget" );
         });
         
-        // Listen for afterstate
+        /**
+         *
+         * @event afterstate
+         *
+         */
         this._pusher.on( "afterstate", function () {
             self._fire( "afterget" );
         });
         
         // Manually fire first GET
-        this._pusher.push( window.location.href, function ( response ) {
-            self._fire( "get", window.location.href, response );
-            
-            isReady = true;
-        });
+        // Async this in order to allow .get() to work after instantiation
+        setTimeout(function () {
+            self._pusher.push( window.location.href, function ( response ) {
+                self._fire( "get", window.location.href, response );
+                
+                isReady = true;
+            });
+
+        }, _initDelay );
     },
     
     /**
      *
-     * This is merely a wrapper for PushState.on()
-     * It supports "beforeget", and "afterget" events
+     * Add an event listener
+     * Binding "beforeget" and "afterget" is a wrapper
+     * to hook into the PushState classes "beforestate" and "afterstate".
      * @memberof Router
      * @method on
      * @param {string} event The event to bind to
@@ -3720,12 +3840,40 @@ Router.prototype = {
      *
      */
     on: function ( event, callback ) {
-        // Force "get" event through Router.get()
-        if ( event === "get" ) {
-            return this;
-        }
-        
         this._bind( event, callback );
+    },
+
+    /**
+     *
+     * Remove an event listener
+     * @memberof Router
+     * @method off
+     * @param {string} event The event to unbind
+     * @param {function} callback The function to reference
+     *
+     */
+    off: function ( event, callback ) {
+        this._unbind( event, callback );
+    },
+
+    /**
+     *
+     * Support router triggers by url
+     * @memberof Router
+     * @method trigger
+     * @param {string} url The url to route to
+     *
+     */
+    trigger: function ( url ) {
+        if ( !_triggerEl ) {
+            _triggerEl = document.createElement( "a" );
+        }
+
+        _triggerEl.href = url;
+
+        this._handler( _triggerEl, {
+            target: _triggerEl
+        });
     },
     
     /**
@@ -3757,6 +3905,32 @@ Router.prototype = {
             this._bind( "get", callback );
         }
     },
+
+    /**
+     *
+     * Get a sanitized route for a url
+     * @memberof Router
+     * @method getRouteForUrl
+     * @param {string} url The url to use
+     * @returns {string}
+     *
+     */
+    getRouteForUrl: function ( url ) {
+        return this._matcher._cleanRoute( url );
+    },
+
+    /**
+     *
+     * Get the match data for a url against the routes config
+     * @memberof Router
+     * @method getRouteDataForUrl
+     * @param {string} url The url to use
+     * @returns {object}
+     *
+     */
+    getRouteDataForUrl: function ( url ) {
+        return this._matcher.parse( url, this._matcher.getRoutes() ).matches;
+    },
     
     /**
      *
@@ -3777,6 +3951,7 @@ Router.prototype = {
      * @memberof Router
      * @method _preventDefault
      * @param {object} e The event object
+     * @private
      *
      */
     _preventDefault: function ( e ) {
@@ -3793,42 +3968,19 @@ Router.prototype = {
     },
     
     /**
-     *
-     * Router match an element to a selector
-     * @memberof Router
-     * @method Router._matchElement
-     * @param {object} el the element
-     * @param {string} selector the selector to match
-     * @returns element OR null
-     *
-     */
-    _matchElement: function ( el, selector ) {
-        var method = ( el.matches ) ? "matches" : ( el.webkitMatchesSelector ) ? "webkitMatchesSelector" : ( el.mozMatchesSelector ) ? "mozMatchesSelector" : ( el.msMatchesSelector ) ? "msMatchesSelector" : ( el.oMatchesSelector ) ? "oMatchesSelector" : null;
-        
-        // Try testing the element agains the selector
-        if ( method && el[ method ].call( el, selector ) ) {
-            return el;
-        
-        // Keep walking up the DOM if we can    
-        } else if ( el !== document.documentElement && el.parentNode ) {
-            return this._matchElement( el.parentNode, selector );
-        
-        // Otherwise we should not execute an event    
-        } else {
-            return null;
-        }
-    },
-    
-    /**
      * GET click event handler
      * @memberof Router
      * @method _handler
+     * @param {object} el The event context element
      * @param {object} e The event object
+     * @private
+     *
+     * @fires get
      *
      */
-    _handler: function ( e ) {
+    _handler: function ( el, e ) {
         var self = this,
-            elem = this._matchElement( e.target, "a" );
+            elem = (matchElement( el, "a" ) || matchElement( e.target, "a" ));
         
         if ( elem ) {
             if ( elem.href.indexOf( "#" ) === -1 && this._matcher.test( elem.href ) ) {
@@ -3848,6 +4000,7 @@ Router.prototype = {
      * @method _bind
      * @param {string} event what to bind on
      * @param {function} callback fired on event
+     * @private
      *
      */
     _bind: function ( event, callback ) {
@@ -3856,10 +4009,44 @@ Router.prototype = {
                 this._callbacks[ event ] = [];
             }
             
-            callback._routerID = this.getUID();
-            callback._routerType = event;
+            callback._jsRouterID = this.getUID();
             
             this._callbacks[ event ].push( callback );
+        }
+    },
+
+    /**
+     *
+     * Unbind an event to a callback(s)
+     * @memberof Router
+     * @method _bind
+     * @param {string} event what to bind on
+     * @param {function} callback fired on event
+     * @private
+     *
+     */
+    _unbind: function ( event, callback ) {
+        if ( !this._callbacks[ event ] ) {
+            return this;
+        }
+
+        // Remove a single callback
+        if ( callback ) {
+            for ( var i = 0, len = this._callbacks[ event ].length; i < len; i++ ) {
+                if ( callback._jsRouterID === this._callbacks[ event ][ i ]._jsRouterID ) {
+                    this._callbacks[ event ].splice( i, 1 );
+    
+                    break;
+                }
+            }
+
+        // Remove all callbacks for event
+        } else {
+            for ( var j = this._callbacks[ event ].length; j--; ) {
+                this._callbacks[ event ][ j ] = null;
+            }
+    
+            delete this._callbacks[ event ];
         }
     },
     
@@ -3871,6 +4058,7 @@ Router.prototype = {
      * @param {string} event what to bind on
      * @param {string} url fired on event
      * @param {string} response html from responseText
+     * @private
      *
      */
     _fire: function ( event, url, response ) {
@@ -3909,20 +4097,20 @@ window.Router = Router;
  *
  * Window scroll event controller
  *
- * @Scroller
+ * @ScrollController
  * @author: kitajchuk
  *
  *
  */
-(function ( window, undefined ) {
+(function ( Controller ) {
 
 
 "use strict";
 
 
 // Break on no Controller
-if ( !window.Controller ) {
-    throw new Error( "Scroller Class requires Controller Class" );
+if ( !Controller ) {
+    throw new Error( "ScrollController Class requires Controller Class" );
 }
 
 
@@ -3935,11 +4123,19 @@ var _currentY = null,
 /**
  *
  * Window scroll event controller
- * @constructor Scroller
+ * @constructor ScrollController
+ * @augments Controller
+ * @requires Controller
  * @memberof! <global>
  *
+ * @fires scroll
+ * @fires scrolldown
+ * @fires scrollup
+ * @fires scrollmax
+ * @fires scrollmin
+ *
  */
-var Scroller = function () {
+var ScrollController = function () {
     // Singleton
     if ( !_instance ) {
         _instance = this;
@@ -3956,22 +4152,47 @@ var Scroller = function () {
 
             // Fire blanket scroll event
             if ( isScroll ) {
+                /**
+                 *
+                 * @event scroll
+                 *
+                 */
                 _instance.fire( "scroll" );
             }
 
             // Fire scrollup and scrolldown
             if ( isScrollDown ) {
+                /**
+                 *
+                 * @event scrolldown
+                 *
+                 */
                 _instance.fire( "scrolldown" );
 
             } else if ( isScrollUp ) {
+                /**
+                 *
+                 * @event scrollup
+                 *
+                 */
                 _instance.fire( "scrollup" );
             }
 
             // Fire scrollmax and scrollmin
             if ( isScrollMax ) {
+                /**
+                 *
+                 * @event scrollmax
+                 *
+                 */
                 _instance.fire( "scrollmax" );
 
             } else if ( isScrollMin ) {
+                /**
+                 *
+                 * @event scrollmin
+                 *
+                 */
                 _instance.fire( "scrollmin" );
             }
 
@@ -3982,26 +4203,50 @@ var Scroller = function () {
     return _instance;
 };
 
-Scroller.prototype = new Controller();
+ScrollController.prototype = new Controller();
 
-Scroller.prototype.getScrollY = function () {
+/**
+ *
+ * Returns the current window vertical scroll position
+ * @memberof ScrollController
+ * @method getScrollY
+ * @returns number
+ *
+ */
+ScrollController.prototype.getScrollY = function () {
     return (window.scrollY || document.documentElement.scrollTop);
 };
 
-Scroller.prototype.isScrollMax = function () {
+/**
+ *
+ * Determines if scroll position is at maximum for document
+ * @memberof ScrollController
+ * @method isScrollMax
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMax = function () {
     return (this.getScrollY() >= (document.documentElement.offsetHeight - window.innerHeight));
 };
 
-Scroller.prototype.isScrollMin = function () {
+/**
+ *
+ * Determines if scroll position is at minimum for document
+ * @memberof ScrollController
+ * @method isScrollMin
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMin = function () {
     return (this.getScrollY() <= 0);
 };
 
 
 // Expose
-window.Scroller = Scroller;
+window.ScrollController = ScrollController;
 
 
-})( window );
+})( (window.Controller || window.funpack.Controller) );
 /*!
  *
  * A stepped timeout manager
@@ -4093,10 +4338,10 @@ Stagger.prototype = {
          *
          * Number of step occurrences
          * @memberof Stagger
-         * @member Stagger._occurrences
+         * @member Stagger._steps
          *
          */
-        this._occurrences = options.occurrences || 0;
+        this._occurrences = options.steps || 0;
         
         /**
          *
@@ -4114,7 +4359,7 @@ Stagger.prototype = {
          * @member Stagger._paused
          *
          */
-        this._paused = options.paused || false;
+        this._paused = false;
         
         /**
          *
@@ -4133,10 +4378,6 @@ Stagger.prototype = {
          *
          */
         this._resolved = false;
-        
-        if ( !this._started && !this._paused ) {
-            this.start();
-        }
     },
     
     /**
@@ -4168,7 +4409,7 @@ Stagger.prototype = {
         if ( typeof fn === "function" ) {
             this._when[ i ] = fn;
         }
-                            
+
         return this;
     },
     
@@ -4222,13 +4463,9 @@ Stagger.prototype = {
      *
      */
     start: function () {
-        this._started = true;
+        this.play()._stagger();
         
-        if ( this._paused ) {
-            this.play();
-        }
-        
-        this._stagger();
+        return this;
     },
     
     /**
@@ -4241,6 +4478,8 @@ Stagger.prototype = {
     _resolve: function () {
         this._resolved = true;
         this._timeout = null;
+        
+        return this;
     },
     
     /**
@@ -4251,48 +4490,53 @@ Stagger.prototype = {
      *
      */
     _stagger: function () {
-        var self = this;
+        if ( this._started ) {
+            return this;
+        }
         
-        var stagger = function () {
-            self._timeout = setTimeout(function () {
-                clearTimeout( self._timeout );
-                
-                // If resolved, stop timeout loop
-                if ( self._resolved ) {
-                    self._timeout = null;
+        this._started = true;
+        
+        var self = this,
+            stagger = function () {
+                self._timeout = setTimeout(function () {
+                    clearTimeout( self._timeout );
                     
-                    return;
-                
-                // If paused, keep loop going but wait    
-                } else if ( self._paused ) {
-                    stagger();
+                    // If resolved, stop timeout loop
+                    if ( self._resolved ) {
+                        self._timeout = null;
+                        
+                        return;
                     
-                    return;
-                }
-                
-                if ( typeof self._step === "function" ) {
-                    self._step( self._current );
-                }
-                
-                if ( typeof self._when[ self._current ] === "function" ) {
-                    self._when[ self._current ]( self._current );
-                }
-                
-                self._current++;
-                
-                if ( self._current === self._occurrences ) {
-                    if ( typeof self._done === "function" ) {
-                        self._done();
+                    // If paused, keep loop going but wait    
+                    } else if ( self._paused ) {
+                        stagger();
+                        
+                        return;
                     }
                     
-                    self._resolve();
+                    if ( typeof self._step === "function" ) {
+                        self._step( self._current );
+                    }
                     
-                } else {
-                    stagger();
-                }
-                            
-            }, self._delay );
-        };
+                    if ( typeof self._when[ self._current ] === "function" ) {
+                        self._when[ self._current ]( self._current );
+                    }
+                    
+                    self._current++;
+                    
+                    if ( self._current === self._occurrences ) {
+                        self._resolve();
+                        
+                        if ( typeof self._done === "function" ) {
+                            self._done();
+                        }
+                        
+                    } else {
+                        stagger();
+                    }
+                                
+                }, self._delay );
+            };
         
         stagger();
     }
@@ -4322,40 +4566,63 @@ window.Stagger = Stagger;
  *
  * Tween function
  * @constructor Tween
- * @param {number} duration How long the tween will last
- * @param {number} from Where to start the tween
- * @param {number} to When to end the tween
- * @param {function} tween The callback on each iteration
- * @param {function} ease The easing function to use
+ * @requires raf
+ * @requires Easing
+ * @param {object} options Tween animation settings
+ * <ul>
+ * <li>duration - How long the tween will last</li>
+ * <li>from - Where to start the tween</li>
+ * <li>to - When to end the tween</li>
+ * <li>update - The callback on each iteration</li>
+ * <li>complete - The callback on end of animation</li>
+ * <li>ease - The easing function to use</li>
+ * </ul>
  * @memberof! <global>
  *
  */
-var Tween = function ( duration, from, to, tween, ease ) {
-    ease = (ease || function ( t ) {
-        return t;
-    });
+var Tween = function ( options ) {
+    // Normalize options
+    options = (options || {});
+
+    // Normalize easing method
+    options.ease = (options.ease || Easing.swing);
+
+    // Normalize duration
+    options.duration = (options.duration || 600);
+
+    // Normalize from
+    options.from = (options.from || 0);
+
+    // Normalize to
+    options.to = (options.to || 0);
     
-    var time = (duration || 1000),
-        animDiff = (to - from),
-        startTime = new Date(),
-        timer;
-    
+    var tweenDiff = (options.to - options.from),
+        startTime = Date.now(),
+        rafTimer;
+
     function animate() {
-        var diff = new Date() - startTime,
-            animTo = (animDiff * ease( diff / time )) + from;
-        
-        if ( diff > time ) {
-            tween( to );
-            cancelAnimationFrame( timer );
-            timer = null;
+        var animDiff = (Date.now() - startTime),
+            tweenTo = (tweenDiff * options.ease( animDiff / options.duration )) + options.from;
+
+        if ( animDiff > options.duration ) {
+            if ( typeof options.complete === "function" ) {
+                options.complete( options.to );
+            }
+
+            cancelAnimationFrame( rafTimer );
+
+            rafTimer = null;
+
             return false;
         }
-        
-        tween( animTo );
-        timer = requestAnimationFrame( animate );
+
+        if ( typeof options.update === "function" ) {
+            options.update( tweenTo );
+        }
+
+        rafTimer = requestAnimationFrame( animate );
     }
-    
-    // Start the tween
+
     animate();
 };
 
@@ -4371,8 +4638,8 @@ window.Tween = Tween;
  *
  * @ajax
  * @author: kitajchuk
- * @notes:
  *
+ * @notes:
  * Ready State Description
  * 0 The request is not initialized
  * 1 The request has been set up
@@ -4399,21 +4666,9 @@ window.Tween = Tween;
 /**
  *
  * Basic XMLHttpRequest handling using Promises
- * @todo
- * Support options.contentType for headers
- * @example
- * // Handling resolved / rejected states
- * ajax( "/some/api", "POST" ).then(
- *      // Resolved
- *      function ( response ) {
- *          console.log( response );
- *      },
- *
- *      // Rejected
- *      function ( error ) {}
- * );
- * @memberof! <global>
  * @method ajax
+ * @memberof! <global>
+ * @requires Promise
  * @param {string} url The endpoint to hit
  * @param {string} method The requeset method ( GET / POST )
  * @param {object} options The options dataset
@@ -4425,6 +4680,17 @@ window.Tween = Tween;
  * <li>headers - headers to be set using setRequestHeader</li>
  * </ul>
  * @returns new Promise()
+ * @example
+ * // Handling resolved / rejected states
+ * ajax( "/some/api", "POST" ).then(
+ *      // Resolved
+ *      function ( response ) {
+ *          console.log( response );
+ *      },
+ *
+ *      // Rejected
+ *      function ( error ) {}
+ * );
  *
  */
 var ajax = function ( url, method, options ) {
@@ -4588,6 +4854,355 @@ window.debounce = debounce;
 })( window );
 /*!
  *
+ * Use native element selector matching
+ *
+ * @matchElement
+ * @author: kitajchuk
+ *
+ */
+(function ( window, undefined ) {
+
+
+"use strict";
+
+
+/**
+ *
+ * Use native element selector matching
+ * @memberof! <global>
+ * @method matchElement
+ * @param {object} el the element
+ * @param {string} selector the selector to match
+ * @returns element OR null
+ *
+ */
+var matchElement = function ( el, selector ) {
+    var method = ( el.matches ) ? "matches" : ( el.webkitMatchesSelector ) ? 
+                                  "webkitMatchesSelector" : ( el.mozMatchesSelector ) ? 
+                                  "mozMatchesSelector" : ( el.msMatchesSelector ) ? 
+                                  "msMatchesSelector" : ( el.oMatchesSelector ) ? 
+                                  "oMatchesSelector" : null;
+    
+    // Try testing the element agains the selector
+    if ( method && el[ method ].call( el, selector ) ) {
+        return el;
+    
+    // Keep walking up the DOM if we can
+    } else if ( el !== document.documentElement && el.parentNode ) {
+        return matchElement( el.parentNode, selector );
+    
+    // Otherwise we should not execute an event
+    } else {
+        return null;
+    }
+};
+
+
+// Expose
+window.matchElement = matchElement;
+
+
+})( window );
+/*!
+ *
+ * Parse query string into object literal representation
+ *
+ * @compat: jQuery, Ender, Zepto
+ * @author: @kitajchuk
+ * @url: http://github.com/kitajchuk
+ *
+ *
+ */
+(function ( context, undefined ) {
+
+
+"use strict";
+
+
+(function ( factory ) {
+    
+    if ( typeof define === "function" && define.amd ) {
+        define( [ "jquery" ], factory );
+        
+    } else {
+        factory( (context.jQuery || context.ender || context.Zepto) );
+    }
+    
+})(function ( $ ) {
+    
+    var paramalama = function ( str ) {
+        var query = decodeURIComponent( str ).match( /[#|?].*$/g ),
+            ret = {};
+        
+        if ( query ) {
+            query = query[ 0 ].replace( /^\?|^#|^\/|\/$|\[|\]/g, "" );
+            query = query.split( "&" );
+            
+            for ( var i = 0, len = query.length; i < len; i++ ) {
+                var pair = query[ i ].split( "=" ),
+                    key = pair[ 0 ],
+                    val = pair[ 1 ];
+                
+                if ( ret[ key ] ) {
+                    // #2 https://github.com/kitajchuk/paramalama/issues/2
+                    // This supposedly will work as of ECMA-262
+                    // This works since we are not passing objects across frame boundaries
+                    // and we are not considering Array-like objects. This WILL be an Array.
+                    if ( {}.toString.call( ret[ key ] ) !== "[object Array]" ) {
+                        ret[ key ] = [ ret[ key ] ];
+                    }
+                    
+                    ret[ key ].push( val );
+                    
+                } else {
+                    ret[ key ] = val;
+                }
+            }
+        }
+        
+        return ret;
+    };
+    
+    if ( typeof module === "object" && module && typeof module.exports === "object" ) {
+        module.exports = paramalama;
+    
+    } else if ( $ !== undefined ) {
+        $.paramalama = paramalama;
+        context.paramalama = paramalama;
+        
+    } else {
+        context.paramalama = paramalama;
+    }
+    
+});
+
+
+})( this );
+/*!
+ *
+ * Placeholder Text Polyfill
+ *
+ * @compat: jQuery, Ender, Zepto
+ * @author: @kitajchuk
+ * @url: http://github.com/kitajchuk
+ *
+ *
+ */
+(function ( $ ) {
+
+
+"use strict";
+
+
+(function ( factory ) {
+    
+    if ( typeof define === "function" && define.amd ) {
+        define( [ "jquery" ], factory );
+        
+    } else {
+        factory( $ );
+    }
+    
+})(function ( $ ) {
+    
+    var $_body = $( document.body ),
+        
+        _polyCSS = {
+            display: "block",
+            position: "relative",
+            width: "100%"
+        },
+        
+        _shimCSS = {
+            cursor: "text",
+            position: "absolute"
+        },
+        
+        _cloneTextCSS = [
+            "color",
+            "letterSpacing",
+            "lineHeight",
+            "fontFamily",
+            "fontSize",
+            "fontStyle",
+            "fontWeight",
+            "textAlign",
+            "textDecoration",
+            "textTransform"
+        ],
+        
+        // These props add up to be the absolute offsets
+        _cloneShimCSS = {
+            bottom: ["borderBottomWidth", "paddingBottom"],
+            left: ["borderLeftWidth", "paddingLeft"],
+            right: ["borderRightWidth", "paddingRight"],
+            top: ["borderTopWidth", "paddingTop"]
+        },
+        
+        _handleText = function () {
+            var $this = $( this ),
+                data = $this.data();
+            
+            if ( this.value === "" ) {
+                data.$shim.text( $this.attr( "placeholder" ) );
+                
+            } else {
+                data.$shim.text( "" );
+            }
+        },
+        
+        _pollTimeout,
+        _pollForAuto = function () {
+            _pollTimeout = setTimeout(function () {
+                clearTimeout( _pollTimeout );
+                
+                $( ".placeholder__is-init" ).each(function () {
+                    _handleText.call( this );
+                });
+                
+                _pollForAuto();
+                
+            }, 250 );
+        };
+    
+    $.support.placeholderText = ("placeholder" in document.createElement( "input" ));
+    
+    
+    $.placeholderText = $.extend({
+        elemClass: "placeholder-text__elem",
+        matchParent: null,
+        plugClass: "placeholder-text",
+        shimClass: "placeholder-text__shim",
+        tagName: "span"
+        
+    }, $.placeholderText || {} );
+    
+    
+    $.fn.placeholderText = function () {
+        if ( $.support.placeholderText ) {
+            return this;
+        }
+        
+        return this.filter( "[placeholder]" ).not( ".placeholder__is-init" ).each(function () {
+            var tagName = this.tagName.toLowerCase(),
+                $this = $( this ),
+                $parent = $this.parent(),
+                $shim = $( "<"+$.placeholderText.tagName+" />" ).addClass( $.placeholderText.shimClass );
+            
+            if ( $.placeholderText.matchParent && $parent.is( $.placeholderText.matchParent ) ) {
+                $parent.addClass( $.placeholderText.plugClass ).css( _polyCSS );
+                
+            } else {
+                $parent = $( "<"+$.placeholderText.tagName+" />" ).addClass( $.placeholderText.plugClass );
+                $this.wrap( $parent.css( _polyCSS ) );
+            }
+            
+            $shim.insertAfter( $this );
+            $shim.text( $this.attr( "placeholder" ) );
+            $shim.data( "$elem", $this );
+            $shim.addClass( "placeholder-text__shim--"+tagName );
+            $shim.css( _shimCSS );
+            
+            $.each( _cloneTextCSS, function ( i, prop ) {
+                $shim.css( prop, $this.css( prop ) );
+            });
+            
+            $.each( _cloneShimCSS, function ( prop, props ) {
+                var pad = 0;
+                
+                $.each( props, function ( i ) {
+                    var css = parseInt( $this.css( props[ i ] ), 10 );
+                    
+                    if ( css ) {
+                        pad = pad+css;
+                    }
+                });
+                
+                $shim.css( prop, pad+"px" );
+            });
+            
+            $this.data( "$shim", $shim );
+            $this.addClass( "placeholder__is-init" );
+            $this.addClass( $.placeholderText.elemClass );
+        });
+    };
+    
+    $_body.on( "click", "."+$.placeholderText.shimClass, function () {
+        $( this ).data( "$elem" ).focus();
+    });
+    
+    $_body.on( "keyup keydown keypress", "."+$.placeholderText.elemClass, _handleText );
+    
+    $_body.on( "blur", "."+$.placeholderText.elemClass, function () {
+        try {
+            clearTimeout( _pollTimeout );
+            
+        } catch ( err ) {}
+        
+        _handleText.call( this );
+    });
+    
+    $_body.on( "focus", "."+$.placeholderText.elemClass, function () {
+        _pollForAuto();
+    });
+    
+});
+
+
+})( (window.jQuery || window.ender || window.Zepto) );
+/*!
+ *
+ * Adapted from https://gist.github.com/paulirish/1579671 which derived from 
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+ * http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+ * 
+ * requestAnimationFrame polyfill by Erik Möller.
+ * Fixes from Paul Irish, Tino Zijdel, Andrew Mao, Klemen Slavič, Darius Bacon
+ * 
+ * MIT license
+ *
+ * @raf
+ *
+ */
+(function ( window ) {
+
+"use strict";
+
+if ( !Date.now ) {
+    Date.now = function () {
+        return new Date().getTime();
+    };
+}
+
+(function() {
+    var vendors = ["webkit", "moz", "ms", "o"];
+
+    for ( var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i ) {
+        var vp = vendors[i];
+        window.requestAnimationFrame = window[vp + "RequestAnimationFrame"];
+        window.cancelAnimationFrame = (window[vp + "CancelAnimationFrame"] || window[vp + "CancelRequestAnimationFrame"]);
+    }
+
+    if ( /iP(ad|hone|od).*OS 6/.test( window.navigator.userAgent ) || !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
+        var lastTime = 0;
+
+        window.requestAnimationFrame = function ( callback ) {
+            var now = Date.now(),
+                nextTime = Math.max( lastTime + 16, now );
+
+            return setTimeout(function() {
+                callback( lastTime = nextTime );
+
+            }, (nextTime - now) );
+        };
+
+        window.cancelAnimationFrame = clearTimeout;
+    }
+}());
+
+})( window );
+/*!
+ *
  * A basic scrollto function without all the fuss
  *
  * @scroll2
@@ -4605,30 +5220,51 @@ window.debounce = debounce;
  * Window scroll2 function
  * @method scroll2
  * @requires Tween
- * @param {number} to Where are we scrolling
- * @param {number} duration How long will it take
- * @param {function} ease The easing function to use
- * @param {function} callback The callback on complete
+ * @param {object} options Tween animation settings
+ * <ul>
+ * <li>duration - How long the tween will last</li>
+ * <li>complete - The callback on end of animation</li>
+ * <li>ease - The easing function to use</li>
+ * <li>x/y - The axis to tween, where its going to land</li>
+ * </ul>
  * @memberof! <global>
  *
  */
-var scroll2 = function ( to, duration, ease, callback ) {
-    var from = (window.scrollY || window.pageYOffset),
-        hand = function ( t ) {
-            window.scrollTo( 0, t );
-            
-            if ( t === to && typeof callback === "function" ) {
-                callback();
-            }
-        };
-    
-    to = (to || 0);
-    duration = (duration || 400);
-    ease = (ease || function ( t ) {
-        return t;
-    });
-    
-    return new Tween( duration, from, to, hand, ease );
+var scroll2 = function ( options ) {
+    // Get current window positions
+    var position = {
+        x: (window.scrollX || document.documentElement.scrollLeft),
+        y: (window.scrollY || document.documentElement.scrollTop)
+    };
+
+    // Normalize options
+    options = (options || {});
+
+    // Normalize easing method
+    options.ease = (options.ease || Easing.swing);
+
+    // Normalize duration
+    options.duration = (options.duration || 600);
+
+    // Normalize from
+    options.from = ( options.y !== undefined ) ? position.y : position.x;
+
+    // Normalize to
+    options.to = ( options.y !== undefined ) ? options.y : options.x;
+
+    // Apply update method
+    options.update = function ( t ) {
+        // Vertical scroll
+        if ( options.y !== undefined ) {
+            window.scrollTo( position.x, t );
+
+        // Horizontal scroll
+        } else if ( options.x !== undefined ) {
+            window.scrollTo( t, position.y );
+        }
+    };
+
+    return new Tween( options );
 };
 
 
@@ -4639,7 +5275,54 @@ window.scroll2 = scroll2;
 })( window );
 /*!
  *
- * Throttle methods
+ * Element state manager
+ *
+ * @compat: jQuery, Ender, Zepto
+ * @author: @kitajchuk
+ * @url: http://github.com/kitajchuk
+ *
+ *
+ */
+(function ( $ ) {
+
+
+"use strict";
+
+
+(function ( factory ) {
+
+    if ( typeof define === "function" && define.amd ) {
+        define( [ "jquery" ], factory );
+
+    } else {
+        factory( $ );
+    }
+
+})(function ( $ ) {
+
+    $.fn.stateManage = function ( event, stateClass, callback ) {
+        var $this = this;
+
+        return this.on( event, function ( e ) {
+            var $elem = $( this );
+
+            $this.removeClass( stateClass );
+
+            $elem.addClass( stateClass );
+
+            if ( typeof callback === "function" ) {
+                callback.call( this, e );
+            }
+        });
+    };
+
+});
+
+
+})( (window.jQuery || window.ender || window.Zepto) );
+/*!
+ *
+ * Throttle callbacks
  *
  * @throttle
  * @author: kitajchuk
@@ -4654,31 +5337,15 @@ window.scroll2 = scroll2;
 /**
  *
  * Limit method calls
+ * @requires debounce
  * @memberof! <global>
  * @method throttle
- * @param {number} threshold The timeout delay in ms
  * @param {function} callback The method handler
+ * @param {number} threshold The timeout delay in ms
  *
  */
-var throttle = function ( threshold, callback ) {
-    var timeout = null;
-    
-    return function throttled() {
-        var args = arguments,
-            context = this;
-        
-        function delayed() {
-            callback.apply( context, args );
-            
-            timeout = null;
-        }
-        
-        if ( timeout ) {
-            clearTimeout( timeout );
-        }
-        
-        timeout = setTimeout( delayed, (threshold || 100) );
-    };
+var throttle = function ( callback, threshold ) {
+    return debounce( callback, threshold );
 };
 
 

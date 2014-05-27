@@ -1,56 +1,5 @@
 /*!
  *
- * Adapted from https://gist.github.com/paulirish/1579671 which derived from 
- * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
- * http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
- * 
- * requestAnimationFrame polyfill by Erik Möller.
- * Fixes from Paul Irish, Tino Zijdel, Andrew Mao, Klemen Slavič, Darius Bacon
- * 
- * MIT license
- *
- * @raf
- *
- */
-(function ( window ) {
-
-"use strict";
-
-if ( !Date.now ) {
-    Date.now = function () {
-        return new Date().getTime();
-    };
-}
-
-(function() {
-    var vendors = ["webkit", "moz", "ms", "o"];
-
-    for ( var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i ) {
-        var vp = vendors[i];
-        window.requestAnimationFrame = window[vp + "RequestAnimationFrame"];
-        window.cancelAnimationFrame = (window[vp + "CancelAnimationFrame"] || window[vp + "CancelRequestAnimationFrame"]);
-    }
-
-    if ( /iP(ad|hone|od).*OS 6/.test( window.navigator.userAgent ) || !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
-        var lastTime = 0;
-
-        window.requestAnimationFrame = function ( callback ) {
-            var now = Date.now(),
-                nextTime = Math.max( lastTime + 16, now );
-
-            return setTimeout(function() {
-                callback( lastTime = nextTime );
-
-            }, (nextTime - now) );
-        };
-
-        window.cancelAnimationFrame = clearTimeout;
-    }
-}());
-
-})( window );
-/*!
- *
  * Event / Animation cycle manager
  *
  * var MyController = function () {};
@@ -352,3 +301,153 @@ window.Controller = Controller;
 
 
 })( window );
+/*!
+ *
+ * Window resize / orientationchange event controller
+ *
+ * @ResizeController
+ * @author: kitajchuk
+ *
+ *
+ */
+(function ( Controller ) {
+
+
+"use strict";
+
+
+// Break on no Controller
+if ( !Controller ) {
+    throw new Error( "ResizeController Class requires Controller Class" );
+}
+
+
+// Current window viewport
+var _currentView = {
+        width: null,
+        height: null,
+        orient: null
+    },
+
+    // Singleton
+    _instance = null;
+
+/**
+ *
+ * Window resize / orientationchange event controller
+ * @constructor ResizeController
+ * @augments Controller
+ * @requires Controller
+ * @memberof! <global>
+ *
+ * @fires resize
+ * @fires resizedown
+ * @fires resizeup
+ * @fires orientationchange
+ * @fires orientationportrait
+ * @fires orientationlandscape
+ *
+ */
+var ResizeController = function () {
+    // Singleton
+    if ( !_instance ) {
+        _instance = this;
+
+        // Call on parent cycle
+        this.go(function () {
+            var currentView = _instance.getViewport(),
+                isStill = (currentView.width === _currentView.width && currentView.height === _currentView.height),
+                isResize = (currentView.width !== _currentView.width || currentView.height !== _currentView.height),
+                isResizeUp = (currentView.width > _currentView.width || currentView.height > _currentView.height),
+                isResizeDown = (currentView.width < _currentView.width || currentView.height < _currentView.height),
+                isOrientation = (currentView.orient !== _currentView.orient),
+                isOrientationPortrait = (currentView.orient !== _currentView.orient && currentView.orient !== 90),
+                isOrientationLandscape = (currentView.orient !== _currentView.orient && currentView.orient === 90);
+
+            // Fire blanket resize event
+            if ( isResize ) {
+                /**
+                 *
+                 * @event resize
+                 *
+                 */
+                _instance.fire( "resize" );
+            }
+
+            // Fire resizeup and resizedown
+            if ( isResizeDown ) {
+                /**
+                 *
+                 * @event resizedown
+                 *
+                 */
+                _instance.fire( "resizedown" );
+
+            } else if ( isResizeUp ) {
+                /**
+                 *
+                 * @event resizeup
+                 *
+                 */
+                _instance.fire( "resizeup" );
+            }
+
+            // Fire blanket orientationchange event
+            if ( isOrientation ) {
+                /**
+                 *
+                 * @event orientationchange
+                 *
+                 */
+                _instance.fire( "orientationchange" );
+            }
+
+            // Fire orientationportrait and orientationlandscape
+            if ( isOrientationPortrait ) {
+                /**
+                 *
+                 * @event orientationportrait
+                 *
+                 */
+                _instance.fire( "orientationportrait" );
+
+            } else if ( isOrientationLandscape ) {
+                /**
+                 *
+                 * @event orientationlandscape
+                 *
+                 */
+                _instance.fire( "orientationlandscape" );
+            }
+
+            _currentView = currentView;
+        });
+    }
+
+    return _instance;
+};
+
+ResizeController.prototype = new Controller();
+
+/**
+ *
+ * Returns the current window viewport specs
+ * @memberof ResizeController
+ * @method getViewport
+ * @returns object
+ *
+ */
+ResizeController.prototype.getViewport = function () {
+    return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        orient: ("orientation" in window) ? Math.abs( window.orientation ) : null
+    };
+};
+
+
+// Expose
+window.ResizeController = ResizeController;
+
+
+})( (window.Controller || window.funpack.Controller) );

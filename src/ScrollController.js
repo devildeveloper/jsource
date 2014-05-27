@@ -2,20 +2,20 @@
  *
  * Window scroll event controller
  *
- * @Scroller
+ * @ScrollController
  * @author: kitajchuk
  *
  *
  */
-(function ( window, undefined ) {
+(function ( Controller ) {
 
 
 "use strict";
 
 
 // Break on no Controller
-if ( !window.Controller ) {
-    throw new Error( "Scroller Class requires Controller Class" );
+if ( !Controller ) {
+    throw new Error( "ScrollController Class requires Controller Class" );
 }
 
 
@@ -28,11 +28,19 @@ var _currentY = null,
 /**
  *
  * Window scroll event controller
- * @constructor Scroller
+ * @constructor ScrollController
+ * @augments Controller
+ * @requires Controller
  * @memberof! <global>
  *
+ * @fires scroll
+ * @fires scrolldown
+ * @fires scrollup
+ * @fires scrollmax
+ * @fires scrollmin
+ *
  */
-var Scroller = function () {
+var ScrollController = function () {
     // Singleton
     if ( !_instance ) {
         _instance = this;
@@ -49,22 +57,47 @@ var Scroller = function () {
 
             // Fire blanket scroll event
             if ( isScroll ) {
+                /**
+                 *
+                 * @event scroll
+                 *
+                 */
                 _instance.fire( "scroll" );
             }
 
             // Fire scrollup and scrolldown
             if ( isScrollDown ) {
+                /**
+                 *
+                 * @event scrolldown
+                 *
+                 */
                 _instance.fire( "scrolldown" );
 
             } else if ( isScrollUp ) {
+                /**
+                 *
+                 * @event scrollup
+                 *
+                 */
                 _instance.fire( "scrollup" );
             }
 
             // Fire scrollmax and scrollmin
             if ( isScrollMax ) {
+                /**
+                 *
+                 * @event scrollmax
+                 *
+                 */
                 _instance.fire( "scrollmax" );
 
             } else if ( isScrollMin ) {
+                /**
+                 *
+                 * @event scrollmin
+                 *
+                 */
                 _instance.fire( "scrollmin" );
             }
 
@@ -75,23 +108,47 @@ var Scroller = function () {
     return _instance;
 };
 
-Scroller.prototype = new Controller();
+ScrollController.prototype = new Controller();
 
-Scroller.prototype.getScrollY = function () {
+/**
+ *
+ * Returns the current window vertical scroll position
+ * @memberof ScrollController
+ * @method getScrollY
+ * @returns number
+ *
+ */
+ScrollController.prototype.getScrollY = function () {
     return (window.scrollY || document.documentElement.scrollTop);
 };
 
-Scroller.prototype.isScrollMax = function () {
+/**
+ *
+ * Determines if scroll position is at maximum for document
+ * @memberof ScrollController
+ * @method isScrollMax
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMax = function () {
     return (this.getScrollY() >= (document.documentElement.offsetHeight - window.innerHeight));
 };
 
-Scroller.prototype.isScrollMin = function () {
+/**
+ *
+ * Determines if scroll position is at minimum for document
+ * @memberof ScrollController
+ * @method isScrollMin
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMin = function () {
     return (this.getScrollY() <= 0);
 };
 
 
 // Expose
-window.Scroller = Scroller;
+window.ScrollController = ScrollController;
 
 
-})( window );
+})( (window.Controller || window.funpack.Controller) );

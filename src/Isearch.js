@@ -30,16 +30,17 @@ Isearch.prototype = {
      *
      * Expression for characters to escape from input
      * @memberof Isearch
-     * @member Isearch._rEscChars
+     * @member _rEscChars
+     * @private
      *
      */
-    _rEscChars: /\/|\\|\.|\||\*|\&|\+|\(|\)|\[|\]|\?|\$|\^/g,
+    _rEscChars: /[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]/g,
     
     /**
      *
      * Isearch init constructor method
      * @memberof Isearch
-     * @method Isearch.init
+     * @method init
      * @param {object} options Any values used to perform search queries
      *
      */
@@ -48,7 +49,7 @@ Isearch.prototype = {
          *
          * Flag for input escaping
          * @memberof Isearch
-         * @member Isearch.escapeInputs
+         * @member escapeInputs
          *
          */
         this.escapeInputs = false;
@@ -57,25 +58,16 @@ Isearch.prototype = {
          *
          * Flag for only matching from front of input
          * @memberof Isearch
-         * @member Isearch.matchFront
+         * @member matchFront
          *
          */
         this.matchFront = false;
         
         /**
          *
-         * Flag for matching anywhere in input
-         * @memberof Isearch
-         * @member Isearch.matchAny
-         *
-         */
-        this.matchAny = true;
-        
-        /**
-         *
          * Flag for case sensitivity on matching
          * @memberof Isearch
-         * @member Isearch.matchCase
+         * @member matchCase
          *
          */
         this.matchCase = false;
@@ -84,7 +76,7 @@ Isearch.prototype = {
          *
          * Flag for sorting results alphabetically
          * @memberof Isearch
-         * @member Isearch.alphaResults
+         * @member alphaResults
          *
          */
         this.alphaResults = false;
@@ -186,10 +178,11 @@ Isearch.prototype = {
      *
      * Isearch alpha sorting used with [].sort
      * @memberof Isearch
-     * @method Isearch._sortAlpha
+     * @method _sortAlpha
      * @param {string} a First test case
      * @param {string} b Second test case
      * @returns -1, 1 or 0
+     * @private
      *
      */
     _sortAlpha: function ( a, b ) {

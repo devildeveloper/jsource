@@ -1,6 +1,6 @@
 /*!
  *
- * Throttle methods
+ * Throttle callbacks
  *
  * @throttle
  * @author: kitajchuk
@@ -15,31 +15,15 @@
 /**
  *
  * Limit method calls
+ * @requires debounce
  * @memberof! <global>
  * @method throttle
- * @param {number} threshold The timeout delay in ms
  * @param {function} callback The method handler
+ * @param {number} threshold The timeout delay in ms
  *
  */
-var throttle = function ( threshold, callback ) {
-    var timeout = null;
-    
-    return function throttled() {
-        var args = arguments,
-            context = this;
-        
-        function delayed() {
-            callback.apply( context, args );
-            
-            timeout = null;
-        }
-        
-        if ( timeout ) {
-            clearTimeout( timeout );
-        }
-        
-        timeout = setTimeout( delayed, (threshold || 100) );
-    };
+var throttle = function ( callback, threshold ) {
+    return debounce( callback, threshold );
 };
 
 

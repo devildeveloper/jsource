@@ -25,6 +25,7 @@ var raf = window.requestAnimationFrame,
  *
  * Event / Animation cycle manager
  * @constructor Controller
+ * @requires raf
  * @memberof! <global>
  *
  */
@@ -47,7 +48,8 @@ Controller.prototype = {
          *
          * Controller event handlers object
          * @memberof Controller
-         * @member Controller._handlers
+         * @member _handlers
+         * @private
          *
          */
         this._handlers = {};
@@ -56,7 +58,8 @@ Controller.prototype = {
          *
          * Controller unique ID
          * @memberof Controller
-         * @member Controller._uid
+         * @member _uid
+         * @private
          *
          */
         this._uid = 0;
@@ -65,7 +68,8 @@ Controller.prototype = {
          *
          * Started iteration flag
          * @memberof Controller
-         * @member Controller._started
+         * @member _started
+         * @private
          *
          */
         this._started = false;
@@ -74,7 +78,8 @@ Controller.prototype = {
          *
          * Paused flag
          * @memberof Controller
-         * @member Controller._paused
+         * @member _paused
+         * @private
          *
          */
         this._paused = false;
@@ -83,7 +88,8 @@ Controller.prototype = {
          *
          * Timeout reference
          * @memberof Controller
-         * @member Controller._timeout
+         * @member _cycle
+         * @private
          *
          */
         this._cycle = null;
@@ -93,11 +99,11 @@ Controller.prototype = {
      *
      * Controller go method to start frames
      * @memberof Controller
-     * @method Controller.go
+     * @method go
      *
      */
     go: function ( fn ) {
-        if ( this._started ) {
+        if ( this._started && this._cycle ) {
             return this;
         }
 
@@ -107,7 +113,7 @@ Controller.prototype = {
             anim = function () {
                 self._cycle = raf( anim );
 
-                if ( !self._paused ) {
+                if ( self._started ) {
                     if ( typeof fn === "function" ) {
                         fn();
                     }
@@ -121,7 +127,7 @@ Controller.prototype = {
      *
      * Pause the cycle
      * @memberof Controller
-     * @method Controller.pause
+     * @method pause
      *
      */
     pause: function () {
@@ -134,7 +140,7 @@ Controller.prototype = {
      *
      * Play the cycle
      * @memberof Controller
-     * @method Controller.play
+     * @method play
      *
      */
     play: function () {
@@ -145,32 +151,15 @@ Controller.prototype = {
 
     /**
      *
-     * Start the cycle
-     * @memberof Controller
-     * @method Controller.start
-     *
-     */
-    start: function () {
-        if ( this._started ) {
-            return this;
-        }
-
-        this._paused = false;
-        this._blitInit();
-
-        return this;
-    },
-
-    /**
-     *
      * Stop the cycle
      * @memberof Controller
-     * @method Controller.stop
+     * @method stop
      *
      */
     stop: function () {
         caf( this._cycle );
 
+        this._paused = false;
         this._started = false;
         this._cycle = null;
 
@@ -181,7 +170,7 @@ Controller.prototype = {
      *
      * Controller add event handler
      * @memberof Controller
-     * @method Controller.on
+     * @method on
      * @param {string} event the event to listen for
      * @param {function} handler the handler to call
      *
@@ -210,7 +199,7 @@ Controller.prototype = {
      *
      * Controller remove event handler
      * @memberof Controller
-     * @method Controller.off
+     * @method off
      * @param {string} event the event to remove handler for
      * @param {function} handler the handler to remove
      *
@@ -224,7 +213,7 @@ Controller.prototype = {
         if ( handler ) {
             this._off( event, handler );
 
-        // Remove all handlers for event    
+        // Remove all handlers for event
         } else {
             this._offed( event );
         }
@@ -236,7 +225,7 @@ Controller.prototype = {
      *
      * Controller fire an event
      * @memberof Controller
-     * @method Controller.fire
+     * @method fire
      * @param {string} event the event to fire
      *
      */
@@ -272,9 +261,10 @@ Controller.prototype = {
      *
      * Controller internal off method assumes event AND handler are good
      * @memberof Controller
-     * @method Controller._off
+     * @method _off
      * @param {string} event the event to remove handler for
      * @param {function} handler the handler to remove
+     * @private
      *
      */
     _off: function ( event, handler ) {
@@ -291,8 +281,9 @@ Controller.prototype = {
      *
      * Controller completely remove all handlers and an event type
      * @memberof Controller
-     * @method Controller._offed
+     * @method _offed
      * @param {string} event the event to remove handler for
+     * @private
      *
      */
     _offed: function ( event ) {

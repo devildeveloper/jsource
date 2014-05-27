@@ -16,40 +16,63 @@
  *
  * Tween function
  * @constructor Tween
- * @param {number} duration How long the tween will last
- * @param {number} from Where to start the tween
- * @param {number} to When to end the tween
- * @param {function} tween The callback on each iteration
- * @param {function} ease The easing function to use
+ * @requires raf
+ * @requires Easing
+ * @param {object} options Tween animation settings
+ * <ul>
+ * <li>duration - How long the tween will last</li>
+ * <li>from - Where to start the tween</li>
+ * <li>to - When to end the tween</li>
+ * <li>update - The callback on each iteration</li>
+ * <li>complete - The callback on end of animation</li>
+ * <li>ease - The easing function to use</li>
+ * </ul>
  * @memberof! <global>
  *
  */
-var Tween = function ( duration, from, to, tween, ease ) {
-    ease = (ease || function ( t ) {
-        return t;
-    });
+var Tween = function ( options ) {
+    // Normalize options
+    options = (options || {});
+
+    // Normalize easing method
+    options.ease = (options.ease || Easing.swing);
+
+    // Normalize duration
+    options.duration = (options.duration || 600);
+
+    // Normalize from
+    options.from = (options.from || 0);
+
+    // Normalize to
+    options.to = (options.to || 0);
     
-    var time = (duration || 1000),
-        animDiff = (to - from),
-        startTime = new Date(),
-        timer;
-    
+    var tweenDiff = (options.to - options.from),
+        startTime = Date.now(),
+        rafTimer;
+
     function animate() {
-        var diff = new Date() - startTime,
-            animTo = (animDiff * ease( diff / time )) + from;
-        
-        if ( diff > time ) {
-            tween( to );
-            cancelAnimationFrame( timer );
-            timer = null;
+        var animDiff = (Date.now() - startTime),
+            tweenTo = (tweenDiff * options.ease( animDiff / options.duration )) + options.from;
+
+        if ( animDiff > options.duration ) {
+            if ( typeof options.complete === "function" ) {
+                options.complete( options.to );
+            }
+
+            cancelAnimationFrame( rafTimer );
+
+            rafTimer = null;
+
             return false;
         }
-        
-        tween( animTo );
-        timer = requestAnimationFrame( animate );
+
+        if ( typeof options.update === "function" ) {
+            options.update( tweenTo );
+        }
+
+        rafTimer = requestAnimationFrame( animate );
     }
-    
-    // Start the tween
+
     animate();
 };
 
@@ -78,30 +101,51 @@ window.Tween = Tween;
  * Window scroll2 function
  * @method scroll2
  * @requires Tween
- * @param {number} to Where are we scrolling
- * @param {number} duration How long will it take
- * @param {function} ease The easing function to use
- * @param {function} callback The callback on complete
+ * @param {object} options Tween animation settings
+ * <ul>
+ * <li>duration - How long the tween will last</li>
+ * <li>complete - The callback on end of animation</li>
+ * <li>ease - The easing function to use</li>
+ * <li>x/y - The axis to tween, where its going to land</li>
+ * </ul>
  * @memberof! <global>
  *
  */
-var scroll2 = function ( to, duration, ease, callback ) {
-    var from = (window.scrollY || window.pageYOffset),
-        hand = function ( t ) {
-            window.scrollTo( 0, t );
-            
-            if ( t === to && typeof callback === "function" ) {
-                callback();
-            }
-        };
-    
-    to = (to || 0);
-    duration = (duration || 400);
-    ease = (ease || function ( t ) {
-        return t;
-    });
-    
-    return new Tween( duration, from, to, hand, ease );
+var scroll2 = function ( options ) {
+    // Get current window positions
+    var position = {
+        x: (window.scrollX || document.documentElement.scrollLeft),
+        y: (window.scrollY || document.documentElement.scrollTop)
+    };
+
+    // Normalize options
+    options = (options || {});
+
+    // Normalize easing method
+    options.ease = (options.ease || Easing.swing);
+
+    // Normalize duration
+    options.duration = (options.duration || 600);
+
+    // Normalize from
+    options.from = ( options.y !== undefined ) ? position.y : position.x;
+
+    // Normalize to
+    options.to = ( options.y !== undefined ) ? options.y : options.x;
+
+    // Apply update method
+    options.update = function ( t ) {
+        // Vertical scroll
+        if ( options.y !== undefined ) {
+            window.scrollTo( position.x, t );
+
+        // Horizontal scroll
+        } else if ( options.x !== undefined ) {
+            window.scrollTo( t, position.y );
+        }
+    };
+
+    return new Tween( options );
 };
 
 

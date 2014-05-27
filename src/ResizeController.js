@@ -2,20 +2,20 @@
  *
  * Window resize / orientationchange event controller
  *
- * @Resizer
+ * @ResizeController
  * @author: kitajchuk
  *
  *
  */
-(function ( window, undefined ) {
+(function ( Controller ) {
 
 
 "use strict";
 
 
 // Break on no Controller
-if ( !window.Controller ) {
-    throw new Error( "Resizer Class requires Controller Class" );
+if ( !Controller ) {
+    throw new Error( "ResizeController Class requires Controller Class" );
 }
 
 
@@ -32,11 +32,20 @@ var _currentView = {
 /**
  *
  * Window resize / orientationchange event controller
- * @constructor Resizer
+ * @constructor ResizeController
+ * @augments Controller
+ * @requires Controller
  * @memberof! <global>
  *
+ * @fires resize
+ * @fires resizedown
+ * @fires resizeup
+ * @fires orientationchange
+ * @fires orientationportrait
+ * @fires orientationlandscape
+ *
  */
-var Resizer = function () {
+var ResizeController = function () {
     // Singleton
     if ( !_instance ) {
         _instance = this;
@@ -54,27 +63,57 @@ var Resizer = function () {
 
             // Fire blanket resize event
             if ( isResize ) {
+                /**
+                 *
+                 * @event resize
+                 *
+                 */
                 _instance.fire( "resize" );
             }
 
             // Fire resizeup and resizedown
             if ( isResizeDown ) {
+                /**
+                 *
+                 * @event resizedown
+                 *
+                 */
                 _instance.fire( "resizedown" );
 
             } else if ( isResizeUp ) {
+                /**
+                 *
+                 * @event resizeup
+                 *
+                 */
                 _instance.fire( "resizeup" );
             }
 
             // Fire blanket orientationchange event
             if ( isOrientation ) {
+                /**
+                 *
+                 * @event orientationchange
+                 *
+                 */
                 _instance.fire( "orientationchange" );
             }
 
             // Fire orientationportrait and orientationlandscape
             if ( isOrientationPortrait ) {
+                /**
+                 *
+                 * @event orientationportrait
+                 *
+                 */
                 _instance.fire( "orientationportrait" );
 
             } else if ( isOrientationLandscape ) {
+                /**
+                 *
+                 * @event orientationlandscape
+                 *
+                 */
                 _instance.fire( "orientationlandscape" );
             }
 
@@ -85,9 +124,17 @@ var Resizer = function () {
     return _instance;
 };
 
-Resizer.prototype = new Controller();
+ResizeController.prototype = new Controller();
 
-Resizer.prototype.getViewport = function () {
+/**
+ *
+ * Returns the current window viewport specs
+ * @memberof ResizeController
+ * @method getViewport
+ * @returns object
+ *
+ */
+ResizeController.prototype.getViewport = function () {
     return {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -97,7 +144,7 @@ Resizer.prototype.getViewport = function () {
 
 
 // Expose
-window.Resizer = Resizer;
+window.ResizeController = ResizeController;
 
 
-})( window );
+})( (window.Controller || window.funpack.Controller) );

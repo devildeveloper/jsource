@@ -35,7 +35,8 @@ MatchRoute.prototype = {
      *
      * Expression match http/https
      * @memberof MatchRoute
-     * @member MatchRoute._rHTTPs
+     * @member _rHTTPs
+     * @private
      *
      */
     _rHTTPs: /^http[s]?:\/\/.*?\//,
@@ -44,7 +45,8 @@ MatchRoute.prototype = {
      *
      * Expression match trail slashes
      * @memberof MatchRoute
-     * @member MatchRoute._rTrails
+     * @member _rTrails
+     * @private
      *
      */
     _rTrails: /^\/|\/$/g,
@@ -53,7 +55,8 @@ MatchRoute.prototype = {
      *
      * Expression match hashbang/querystring
      * @memberof MatchRoute
-     * @member MatchRoute._rHashQuery
+     * @member _rHashQuery
+     * @private
      *
      */
     _rHashQuery: /#.*$|\?.*$/g,
@@ -62,7 +65,8 @@ MatchRoute.prototype = {
      *
      * Expression match wildcards
      * @memberof MatchRoute
-     * @member MatchRoute._rWild
+     * @member _rWild
+     * @private
      *
      */
     _rWild: /^:/,
@@ -71,7 +75,8 @@ MatchRoute.prototype = {
      *
      * Expressions to match wildcards with supported conditions
      * @memberof MatchRoute
-     * @member MatchRoute._wilders
+     * @member _wilders
+     * @private
      *
      */
     _wilders: {
@@ -84,7 +89,7 @@ MatchRoute.prototype = {
      *
      * MatchRoute init constructor method
      * @memberof MatchRoute
-     * @method MatchRoute.init
+     * @method init
      * @param {array} routes Config routes can be passed on instantiation
      *
      */
@@ -93,10 +98,23 @@ MatchRoute.prototype = {
          *
          * The routes config array
          * @memberof MatchRoute
-         * @member MatchRoute._routes
+         * @member _routes
+         * @private
          *
          */
         this._routes = ( routes ) ? this._cleanRoutes( routes ) : [];
+    },
+
+    /**
+     *
+     * Get the internal route array
+     * @memberof MatchRoute
+     * @method MatchRoute.getRoutes
+     * @returns {array}
+     *
+     */
+    getRoutes: function () {
+        return this._routes;
     },
     
     /**
@@ -108,6 +126,9 @@ MatchRoute.prototype = {
      *
      */
     config: function ( routes ) {
+        // Force array on routes
+        routes = ( typeof routes === "string" ) ? [ routes ] : routes;
+
         this._routes = this._routes.concat( this._cleanRoutes( routes ) );
         
         return this;
@@ -186,6 +207,7 @@ MatchRoute.prototype = {
             ret = {
                 match: false,
                 route: null,
+                uri: [],
                 matches: {}
             };
             
@@ -219,9 +241,6 @@ MatchRoute.prototype = {
                     // The match condition
                     cond = matches[ 1 ];
                     
-                    // Add the match to the config data
-                    ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
-                    
                     // With conditions
                     if ( cond ) {
                         // We support this condition
@@ -232,14 +251,18 @@ MatchRoute.prototype = {
                         // Test against the condition
                         if ( regex && regex.test( uris[ j ] ) ) {
                             segMatches++;
+                            
+                            // Add the match to the config data
+                            ret.matches[ match.replace( this._rWild, "" ) ] = uris[ j ];
+                            ret.uri.push( uris[ j ] );
                         }
                     
-                    // No conditions, anything goes    
+                    // No conditions, anything goes   
                     } else {
                         segMatches++;
                     }
                 
-                // Defined segment always goes    
+                // Defined segment always goes   
                 } else {
                     if ( uris[ j ] === ruris[ j ] ) {
                         segMatches++;
@@ -250,6 +273,7 @@ MatchRoute.prototype = {
             if ( segMatches === uris.length ) {
                 ret.match = true;
                 ret.route = routes[ i ];
+                ret.uri = ret.uri.join( "/" );
                 
                 break;
             }
@@ -263,9 +287,10 @@ MatchRoute.prototype = {
      * Clean a route string
      * If the route === "/" then it is returned as is
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoute
      * @param {string} route the route to clean
      * @returns cleaned route string
+     * @private
      *
      */
     _cleanRoute: function ( route ) {
@@ -286,9 +311,10 @@ MatchRoute.prototype = {
      *
      * Clean an array of route strings
      * @memberof MatchRoute
-     * @method parse
+     * @method _cleanRoutes
      * @param {array} routes the routes to clean
      * @returns cleaned routes array
+     * @private
      *
      */
     _cleanRoutes: function ( routes ) {

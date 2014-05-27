@@ -16,40 +16,63 @@
  *
  * Tween function
  * @constructor Tween
- * @param {number} duration How long the tween will last
- * @param {number} from Where to start the tween
- * @param {number} to When to end the tween
- * @param {function} tween The callback on each iteration
- * @param {function} ease The easing function to use
+ * @requires raf
+ * @requires Easing
+ * @param {object} options Tween animation settings
+ * <ul>
+ * <li>duration - How long the tween will last</li>
+ * <li>from - Where to start the tween</li>
+ * <li>to - When to end the tween</li>
+ * <li>update - The callback on each iteration</li>
+ * <li>complete - The callback on end of animation</li>
+ * <li>ease - The easing function to use</li>
+ * </ul>
  * @memberof! <global>
  *
  */
-var Tween = function ( duration, from, to, tween, ease ) {
-    ease = (ease || function ( t ) {
-        return t;
-    });
+var Tween = function ( options ) {
+    // Normalize options
+    options = (options || {});
+
+    // Normalize easing method
+    options.ease = (options.ease || Easing.swing);
+
+    // Normalize duration
+    options.duration = (options.duration || 600);
+
+    // Normalize from
+    options.from = (options.from || 0);
+
+    // Normalize to
+    options.to = (options.to || 0);
     
-    var time = (duration || 1000),
-        animDiff = (to - from),
-        startTime = new Date(),
-        timer;
-    
+    var tweenDiff = (options.to - options.from),
+        startTime = Date.now(),
+        rafTimer;
+
     function animate() {
-        var diff = new Date() - startTime,
-            animTo = (animDiff * ease( diff / time )) + from;
-        
-        if ( diff > time ) {
-            tween( to );
-            cancelAnimationFrame( timer );
-            timer = null;
+        var animDiff = (Date.now() - startTime),
+            tweenTo = (tweenDiff * options.ease( animDiff / options.duration )) + options.from;
+
+        if ( animDiff > options.duration ) {
+            if ( typeof options.complete === "function" ) {
+                options.complete( options.to );
+            }
+
+            cancelAnimationFrame( rafTimer );
+
+            rafTimer = null;
+
             return false;
         }
-        
-        tween( animTo );
-        timer = requestAnimationFrame( animate );
+
+        if ( typeof options.update === "function" ) {
+            options.update( tweenTo );
+        }
+
+        rafTimer = requestAnimationFrame( animate );
     }
-    
-    // Start the tween
+
     animate();
 };
 

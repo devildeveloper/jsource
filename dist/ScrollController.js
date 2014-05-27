@@ -1,56 +1,5 @@
 /*!
  *
- * Adapted from https://gist.github.com/paulirish/1579671 which derived from 
- * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
- * http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
- * 
- * requestAnimationFrame polyfill by Erik Möller.
- * Fixes from Paul Irish, Tino Zijdel, Andrew Mao, Klemen Slavič, Darius Bacon
- * 
- * MIT license
- *
- * @raf
- *
- */
-(function ( window ) {
-
-"use strict";
-
-if ( !Date.now ) {
-    Date.now = function () {
-        return new Date().getTime();
-    };
-}
-
-(function() {
-    var vendors = ["webkit", "moz", "ms", "o"];
-
-    for ( var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i ) {
-        var vp = vendors[i];
-        window.requestAnimationFrame = window[vp + "RequestAnimationFrame"];
-        window.cancelAnimationFrame = (window[vp + "CancelAnimationFrame"] || window[vp + "CancelRequestAnimationFrame"]);
-    }
-
-    if ( /iP(ad|hone|od).*OS 6/.test( window.navigator.userAgent ) || !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
-        var lastTime = 0;
-
-        window.requestAnimationFrame = function ( callback ) {
-            var now = Date.now(),
-                nextTime = Math.max( lastTime + 16, now );
-
-            return setTimeout(function() {
-                callback( lastTime = nextTime );
-
-            }, (nextTime - now) );
-        };
-
-        window.cancelAnimationFrame = clearTimeout;
-    }
-}());
-
-})( window );
-/*!
- *
  * Event / Animation cycle manager
  *
  * var MyController = function () {};
@@ -352,3 +301,157 @@ window.Controller = Controller;
 
 
 })( window );
+/*!
+ *
+ * Window scroll event controller
+ *
+ * @ScrollController
+ * @author: kitajchuk
+ *
+ *
+ */
+(function ( Controller ) {
+
+
+"use strict";
+
+
+// Break on no Controller
+if ( !Controller ) {
+    throw new Error( "ScrollController Class requires Controller Class" );
+}
+
+
+// Current scroll position
+var _currentY = null,
+
+    // Singleton
+    _instance = null;
+
+/**
+ *
+ * Window scroll event controller
+ * @constructor ScrollController
+ * @augments Controller
+ * @requires Controller
+ * @memberof! <global>
+ *
+ * @fires scroll
+ * @fires scrolldown
+ * @fires scrollup
+ * @fires scrollmax
+ * @fires scrollmin
+ *
+ */
+var ScrollController = function () {
+    // Singleton
+    if ( !_instance ) {
+        _instance = this;
+
+        // Call on parent cycle
+        this.go(function () {
+            var currentY = _instance.getScrollY(),
+                isStill = (currentY === _currentY),
+                isScroll = (currentY !== _currentY),
+                isScrollUp = (currentY < _currentY),
+                isScrollDown = (currentY > _currentY),
+                isScrollMax = (currentY !== _currentY && _instance.isScrollMax()),
+                isScrollMin = (currentY !== _currentY && _instance.isScrollMin());
+
+            // Fire blanket scroll event
+            if ( isScroll ) {
+                /**
+                 *
+                 * @event scroll
+                 *
+                 */
+                _instance.fire( "scroll" );
+            }
+
+            // Fire scrollup and scrolldown
+            if ( isScrollDown ) {
+                /**
+                 *
+                 * @event scrolldown
+                 *
+                 */
+                _instance.fire( "scrolldown" );
+
+            } else if ( isScrollUp ) {
+                /**
+                 *
+                 * @event scrollup
+                 *
+                 */
+                _instance.fire( "scrollup" );
+            }
+
+            // Fire scrollmax and scrollmin
+            if ( isScrollMax ) {
+                /**
+                 *
+                 * @event scrollmax
+                 *
+                 */
+                _instance.fire( "scrollmax" );
+
+            } else if ( isScrollMin ) {
+                /**
+                 *
+                 * @event scrollmin
+                 *
+                 */
+                _instance.fire( "scrollmin" );
+            }
+
+            _currentY = currentY;
+        });
+    }
+
+    return _instance;
+};
+
+ScrollController.prototype = new Controller();
+
+/**
+ *
+ * Returns the current window vertical scroll position
+ * @memberof ScrollController
+ * @method getScrollY
+ * @returns number
+ *
+ */
+ScrollController.prototype.getScrollY = function () {
+    return (window.scrollY || document.documentElement.scrollTop);
+};
+
+/**
+ *
+ * Determines if scroll position is at maximum for document
+ * @memberof ScrollController
+ * @method isScrollMax
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMax = function () {
+    return (this.getScrollY() >= (document.documentElement.offsetHeight - window.innerHeight));
+};
+
+/**
+ *
+ * Determines if scroll position is at minimum for document
+ * @memberof ScrollController
+ * @method isScrollMin
+ * @returns boolean
+ *
+ */
+ScrollController.prototype.isScrollMin = function () {
+    return (this.getScrollY() <= 0);
+};
+
+
+// Expose
+window.ScrollController = ScrollController;
+
+
+})( (window.Controller || window.funpack.Controller) );

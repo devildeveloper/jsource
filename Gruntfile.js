@@ -13,28 +13,14 @@ module.exports = function ( grunt ) {
     grunt.initConfig({
         // Project meta.
         meta: {
-            version: "0.1.0"
+            version: "1.0.0"
         },
-        
-        
-        // Project banner.
-        banner:
-            "/*!\n"+
-            " * \n"+
-            " * \n"+
-            " * JSource - v<%= meta.version %> - <%= grunt.template.today('yyyy-mm-dd') %>\n"+
-            " * Copyright (c) Brandon Lee Kitajchuk <%= grunt.template.today('yyyy') %>\n"+
-            " * Licensed MIT\n"+
-            " * \n"+
-            " * \n"+
-            " */\n"+
-            "\n",
         
         
         // Concat config.
         concat: {
             jsource: {
-                src: ["src/**/*.js"],
+                src: ["banner.js", "src/**/*.js"],
                 dest: "dist/jsource.js"
             }
         },
@@ -43,7 +29,7 @@ module.exports = function ( grunt ) {
         // Uglify config.
         uglify: {
             jsource: {
-                src: ["src/**/*.js"],
+                src: ["banner.js", "src/**/*.js"],
                 dest: "dist/jsource.min.js"
             }
         },
@@ -143,6 +129,12 @@ module.exports = function ( grunt ) {
             
             grunt.task.run( "build:" + script );
         });
+    });
+    
+    // Register jsdoc task.
+    grunt.registerTask( "jsdoc", function () {
+        var spawn = require( "child_process" ).spawn,
+            child = spawn( "node_modules/jsdoc/jsdoc", ["-r", "src", "-d", "docs"] );
     });
     
     

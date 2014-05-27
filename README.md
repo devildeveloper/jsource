@@ -3,52 +3,10 @@ JSource
 
 > A vanilla javascript resource for the everyday developer.
 
+These javascript resources can be used standalone or with one another. They are meant to be vanilla javascript resources that are lightweight and useful. Basically, this is where I write scripts one time only so I can reuse them. There are a few scripts that are written on top of library dependencies such as [jQuery](https://github.com/jquery/jquery) and [Hammerjs](https://github.com/EightMedia/hammer.js).
 
-These javascript resources can be used standalone or with one another. They are meant to be vanilla javascript resources that are lightweight and useful. Basically, this is where I write scripts one time only so I can reuse them. These resources are always a result of not being able to find what I need in another script. All too often javascript resources just try to do too much. I typically aim to make these as small and basic as possible. That being said, they are great starting points in a sea of bloated scripts.
+## Authoring Javascript
+Document all javascript fully in [jsdoc](http://usejsdoc.org/) format. You can generate jsdocs for jsource scripts with grunt, `grunt jsdoc`. They will be compiled into a `docs` directory. Javascript that is written as a [jQuery](https://github.com/jquery/jquery) extension should be done so in such a way that it supports extending other frameworks as well such as [Ender](https://github.com/ender-js/ender-js) and [Zepto](https://github.com/madrobby/zepto). This makes the code more reusable across projects using different frameworks either by necessity or preference.
 
-
-### Src
- - [ajax](https://github.com/kitajchuk/jsource/blob/master/src/ajax.js) - Basic XMLHttpRequest handling using Promises
-   - You likely need a promise polyfill in the meantime, so [look no further](https://github.com/jakearchibald/es6-promise).
- - [Blit](https://github.com/kitajchuk/jsource/blob/master/src/Blit.js) - A simple gamecycle engine
- - [Controller](https://github.com/kitajchuk/jsource/blob/master/src/Controller.js) - An extendable Event / Animation cycle manager
- - [debounce](https://github.com/kitajchuk/jsource/blob/master/src/debounce.js) - The classic debounce pattern
- - [Easing](https://github.com/kitajchuk/jsource/blob/master/src/Easing.js) - A base set of easing methods
- - [EventApi](https://github.com/kitajchuk/jsource/blob/master/src/EventApi.js) - A basic cross-browser event api
- - [Eventful](https://github.com/kitajchuk/jsource/blob/master/src/Eventful.js) - A singleton event dispatching utility
- - [Isearch](https://github.com/kitajchuk/jsource/blob/master/src/Isearch.js) - Expression matching for term lists
- - [KonamiCode](https://github.com/kitajchuk/jsource/blob/master/src/KonamiCode.js) - A konami code easter egg handler
- - [MatchRoute](https://github.com/kitajchuk/jsource/blob/master/src/MatchRoute.js) - A wildcard route matcher
- - [MediaBox](https://github.com/kitajchuk/jsource/blob/master/src/MediaBox.js) - An audio and video box manager
- - [PushState](https://github.com/kitajchuk/jsource/blob/master/src/PushState.js) - A simple history pushState class utility
- - [Resizer](https://github.com/kitajchuk/jsource/blob/master/src/Resizer.js) - Manager for window resize / orientationchange events. Extends Controller
- - [Router](https://github.com/kitajchuk/jsource/blob/master/src/Router.js) - Handles basic GET routing
- - [scroll2](https://github.com/kitajchuk/jsource/blob/master/src/scroll2.js) - A basic window scroll-to function
- - [Scroller](https://github.com/kitajchuk/jsource/blob/master/src/Scroller.js) - Manager for window scroll events. Extends Controller
- - [Stagger](https://github.com/kitajchuk/jsource/blob/master/src/Stagger.js) - A stepped timeout manager
- - [throttle](https://github.com/kitajchuk/jsource/blob/master/src/throttle.js) - The classic throttle pattern
- - [Tween](https://github.com/kitajchuk/jsource/blob/master/src/Tween.js) - A simple tween class using requestAnimationFrame
-
-
-### Docs
-Run the following to jsdoc all the code in the src directory.
-
-```shell
-# make jsdocs
-make jsdocs
-
-# start a server
-python -m SimpleHTTPServer
-```
-
-You should be able to see the docs at [http://localhost:8000/docs/](http://localhost:8000/docs/)
-
-
-### Build
-You can use [grunt](http://gruntjs.com/) to build just a single resource you need. For instance, the `Router` uses `PushState` and `MatchRoute` standalone classes. That's actually the only case where files are broken out and need to be combined. Well, `scrollTo` uses `Tween`. Anyway, the following would build Router for you as an example:
-```shell
-# build Router with grunt
-grunt build:Router
-```
-
-This distributes to `dist/Router.js` and `dist/Router.min.js`.
+### Javascript Listing
+Check the [src](https://github.com/kitajchuk/jsource/blob/master/src/) to see what is available.
