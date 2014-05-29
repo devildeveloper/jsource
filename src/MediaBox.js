@@ -159,10 +159,10 @@ MediaBox.prototype = {
         var AudioContext;
         
         if ( window.AudioContext ) {
-            AudioContext = AudioContext;
+            AudioContext = window.AudioContext;
             
         } else if ( window.webkitAudioContext ) {
-            AudioContext = webkitAudioContext;
+            AudioContext = window.webkitAudioContext;
         }
         
         return ( AudioContext ) ? new AudioContext() : AudioContext;
