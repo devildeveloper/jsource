@@ -13,7 +13,7 @@ module.exports = function ( grunt ) {
     grunt.initConfig({
         // Project meta.
         meta: {
-            version: "1.0.5"
+            version: "1.0.6"
         },
         
         

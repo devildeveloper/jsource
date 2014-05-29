@@ -469,6 +469,50 @@ MediaBox.prototype = {
     
     /**
      *
+     * MediaBox check stopped/paused status for audio/video
+     * @memberof MediaBox
+     * @method MediaBox.isStopped
+     * @param {string} id reference id for media
+     * @returns boolean
+     *
+     */
+    isStopped: function ( id ) {
+        var ret;
+        
+        if ( this._video[ id ] ) {
+            ret = this._video[ id ].element.paused;
+            
+        } else if ( this._audio[ id ] ) {
+            ret = this._audio[ id ].state === this.STATE_STOPPED;
+        }
+        
+        return ret;
+    },
+    
+    /**
+     *
+     * MediaBox check playing status for audio/video
+     * @memberof MediaBox
+     * @method MediaBox.isPlaying
+     * @param {string} id reference id for media
+     * @returns boolean
+     *
+     */
+    isPlaying: function ( id ) {
+        var ret;
+        
+        if ( this._video[ id ] ) {
+            ret = !this._video[ id ].element.paused;
+            
+        } else if ( this._audio[ id ] ) {
+            ret = this._audio[ id ].state === this.STATE_PLAYING;
+        }
+        
+        return ret;
+    },
+    
+    /**
+     *
      * MediaBox load media config JSON formatted in Akihabara bundle style
      * @memberof MediaBox
      * @method MediaBox.loadMedia
@@ -568,7 +612,6 @@ MediaBox.prototype = {
         this._video[ id ].loop = (obj[ 2 ].loop || false);
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
-        //this._video[ id ].element.setAttribute( "controls", false );
         this._video[ id ]._usedSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
         this._video[ id ]._events = {};
         
@@ -635,7 +678,7 @@ MediaBox.prototype = {
      * MediaBox get video element by id
      * @memberof MediaBox
      * @method MediaBox.getVideo
-     * @param {id} string reference id for video
+     * @param {string} id reference id for media
      * @returns <video> element
      *
      */
@@ -651,14 +694,32 @@ MediaBox.prototype = {
     
     /**
      *
+     * MediaBox get all video elements as an array
+     * @memberof MediaBox
+     * @method MediaBox.getVideos
+     * @returns array
+     *
+     */
+    getVideos: function () {
+        var ret = [];
+        
+        for ( var id in this._video ) {
+            ret.push( this._video[ id ].element );
+        }
+        
+        return ret;
+    },
+    
+    /**
+     *
      * MediaBox play video element by id
      * @memberof MediaBox
      * @method MediaBox.playVideo
-     * @param {id} string reference id for video
+     * @param {string} id reference id for media
      *
      */
     playVideo: function ( id ) {
-        if ( this._video[ id ] ) {
+        if ( this._video[ id ] && this.isStopped( id ) ) {
             this._video[ id ].element.volume = this._channels[ this._video[ id ].channel ].volume;
             this._video[ id ].element.play();
         }
@@ -669,11 +730,11 @@ MediaBox.prototype = {
      * MediaBox stop video element by id
      * @memberof MediaBox
      * @method MediaBox.playVideo
-     * @param {id} string reference id for video
+     * @param {string} id reference id for media
      *
      */
     stopVideo: function ( id ) {
-        if ( this._video[ id ] ) {
+        if ( this._video[ id ] && this.isPlaying( id ) ) {
             this._video[ id ].element.pause();
         }
     },
