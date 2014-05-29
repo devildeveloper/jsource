@@ -1,7 +1,7 @@
 {
     "name": "jsource",
     "description": "A Javascript resource for the everyday coder.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "homepage": "https://github.com/kitajchuk/jsource",
     "readmeFilename": "README.md",
     "author": {
