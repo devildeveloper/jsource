@@ -568,9 +568,13 @@ MediaBox.prototype = {
         this._video[ id ].loop = (obj[ 2 ].loop || false);
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
-        this._video[ id ].element.setAttribute( "controls", false );
+        //this._video[ id ].element.setAttribute( "controls", false );
         this._video[ id ]._usedSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
         this._video[ id ]._events = {};
+        
+        if ( this._video[ id ].loop ) {
+            this._video[ id ].element.loop = true;
+        }
         
         xhr.open( "GET", this._video[ id ]._usedSource.source, true );
         xhr.onload = function ( e ) {
