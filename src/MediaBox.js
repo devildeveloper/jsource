@@ -522,9 +522,10 @@ MediaBox.prototype = {
      * @method MediaBox.fadeAudioIn
      * @param {string} id string reference id for audio
      * @param {number} duration tween time in ms
+     * @param {function} easing optional easing to use
      *
      */
-    fadeAudioIn: function ( id, duration ) {
+    fadeAudioIn: function ( id, duration, easing ) {
         if ( this._audio[ id ].state === this.STATE_PLAYING ) {
             //console.log( "@MediaBox:fadeAudioIn Already playing " + id );
             
@@ -546,8 +547,17 @@ MediaBox.prototype = {
                 this._audio[ id ].state = this.STATE_PLAYING;
             }
             
-            new Tween( (duration || 1000), 0, volume, function ( v ) {
-                self._audio[ id ].gainNode.gain.value = v;
+            new Tween({
+                to: volume,
+                from: 0,
+                ease: ( typeof easing === "function" ) ? easing : Easing.linear,
+                duration: (duration || 1000),
+                update: function ( v ) {
+                    self._audio[ id ].gainNode.gain.value = v;
+                },
+                complete: function ( v ) {
+                    self._audio[ id ].gainNode.gain.value = v;
+                }
             });
         }
     },
@@ -559,21 +569,18 @@ MediaBox.prototype = {
      * @method MediaBox.fadeAudioOut
      * @param {string} id string reference id for audio
      * @param {number} duration tween time in ms
+     * @param {function} easing optional easing to use
      *
      */
-    fadeAudioOut: function ( id, duration ) {
+    fadeAudioOut: function ( id, duration, easing ) {
         if ( this._audio[ id ].state === this.STATE_STOPPING ) {
             //console.log( "@MediaBox:fadeAudioOut Already stopping " + id );
             
             return this;
         }
         
-        var self = this;
-        
-        if ( this._audio[ id ] ) {
-            this._audio[ id ].state = this.STATE_STOPPING;
-            
-            new Tween( (duration || 1000), this._audio[ id ].gainNode.gain.value, 0, function ( v ) {
+        var self = this,
+            handler = function ( v ) {
                 // Check audio state on fadeout in case it is started again
                 // before the duration of the fadeout is complete.
                 if ( self._audio[ id ].state === self.STATE_STOPPING ) {
@@ -583,6 +590,18 @@ MediaBox.prototype = {
                         self.stopAudio( id );
                     }
                 }
+            };
+        
+        if ( this._audio[ id ] ) {
+            this._audio[ id ].state = this.STATE_STOPPING;
+            
+            new Tween({
+                to: 0,
+                from: this._audio[ id ].gainNode.gain.value,
+                ease: ( typeof easing === "function" ) ? easing : Easing.linear,
+                duration: (duration || 1000),
+                update: handler,
+                complete: handler
             });
         }
     },
