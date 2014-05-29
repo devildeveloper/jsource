@@ -248,6 +248,15 @@ window.Easing = Easing;
 "use strict";
 
 
+var defaults = {
+    ease: Easing.swing,
+    duration: 600,
+    from: 0,
+    to: 0,
+    delay: 0
+};
+
+
 /**
  *
  * Tween function
@@ -262,6 +271,7 @@ window.Easing = Easing;
  * <li>update - The callback on each iteration</li>
  * <li>complete - The callback on end of animation</li>
  * <li>ease - The easing function to use</li>
+ * <li>delay - How long to wait before animation</li>
  * </ul>
  * @memberof! <global>
  *
@@ -270,20 +280,15 @@ var Tween = function ( options ) {
     // Normalize options
     options = (options || {});
 
-    // Normalize easing method
-    options.ease = (options.ease || Easing.swing);
+    // Normalize options
+    for ( var i in options ) {
+        if ( typeof defaults[ i ] !== undefined ) {
+            options[ i ] = ( typeof options[ i ] !== undefined ) ? options[ i ] : defaults[ i ];
+        }
+    }
 
-    // Normalize duration
-    options.duration = (options.duration || 600);
-
-    // Normalize from
-    options.from = (options.from || 0);
-
-    // Normalize to
-    options.to = (options.to || 0);
-    
     var tweenDiff = (options.to - options.from),
-        startTime = Date.now(),
+        startTime,
         rafTimer;
 
     function animate() {
@@ -309,7 +314,11 @@ var Tween = function ( options ) {
         rafTimer = requestAnimationFrame( animate );
     }
 
-    animate();
+    setTimeout(function () {
+        startTime = Date.now();
+        animate();
+
+    }, options.delay );
 };
 
 
