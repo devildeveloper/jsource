@@ -198,11 +198,13 @@ window.Easing = Easing;
 
 
 var defaults = {
-    ease: Easing.swing,
+    ease: Easing.linear,
     duration: 600,
     from: 0,
     to: 0,
-    delay: 0
+    delay: 0,
+    update: function () {},
+    complete: function () {}
 };
 
 
@@ -230,9 +232,9 @@ var Tween = function ( options ) {
     options = (options || {});
 
     // Normalize options
-    for ( var i in options ) {
-        if ( typeof defaults[ i ] !== undefined ) {
-            options[ i ] = ( typeof options[ i ] !== undefined ) ? options[ i ] : defaults[ i ];
+    for ( var i in defaults ) {
+        if ( options[ i ] === undefined ) {
+            options[ i ] = defaults[ i ];
         }
     }
 
@@ -244,6 +246,10 @@ var Tween = function ( options ) {
         var animDiff = (Date.now() - startTime),
             tweenTo = (tweenDiff * options.ease( animDiff / options.duration )) + options.from;
 
+        if ( typeof options.update === "function" ) {
+            options.update( tweenTo );
+        }
+
         if ( animDiff > options.duration ) {
             if ( typeof options.complete === "function" ) {
                 options.complete( options.to );
@@ -254,10 +260,6 @@ var Tween = function ( options ) {
             rafTimer = null;
 
             return false;
-        }
-
-        if ( typeof options.update === "function" ) {
-            options.update( tweenTo );
         }
 
         rafTimer = requestAnimationFrame( animate );
