@@ -86,11 +86,20 @@ MediaBox.prototype = {
         /**
          *
          * MediaBox information for each channel
+         * <ul>
+         * <li>bgm - background music channel</li>
+         * <li>sfx - sound effects channel</li>
+         * <li>vid - video channel</li>
+         * </ul>
          * @memberof MediaBox
          * @member MediaBox._channels
          *
          */
-        this._channels = {};
+        this._channels = {
+            bgm: {},
+            sfx: {},
+            vid: {}
+        };
         
         /**
          *
@@ -122,29 +131,18 @@ MediaBox.prototype = {
         /**
          *
          * MediaBox supports
+         * <ul>
+         * <li>audio - browser support for audio</li>
+         * <li>video - browser support for video</li>
+         * </ul>
          * @memberof MediaBox
          * @member MediaBox._supported
          *
          */
-        this._supported = {};
-        
-        /**
-         *
-         * MediaBox supported audio
-         * @memberof MediaBox
-         * @member MediaBox._supported.audio
-         *
-         */
-        this._supported.audio = this._getAudioSupport();
-        
-        /**
-         *
-         * MediaBox supported video
-         * @memberof MediaBox
-         * @member MediaBox._supported.video
-         *
-         */
-        this._supported.video = this._getVideoSupport();
+        this._supported = {
+            audio: this._getAudioSupport(),
+            video: this._getVideoSupport()
+        };
     },
     
     /**
@@ -324,18 +322,15 @@ MediaBox.prototype = {
             id = obj[ 0 ],
             xhr = new XMLHttpRequest();
         
-        if ( !this._channels[ obj[ 2 ].channel ] ) {
-            this._channels[ obj[ 2 ].channel ] = {};
-        }
-        
         // Create video object
         this._video[ id ] = {};
-        this._video[ id ].channel = obj[ 2 ].channel;
+        this._video[ id ].channel = "vid";
         this._video[ id ].loop = (obj[ 2 ].loop || false);
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
         this._video[ id ]._usedSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
         this._video[ id ]._events = {};
+        this._video[ id ].state = this.STATE_STOPPED;
         
         if ( this._video[ id ].loop ) {
             this._video[ id ].element.loop = true;
@@ -444,12 +439,28 @@ MediaBox.prototype = {
         if ( this._video[ id ] && this.isStopped( id ) ) {
             this._video[ id ].element.volume = this._channels[ this._video[ id ].channel ].volume;
             this._video[ id ].element.play();
+            this._video[ id ].state = this.STATE_PLAYING;
         }
     },
     
     /**
      *
-     * MediaBox stop video element by id
+     * MediaBox stop video element by id with a paused state
+     * @memberof MediaBox
+     * @method MediaBox.pauseVideo
+     * @param {string} id reference id for media
+     *
+     */
+    pauseVideo: function ( id ) {
+        if ( this._video[ id ] && this.isPlaying( id ) ) {
+            this._video[ id ].element.pause();
+            this._video[ id ].state = this.STATE_PAUSED;
+        }
+    },
+    
+    /**
+     *
+     * MediaBox stop video element by id with a stopped state
      * @memberof MediaBox
      * @method MediaBox.playVideo
      * @param {string} id reference id for media
@@ -458,6 +469,7 @@ MediaBox.prototype = {
     stopVideo: function ( id ) {
         if ( this._video[ id ] && this.isPlaying( id ) ) {
             this._video[ id ].element.pause();
+            this._video[ id ].state = this.STATE_STOPPED;
         }
     },
     
@@ -475,11 +487,8 @@ MediaBox.prototype = {
             id = obj[ 0 ],
             xhr = new XMLHttpRequest();
         
-        if ( !this._channels[ obj[ 2 ].channel ] ) {
-            this._channels[ obj[ 2 ].channel ] = {};
-        }
-        
         // Create audio object
+        // Audio channel can be either "bgm" or "sfx"
         this._audio[ id ] = {};
         this._audio[ id ].channel = obj[ 2 ].channel;
         this._audio[ id ].loop = (obj[ 2 ].loop || false);
@@ -680,9 +689,20 @@ MediaBox.prototype = {
      *
      */
     stopChannel: function ( channel ) {
-        for ( var id in this._audio ) {
-            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PLAYING ) {
-                this.pauseAudio( id );
+        var id;
+
+        if ( channel === "vid" ) {
+            for ( id in this._video ) {
+                if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PLAYING ) {
+                    this.pauseVideo( id );
+                }
+            }
+            
+        } else {
+            for ( id in this._audio ) {
+                if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PLAYING ) {
+                    this.pauseAudio( id );
+                }
             }
         }
     },
@@ -696,9 +716,20 @@ MediaBox.prototype = {
      *
      */
     playChannel: function ( channel ) {
-        for ( var id in this._audio ) {
-            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PAUSED ) {
-                this.playAudio( id );
+        var id;
+
+        if ( channel === "vid" ) {
+            for ( id in this._video ) {
+                if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PAUSED ) {
+                    this.playVideo( id );
+                }
+            }
+            
+        } else {
+            for ( id in this._audio ) {
+                if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PAUSED ) {
+                    this.playAudio( id );
+                }
             }
         }
     },
