@@ -104,6 +104,15 @@ MediaBox.prototype = {
         
         /**
          *
+         * MediaBox holds all loaded source urls
+         * @memberof MediaBox
+         * @member MediaBox._loaded
+         *
+         */
+        this._loaded = [];
+        
+        /**
+         *
          * MediaBox holds all audio tracks
          * @memberof MediaBox
          * @member MediaBox._audio
@@ -321,7 +330,16 @@ MediaBox.prototype = {
     addVideo: function ( obj, callback ) {
         var self = this,
             id = obj[ 0 ],
-            xhr = new XMLHttpRequest();
+            
+            // Handle the loaded video
+            handler = function () {
+                var source = document.createElement( "source" );
+                    source.src = self._video[ id ]._usedSource.source;
+                    source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
+            
+                self._video[ id ].element.appendChild( source );
+            },
+            xhr;
         
         // Allow new channels to exist
         if ( !this._channels[ obj[ 2 ].channel ] ) {
@@ -338,17 +356,28 @@ MediaBox.prototype = {
         this._video[ id ]._events = {};
         this._video[ id ].state = this.STATE_STOPPED;
         
+        // Set loop
         if ( this._video[ id ].loop ) {
             this._video[ id ].element.loop = true;
         }
         
+        // Check if we have loaded this before
+        if ( this._loaded.indexOf( this._video[ id ]._usedSource.source ) !== -1 ) {
+            if ( typeof callback === "function" ) {
+                handler();
+                callback();
+                
+                return;
+            }
+        }
+        
+        // Push the source onto the loaded stack
+        this._loaded.push( this._video[ id ]._usedSource.source );
+        
+        xhr = new XMLHttpRequest();
         xhr.open( "GET", this._video[ id ]._usedSource.source, true );
         xhr.onload = function ( e ) {
-            var source = document.createElement( "source" );
-                source.src = self._video[ id ]._usedSource.source;
-                source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
-        
-            self._video[ id ].element.appendChild( source );
+            handler();
             
             if ( typeof callback === "function" ) {
                 callback();

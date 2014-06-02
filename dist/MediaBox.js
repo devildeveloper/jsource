@@ -365,7 +365,8 @@ MediaBox.prototype = {
         
         /**
          *
-         * MediaBox information for each channel
+         * MediaBox information for each channel.
+         * These are default channels you can use.
          * <ul>
          * <li>bgm - background music channel</li>
          * <li>sfx - sound effects channel</li>
@@ -380,6 +381,15 @@ MediaBox.prototype = {
             sfx: {},
             vid: {}
         };
+        
+        /**
+         *
+         * MediaBox holds all loaded source urls
+         * @memberof MediaBox
+         * @member MediaBox._loaded
+         *
+         */
+        this._loaded = [];
         
         /**
          *
@@ -600,11 +610,25 @@ MediaBox.prototype = {
     addVideo: function ( obj, callback ) {
         var self = this,
             id = obj[ 0 ],
-            xhr = new XMLHttpRequest();
+            
+            // Handle the loaded video
+            handler = function () {
+                var source = document.createElement( "source" );
+                    source.src = self._video[ id ]._usedSource.source;
+                    source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
+            
+                self._video[ id ].element.appendChild( source );
+            },
+            xhr;
+        
+        // Allow new channels to exist
+        if ( !this._channels[ obj[ 2 ].channel ] ) {
+            this._channels[ obj[ 2 ].channel ] = {};
+        }
         
         // Create video object
         this._video[ id ] = {};
-        this._video[ id ].channel = "vid";
+        this._video[ id ].channel = obj[ 2 ].channel;
         this._video[ id ].loop = (obj[ 2 ].loop || false);
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
@@ -612,17 +636,28 @@ MediaBox.prototype = {
         this._video[ id ]._events = {};
         this._video[ id ].state = this.STATE_STOPPED;
         
+        // Set loop
         if ( this._video[ id ].loop ) {
             this._video[ id ].element.loop = true;
         }
         
+        // Check if we have loaded this before
+        if ( this._loaded.indexOf( this._video[ id ]._usedSource.source ) !== -1 ) {
+            if ( typeof callback === "function" ) {
+                handler();
+                callback();
+                
+                return;
+            }
+        }
+        
+        // Push the source onto the loaded stack
+        this._loaded.push( this._video[ id ]._usedSource.source );
+        
+        xhr = new XMLHttpRequest();
         xhr.open( "GET", this._video[ id ]._usedSource.source, true );
         xhr.onload = function ( e ) {
-            var source = document.createElement( "source" );
-                source.src = self._video[ id ]._usedSource.source;
-                source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
-        
-            self._video[ id ].element.appendChild( source );
+            handler();
             
             if ( typeof callback === "function" ) {
                 callback();
@@ -767,8 +802,12 @@ MediaBox.prototype = {
             id = obj[ 0 ],
             xhr = new XMLHttpRequest();
         
+        // Allow new channels to exist
+        if ( !this._channels[ obj[ 2 ].channel ] ) {
+            this._channels[ obj[ 2 ].channel ] = {};
+        }
+        
         // Create audio object
-        // Audio channel can be either "bgm" or "sfx"
         this._audio[ id ] = {};
         this._audio[ id ].channel = obj[ 2 ].channel;
         this._audio[ id ].loop = (obj[ 2 ].loop || false);
@@ -970,19 +1009,18 @@ MediaBox.prototype = {
      */
     stopChannel: function ( channel ) {
         var id;
-
-        if ( channel === "vid" ) {
-            for ( id in this._video ) {
-                if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PLAYING ) {
-                    this.pauseVideo( id );
-                }
+        
+        // Look at video index
+        for ( id in this._video ) {
+            if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PLAYING ) {
+                this.pauseVideo( id );
             }
-            
-        } else {
-            for ( id in this._audio ) {
-                if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PLAYING ) {
-                    this.pauseAudio( id );
-                }
+        }
+        
+        // Look at audio index
+        for ( id in this._audio ) {
+            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PLAYING ) {
+                this.pauseAudio( id );
             }
         }
     },
@@ -997,19 +1035,18 @@ MediaBox.prototype = {
      */
     playChannel: function ( channel ) {
         var id;
-
-        if ( channel === "vid" ) {
-            for ( id in this._video ) {
-                if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PAUSED ) {
-                    this.playVideo( id );
-                }
+        
+        // Look at video index
+        for ( id in this._video ) {
+            if ( this._video[ id ].channel === channel && this._video[ id ].state === this.STATE_PAUSED ) {
+                this.playVideo( id );
             }
-            
-        } else {
-            for ( id in this._audio ) {
-                if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PAUSED ) {
-                    this.playAudio( id );
-                }
+        }
+        
+        // Look at audio index
+        for ( id in this._audio ) {
+            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === this.STATE_PAUSED ) {
+                this.playAudio( id );
             }
         }
     },
