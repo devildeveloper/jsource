@@ -668,6 +668,33 @@ MediaBox.prototype = {
     
     /**
      *
+     * MediaBox get a video element property
+     * @memberof MediaBox
+     * @method MediaBox.getVideoProp
+     * @param {string} id Video id to add event for
+     * @param {string} prop The property to access
+     *
+     */
+    getVideoProp: function ( id, prop ) {
+        return this._video[ id ].element[ prop ];
+    },
+    
+    /**
+     *
+     * MediaBox set a video element property
+     * @memberof MediaBox
+     * @method MediaBox.setVideoProp
+     * @param {string} id Video id to add event for
+     * @param {string} prop The property to set
+     * @param {mixed} value The value to assign
+     *
+     */
+    setVideoProp: function ( id, prop, value ) {
+        this._video[ id ].element[ prop ] = value;
+    },
+    
+    /**
+     *
      * MediaBox add a video element event listener
      * @memberof MediaBox
      * @method MediaBox.addVideoEvent
