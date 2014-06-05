@@ -111,7 +111,7 @@ KonamiCode.prototype = {
         if ( document.addEventListener ) {
             document.addEventListener( "keydown", handler, false );
             
-        } else {
+        } else if ( document.attachEvent ) {
             document.attachEvent( "onkeydown", handler );
         }
     },

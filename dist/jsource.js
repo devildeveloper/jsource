@@ -1729,7 +1729,7 @@ KonamiCode.prototype = {
         if ( document.addEventListener ) {
             document.addEventListener( "keydown", handler, false );
             
-        } else {
+        } else if ( document.attachEvent ) {
             document.attachEvent( "onkeydown", handler );
         }
     },
@@ -2306,6 +2306,21 @@ MediaBox.prototype = {
     
     /**
      *
+     * MediaBox check if media is loaded via ajax
+     * @memberof MediaBox
+     * @method MediaBox.isLoaded
+     * @param {string} id reference id for media
+     * @returns boolean
+     *
+     */
+    isLoaded: function ( id ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        return (obj.loaded === true);
+    },
+    
+    /**
+     *
      * MediaBox check stopped/paused status for audio/video
      * @memberof MediaBox
      * @method MediaBox.isStopped
@@ -2314,16 +2329,9 @@ MediaBox.prototype = {
      *
      */
     isStopped: function ( id ) {
-        var ret;
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
         
-        if ( this._video[ id ] ) {
-            ret = this._video[ id ].element.paused;
-            
-        } else if ( this._audio[ id ] ) {
-            ret = this._audio[ id ].state === this.STATE_STOPPED;
-        }
-        
-        return ret;
+        return (obj.state === this.STATE_STOPPED);
     },
     
     /**
@@ -2336,16 +2344,9 @@ MediaBox.prototype = {
      *
      */
     isPlaying: function ( id ) {
-        var ret;
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
         
-        if ( this._video[ id ] ) {
-            ret = !this._video[ id ].element.paused;
-            
-        } else if ( this._audio[ id ] ) {
-            ret = this._audio[ id ].state === this.STATE_PLAYING;
-        }
-        
-        return ret;
+        return (obj.state === this.STATE_PLAYING);
     },
     
     /**
@@ -2444,9 +2445,16 @@ MediaBox.prototype = {
                     source.src = self._video[ id ]._usedSource.source;
                     source.type = self._getMimeFromMedia( self._video[ id ]._usedSource.source );
             
+                self._video[ id ].loaded = true;
                 self._video[ id ].element.appendChild( source );
             },
             xhr;
+        
+        // Disallow overrides
+        if ( this._video[ id ] ) {
+            //console.log( "@MediaBox:addVideo Already added " + id );
+            return;
+        }
         
         // Allow new channels to exist
         if ( !this._channels[ obj[ 2 ].channel ] ) {
@@ -2459,9 +2467,10 @@ MediaBox.prototype = {
         this._video[ id ].loop = (obj[ 2 ].loop || false);
         this._video[ id ].sources = obj[ 1 ];
         this._video[ id ].element = document.createElement( "video" );
+        this._video[ id ].state = this.STATE_STOPPED;
+        this._video[ id ].loaded = false;
         this._video[ id ]._usedSource = this._getUsedMediaSource( "video", this._video[ id ].sources );
         this._video[ id ]._events = {};
-        this._video[ id ].state = this.STATE_STOPPED;
         
         // Set loop
         if ( this._video[ id ].loop ) {
@@ -2473,7 +2482,6 @@ MediaBox.prototype = {
             if ( typeof callback === "function" ) {
                 handler();
                 callback();
-                
                 return;
             }
         }
@@ -2605,7 +2613,7 @@ MediaBox.prototype = {
      *
      */
     playVideo: function ( id ) {
-        if ( this._video[ id ] && this.isStopped( id ) ) {
+        if ( this._video[ id ] && this.isLoaded( id ) && this.isStopped( id ) ) {
             this._video[ id ].element.volume = this._channels[ this._video[ id ].channel ].volume;
             this._video[ id ].element.play();
             this._video[ id ].state = this.STATE_PLAYING;
@@ -2621,7 +2629,7 @@ MediaBox.prototype = {
      *
      */
     pauseVideo: function ( id ) {
-        if ( this._video[ id ] && this.isPlaying( id ) ) {
+        if ( this._video[ id ] && this.isLoaded( id ) && this.isPlaying( id ) ) {
             this._video[ id ].element.pause();
             this._video[ id ].state = this.STATE_PAUSED;
         }
@@ -2636,7 +2644,7 @@ MediaBox.prototype = {
      *
      */
     stopVideo: function ( id ) {
-        if ( this._video[ id ] && this.isPlaying( id ) ) {
+        if ( this._video[ id ] && this.isLoaded( id ) && this.isPlaying( id ) ) {
             this._video[ id ].element.pause();
             this._video[ id ].state = this.STATE_STOPPED;
         }
@@ -2654,7 +2662,13 @@ MediaBox.prototype = {
     addAudio: function ( obj, callback ) {
         var self = this,
             id = obj[ 0 ],
-            xhr = new XMLHttpRequest();
+            xhr;
+        
+        // Disallow overrides
+        if ( this._audio[ id ] ) {
+            //console.log( "@MediaBox:addAudio Already added " + id );
+            return;
+        }
         
         // Allow new channels to exist
         if ( !this._channels[ obj[ 2 ].channel ] ) {
@@ -2667,13 +2681,16 @@ MediaBox.prototype = {
         this._audio[ id ].loop = (obj[ 2 ].loop || false);
         this._audio[ id ].sources = obj[ 1 ];
         this._audio[ id ].context = this.createAudioContext();
-        this._audio[ id ]._usedSource = this._getUsedMediaSource( "audio", this._audio[ id ].sources );
         this._audio[ id ].state = this.STATE_STOPPED;
+        this._audio[ id ].loaded = false;
+        this._audio[ id ]._usedSource = this._getUsedMediaSource( "audio", this._audio[ id ].sources );
         
+        xhr = new XMLHttpRequest();
         xhr.open( "GET", this._audio[ id ]._usedSource.source, true );
         xhr.responseType = "arraybuffer";
         xhr.onload = function ( e ) {
             self._audio[ id ].context.decodeAudioData( xhr.response, function ( buffer ) {
+                self._audio[ id ].loaded = true;
                 self._audio[ id ].startTime = 0;
                 self._audio[ id ].startOffset = 0;
                 self._audio[ id ].buffer = buffer;
@@ -3027,6 +3044,7 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._sourceStart
      * @param {string} track audio object to play
+     * @private
      *
      */
     _sourceStart: function ( track ) {
@@ -3044,6 +3062,7 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._sourceStop
      * @param {string} track audio object to stop
+     * @private
      *
      */
     _sourceStop: function ( track ) {
@@ -3061,6 +3080,7 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._getMimeFromMedia
      * @param {string} src media file source
+     * @private
      *
      */
     _getMimeFromMedia: function ( src ) {
@@ -3098,6 +3118,7 @@ MediaBox.prototype = {
      * @param {string} media the media type to check
      * @param {array} sources Array of media sources
      * @returns object
+     * @private
      *
      */
     _getUsedMediaSource: function ( media, sources ) {
@@ -3151,6 +3172,7 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._getAudioSupport
      * @returns object
+     * @private
      *
      */
     _getAudioSupport: function () {
@@ -3182,6 +3204,7 @@ MediaBox.prototype = {
      * @memberof MediaBox
      * @method MediaBox._getVideoSupport
      * @returns object
+     * @private
      *
      */
     _getVideoSupport: function () {
