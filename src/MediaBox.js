@@ -463,7 +463,86 @@ MediaBox.prototype = {
     isPlaying: function ( id ) {
         var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
         
-        return (obj.state === MediaBox.STATE_PLAYING);
+        return (obj.state === MediaBox.STATE_PLAYING || obj.state === MediaBox.STATE_STOPPING);
+    },
+    
+    /**
+     *
+     * MediaBox set volume for audio OR video
+     * @memberof MediaBox
+     * @method setVolume
+     * @param {string} id reference id for media
+     * @param {number} volume the volume to set to
+     *
+     */
+    setVolume: function ( id, volume ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        // Audio
+        if ( obj.context ) {
+            obj.gainNode.gain.value = volume;
+        
+        // Video
+        } else {
+            obj.element.volume = volume;
+        }
+    },
+    
+    /**
+     *
+     * MediaBox set volume for audio OR video
+     * @memberof MediaBox
+     * @method getVolume
+     * @param {string} id reference id for media
+     * @returns number
+     *
+     */
+    getVolume: function ( id ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        return ( obj.context ) ? obj.gainNode.gain.value : obj.element.volume;
+    },
+    
+    /**
+     *
+     * MediaBox play a media object abstractly
+     * @memberof MediaBox
+     * @method playObject
+     * @param {string} id reference id for media
+     *
+     */
+    playObject: function ( id ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        // Audio
+        if ( obj.context ) {
+            this.playAudio( id );
+        
+        // Video
+        } else {
+            this.playVideo( id );
+        }
+    },
+    
+    /**
+     *
+     * MediaBox stop a media object abstractly
+     * @memberof MediaBox
+     * @method stopObject
+     * @param {string} id reference id for media
+     *
+     */
+    stopObject: function ( id ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        // Audio
+        if ( obj.context ) {
+            this.stopAudio( id );
+        
+        // Video
+        } else {
+            this.stopVideo( id );
+        }
     },
     
     /**
@@ -473,8 +552,7 @@ MediaBox.prototype = {
      * @method loadMedia
      * @param {string} url The url to the JSON config
      * @param {function} callback Fired when all media is loaded
-     * @example
-     * // Akihabara bundle format
+     * @example Akihabara bundle format
      * "addAudio": [
      *     [
      *         "{id}",
@@ -565,6 +643,17 @@ MediaBox.prototype = {
      * @method addVideo
      * @param {array} obj Akihabara formatted media bundle
      * @param {function} callback function fired on XMLHttpRequest.onload
+     * @example Video object
+     * {
+     *      channel:        string,
+     *      loop:           boolean
+     *      sources:        array,
+     *      element:        DOMElement
+     *      state:          number
+     *      loaded:         boolean
+     *      _usedSource:    object {source:string, canPlay:string},
+     *      _events:        object
+     * }
      *
      */
     addVideo: function ( obj, callback ) {
@@ -793,6 +882,20 @@ MediaBox.prototype = {
      * @method addAudio
      * @param {array} obj Akihabara formatted media bundle
      * @param {function} callback function fired on XMLHttpRequest.onload
+     * @example Audio object
+     * {
+     *      channel:        string,
+     *      loop:           boolean
+     *      sources:        array,
+     *      context:        AudioContext
+     *      state:          number
+     *      loaded:         boolean
+     *      startTime:      number,
+     *      startOffset:    number,
+     *      buffer:         ArrayBuffer,
+     *      gainNode:       GainNode,
+     *      _usedSource:    object {source:string, canPlay:string},
+     * }
      *
      */
     addAudio: function ( obj, callback ) {
@@ -919,34 +1022,35 @@ MediaBox.prototype = {
     
     /**
      *
-     * MediaBox fade in audio context volume
+     * MediaBox fade in audio/video volume
      * @memberof MediaBox
-     * @method fadeAudioIn
+     * @method fadeVolumeIn
      * @param {string} id string reference id for audio
      * @param {number} duration tween time in ms
      * @param {function} easing optional easing to use
      *
      */
-    fadeAudioIn: function ( id, duration, easing ) {
-        if ( this._audio[ id ].state === MediaBox.STATE_PLAYING ) {
-            //console.log( "@MediaBox:fadeAudioIn Already playing " + id );
-            
+    fadeVolumeIn: function ( id, duration, easing ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ],
+            self = this,
+            volume;
+        
+        if ( obj && obj.state === MediaBox.STATE_PLAYING ) {
+            //console.log( "@MediaBox:fadeVolumeIn Already playing " + id );
             return this;
         }
         
-        var self = this,
-            volume = this._channels[ this._audio[ id ].channel ].volume;
-        
-        if ( this._audio[ id ] ) {
-            // Only reset volume and play if audio is stopped
-            // Audio state could be STATE_STOPPING at this point
-            if ( this._audio[ id ].state === MediaBox.STATE_STOPPED ) {
-                this._audio[ id ].gainNode.gain.value = 0;
+        if ( obj ) {
+            volume = this._channels[ obj.channel ].volume;
             
-                this.playAudio( id );
+            // Only reset volume and play if object is stopped
+            // Object state could be STATE_STOPPING at this point
+            if ( obj.state === MediaBox.STATE_STOPPED ) {
+                this.setVolume( id, 0 );
+                this.playObject( id );
                 
-            } else if ( this._audio[ id ].state === MediaBox.STATE_STOPPING ) {
-                this._audio[ id ].state = MediaBox.STATE_PLAYING;
+            } else if ( obj.state === MediaBox.STATE_STOPPING ) {
+                obj.state = MediaBox.STATE_PLAYING;
             }
             
             new Tween({
@@ -955,10 +1059,10 @@ MediaBox.prototype = {
                 ease: ( isFunction( easing ) ) ? easing : Easing.linear,
                 duration: (duration || 1000),
                 update: function ( v ) {
-                    self._audio[ id ].gainNode.gain.value = v;
+                    self.setVolume( id, v );
                 },
-                complete: function ( v ) {
-                    self._audio[ id ].gainNode.gain.value = v;
+                complete: function () {
+                    self.setVolume( id, volume );
                 }
             });
         }
@@ -966,18 +1070,19 @@ MediaBox.prototype = {
     
     /**
      *
-     * MediaBox fade out audio context volume
+     * MediaBox fade out audio/video volume
      * @memberof MediaBox
-     * @method fadeAudioOut
+     * @method fadeVolumeOut
      * @param {string} id string reference id for audio
      * @param {number} duration tween time in ms
      * @param {function} easing optional easing to use
      *
      */
-    fadeAudioOut: function ( id, duration, easing ) {
-        if ( this._audio[ id ].state === MediaBox.STATE_STOPPING ) {
-            //console.log( "@MediaBox:fadeAudioOut Already stopping " + id );
-            
+    fadeVolumeOut: function ( id, duration, easing ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        if ( obj && obj.state === MediaBox.STATE_STOPPING ) {
+            //console.log( "@MediaBox:fadeVolumeOut Already stopping " + id );
             return this;
         }
         
@@ -985,21 +1090,21 @@ MediaBox.prototype = {
             handler = function ( v ) {
                 // Check audio state on fadeout in case it is started again
                 // before the duration of the fadeout is complete.
-                if ( self._audio[ id ].state === self.STATE_STOPPING ) {
-                    self._audio[ id ].gainNode.gain.value = v;
-                
-                    if ( self._audio[ id ].gainNode.gain.value === 0 ) {
-                        self.stopAudio( id );
+                if ( obj.state === MediaBox.STATE_STOPPING ) {
+                    self.setVolume( id, (v < 0) ? 0 : v );
+                    
+                    if ( self.getVolume( id ) === 0 ) {
+                        self.stopObject( id );
                     }
                 }
             };
         
-        if ( this._audio[ id ] ) {
-            this._audio[ id ].state = MediaBox.STATE_STOPPING;
+        if ( obj ) {
+            obj.state = MediaBox.STATE_STOPPING;
             
             new Tween({
                 to: 0,
-                from: this._audio[ id ].gainNode.gain.value,
+                from: self.getVolume( id ),
                 ease: ( isFunction( easing ) ) ? easing : Easing.linear,
                 duration: (duration || 1000),
                 update: handler,
@@ -1062,7 +1167,7 @@ MediaBox.prototype = {
     
     /**
      *
-     * MediaBox fade out all playing audio for a given channel id
+     * MediaBox fade out all playing audio/video for a given channel id
      * @memberof MediaBox
      * @method fadeChannelOut
      * @param {string} channel string reference id for channel
@@ -1070,34 +1175,53 @@ MediaBox.prototype = {
      *
      */
     fadeChannelOut: function ( channel, duration ) {
-        for ( var id in this._audio ) {
+        var id;
+        
+        // Look at video index
+        for ( id in this._video ) {
+            if ( this._video[ id ].channel === channel && this._video[ id ].state === MediaBox.STATE_PLAYING ) {
+                this.fadeVolumeOut( id, duration );
+            }
+        }
+        
+        // Look at audio index
+        for ( id in this._audio ) {
             if ( this._audio[ id ].channel === channel && this._audio[ id ].state === MediaBox.STATE_PLAYING ) {
-                this.fadeAudioOut( id, duration );
+                this.fadeVolumeOut( id, duration );
             }
         }
     },
     
     /**
      *
-     * MediaBox fade in all playing audio for a given channel id
+     * MediaBox fade in all playing audio/video for a given channel id
      * @memberof MediaBox
      * @method fadeChannelIn
      * @param {string} channel string reference id for channel
      * @param {number} duration tween time in ms
      *
      */
-    // Need to figure out how this would work
     fadeChannelIn: function ( channel, duration ) {
-        for ( var id in this._audio ) {
-            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === MediaBox.STATE_PAUSED ) {
-                this.fadeAudioIn( id, duration );
+        var id;
+        
+        // Look at video index
+        for ( id in this._video ) {
+            if ( this._video[ id ].channel === channel && this._video[ id ].state === MediaBox.STATE_STOPPED ) {
+                this.fadeVolumeIn( id, duration );
+            }
+        }
+        
+        // Look at audio index
+        for ( id in this._audio ) {
+            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === MediaBox.STATE_STOPPED ) {
+                this.fadeVolumeIn( id, duration );
             }
         }
     },
     
     /**
      *
-     * MediaBox crossfade between 2 audio contexts on a given channel
+     * MediaBox crossfade volume between multiple channels
      * @memberof MediaBox
      * @method crossFadeChannel
      * @param {string} channel string reference id for channel
@@ -1106,27 +1230,38 @@ MediaBox.prototype = {
      *
      */
     crossFadeChannel: function ( channel, id, duration ) {
-        for ( var i in this._audio ) {
-            if ( this._audio[ i ].channel === channel && this._audio[ i ].state === MediaBox.STATE_PLAYING ) {
-                this.fadeAudioOut( i, duration );
+        var id;
+        
+        // Look at video index
+        for ( id in this._video ) {
+            if ( this._video[ id ].channel === channel && this._video[ id ].state === MediaBox.STATE_PLAYING ) {
+                this.fadeVolumeOut( id, duration );
             }
         }
         
-        this.fadeAudioIn( id, duration );
+        // Look at audio index
+        for ( id in this._audio ) {
+            if ( this._audio[ id ].channel === channel && this._audio[ id ].state === MediaBox.STATE_PLAYING ) {
+                this.fadeVolumeOut( id, duration );
+            }
+        }
+        
+        this.fadeVolumeIn( id, duration );
     },
     
     /**
      *
      * MediaBox set the master volume for a channel
      * @memberof MediaBox
-     * @method setChannelVolume
-     * @param {string} key string id reference to channel
-     * @param {string} val floating point number for volume setting
+     * @method setChannelProp
+     * @param {string} id string id reference to channel
+     * @param {string} key string prop key
+     * @param {string} val prop val
      *
      */
-    setChannelVolume: function ( key, val ) {
-        if ( this._channels[ key ] ) {
-            this._channels[ key ].volume = val;
+    setChannelProp: function ( id, key, val ) {
+        if ( this._channels[ id ] ) {
+            this._channels[ id ][ key ] = val;
         }
     },
     
