@@ -453,6 +453,21 @@ MediaBox.prototype = {
     
     /**
      *
+     * MediaBox check stopped/paused status for audio/video
+     * @memberof MediaBox
+     * @method isPaused
+     * @param {string} id reference id for media
+     * @returns boolean
+     *
+     */
+    isPaused: function ( id ) {
+        var obj = this._video[ id ] ? this._video[ id ] : this._audio[ id ];
+        
+        return (obj.state === MediaBox.STATE_PAUSED);
+    },
+    
+    /**
+     *
      * MediaBox check playing status for audio/video
      * @memberof MediaBox
      * @method isPlaying
@@ -838,7 +853,7 @@ MediaBox.prototype = {
      *
      */
     playVideo: function ( id ) {
-        if ( this._video[ id ] && this.isLoaded( id ) && this.isStopped( id ) ) {
+        if ( this._video[ id ] && this.isLoaded( id ) && (this.isStopped( id ) || this.isPaused( id )) ) {
             this._video[ id ].element.volume = this._channels[ this._video[ id ].channel ].volume;
             this._video[ id ].element.play();
             this._video[ id ].state = MediaBox.STATE_PLAYING;
